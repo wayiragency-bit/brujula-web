@@ -13,7 +13,7 @@ const themeScript = `(function(){var t=localStorage.getItem('brujula-theme')||'d
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="es">
+    <html lang="es" suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
