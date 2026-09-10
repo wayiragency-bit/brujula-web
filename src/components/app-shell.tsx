@@ -108,14 +108,14 @@ export function AppShell({ children }: Readonly<{ children: React.ReactNode }>) 
         {/* Avatar / logout */}
         <button
           aria-label="Cerrar sesión"
-          className="group relative flex h-10 w-10 items-center justify-center rounded-full bg-teal/60 font-mono text-xs font-bold text-amber/90 ring-2 ring-white/10 transition hover:ring-amber/40"
+          className="group relative flex h-10 w-10 items-center justify-center rounded-xl text-red-400 transition hover:bg-red-500/15 hover:text-red-300"
           onClick={() => logout().then(() => router.replace('/login'))}
           type="button"
         >
-          {initials(user.name)}
+          <LogOut className="h-[18px] w-[18px]" />
           <span className="pointer-events-none absolute left-[56px] z-50 flex items-center gap-1.5 whitespace-nowrap rounded-md bg-paper-elevated px-2.5 py-1.5 text-xs font-medium text-ink opacity-0 shadow-floating transition-opacity group-hover:opacity-100"
                 style={{ border: '1px solid var(--border)' }}>
-            <LogOut className="h-3 w-3 text-red-400" /> Cerrar sesión
+            Cerrar sesión
           </span>
         </button>
       </aside>
