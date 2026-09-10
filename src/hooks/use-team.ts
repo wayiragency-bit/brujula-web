@@ -51,6 +51,9 @@ export function useDeleteMember() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => api.delete(`/team/${id}`),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['team'] }),
+    onMutate: (id: string) => {
+      queryClient.setQueryData<TeamMember[]>(['team'], (old) => old?.filter((m) => m.id !== id) ?? []);
+    },
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ['team'] }),
   });
 }
