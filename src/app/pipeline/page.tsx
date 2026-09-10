@@ -14,6 +14,30 @@ const STATUS_LABELS: Record<QuoteStatus, string> = {
   PAGADA: 'Pagada', RECHAZADA: 'Rechazada', VENCIDA: 'Vencida',
 };
 
+const STATUS_COLORS: Record<QuoteStatus, { dot: string; badge: string; text: string }> = {
+  BORRADOR:  { dot: '#94a3b8', badge: 'rgba(148,163,184,0.15)', text: '#94a3b8' },
+  ENVIADA:   { dot: '#feb23b', badge: 'rgba(254,178,59,0.15)',  text: '#feb23b' },
+  ACEPTADA:  { dot: '#22c55e', badge: 'rgba(34,197,94,0.15)',   text: '#22c55e' },
+  ABONADA:   { dot: '#0ea5e9', badge: 'rgba(14,165,233,0.15)',  text: '#0ea5e9' },
+  PAGADA:    { dot: '#06b6d4', badge: 'rgba(6,182,212,0.15)',   text: '#06b6d4' },
+  RECHAZADA: { dot: '#ef4444', badge: 'rgba(239,68,68,0.15)',   text: '#ef4444' },
+  VENCIDA:   { dot: '#f97316', badge: 'rgba(249,115,22,0.15)',  text: '#f97316' },
+};
+
+function clientInitials(name?: string): string {
+  if (!name) return '?';
+  const parts = name.trim().split(/\s+/);
+  return ((parts[0]?.[0] ?? '') + (parts[1]?.[0] ?? '')).toUpperCase() || '?';
+}
+
+const AVATAR_COLORS = ['#06b6d4','#10b981','#f59e0b','#8b5cf6','#ec4899','#0ea5e9','#22c55e'];
+function avatarColor(name?: string): string {
+  if (!name) return '#94a3b8';
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
+}
+
 const MONTH_NAMES = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
 
 function formatMoney(value: string, currency: string): string {
@@ -100,16 +124,38 @@ function PaymentModal({
 }
 
 function KanbanCard({ card, onDragStart }: { card: PipelineCard; onDragStart: (card: PipelineCard) => void }) {
+  const clientName = card.client?.name ?? 'Sin cliente';
+  const agentName  = (card as unknown as { agent?: { name: string } }).agent?.name;
+  const color      = avatarColor(clientName);
+
   return (
     <Link
-      className="block cursor-grab rounded-xl border border-ink/10 bg-paper p-3 shadow-card transition hover:-translate-y-0.5 active:cursor-grabbing"
+      className="glass-card block cursor-grab rounded-xl p-3 transition hover:-translate-y-0.5 active:cursor-grabbing"
       draggable
       href={`/quotes/${card.id}`}
       onDragStart={(e) => { e.dataTransfer.setData('text/plain', card.id); onDragStart(card); }}
     >
-      <p className="font-mono text-[11px] font-bold text-teal">{card.number}</p>
-      <p className="truncate text-sm font-semibold text-ink">{card.client?.name ?? 'Sin cliente'}</p>
-      <p className="truncate text-xs text-ink-soft">{card.destination}</p>
+      {/* Quote number */}
+      <p className="font-mono text-[10px] font-bold" style={{ color: STATUS_COLORS[card.status].text }}>{card.number}</p>
+
+      {/* Client row */}
+      <div className="mt-1.5 flex items-center gap-2">
+        <div
+          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full font-mono text-[11px] font-bold text-white"
+          style={{ background: color, boxShadow: `0 2px 8px ${color}66` }}
+        >
+          {clientInitials(clientName)}
+        </div>
+        <div className="min-w-0">
+          <p className="truncate text-sm font-semibold text-ink leading-tight">{clientName}</p>
+          {agentName && <p className="truncate text-[10px] text-ink-soft leading-tight">{agentName}</p>}
+        </div>
+      </div>
+
+      {/* Destination */}
+      {card.destination && <p className="mt-1.5 truncate text-[11px] text-ink-soft">{card.destination}</p>}
+
+      {/* Amount */}
       <p className="mt-2 font-mono text-sm font-bold text-ink">{formatMoney(card.total, card.currency)}</p>
     </Link>
   );
@@ -169,26 +215,44 @@ function KanbanBoard() {
       {error ? <p className="mb-3 rounded-lg px-4 py-2 text-sm text-red-400" style={{ background: 'rgba(248,113,113,0.10)' }} onClick={() => setError(null)}>{error} ✕</p> : null}
       <div className="flex gap-4 overflow-x-auto pb-4">
         {data?.data.map((column) => {
-          const total = column.cards.reduce((sum, c) => sum + Number(c.total), 0);
+          const total    = column.cards.reduce((sum, c) => sum + Number(c.total), 0);
           const currency = column.cards[0]?.currency ?? 'COP';
+          const sc       = STATUS_COLORS[column.status];
           return (
             <div
-              className="flex w-72 shrink-0 flex-col gap-3 rounded-2xl border border-ink/10 bg-paper-card p-4"
+              className="flex w-72 shrink-0 flex-col rounded-2xl"
               key={column.status}
+              style={{ background: 'var(--surface)', border: '1px solid var(--border-faint)' }}
               onDragOver={(e) => e.preventDefault()}
               onDrop={() => handleDrop(column.status)}
             >
-              <div className="flex items-center justify-between">
-                <h3 className="label-caps text-ink-soft">{STATUS_LABELS[column.status]}</h3>
-                <span className="font-mono text-xs font-bold text-ink">{column.cards.length}</span>
+              {/* Column header */}
+              <div className="flex items-center justify-between px-4 py-3" style={{ borderBottom: '1px solid var(--border-faint)' }}>
+                <div className="flex items-center gap-2">
+                  <span className="h-2 w-2 rounded-full" style={{ background: sc.dot }} />
+                  <h3 className="label-caps text-ink">{STATUS_LABELS[column.status]}</h3>
+                </div>
+                <span
+                  className="flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 font-mono text-[10px] font-bold"
+                  style={{ background: sc.badge, color: sc.text }}
+                >
+                  {column.cards.length}
+                </span>
               </div>
-              <p className="font-mono text-xs text-ink-soft">{formatMoney(String(total), currency)}</p>
-              <div className="flex min-h-[80px] flex-col gap-2">
+
+              {/* Cards */}
+              <div className="flex flex-1 flex-col gap-2 p-3 min-h-[80px]">
                 {column.cards.length === 0 ? (
-                  <p className="rounded-lg border border-dashed border-ink/15 py-6 text-center text-xs text-ink-soft">Arrastra aquí</p>
+                  <p className="rounded-lg border border-dashed py-6 text-center text-xs text-ink-muted" style={{ borderColor: 'var(--border)' }}>Arrastra aquí</p>
                 ) : (
                   column.cards.map((card) => <KanbanCard card={card} key={card.id} onDragStart={setDragging} />)
                 )}
+              </div>
+
+              {/* Column total */}
+              <div className="px-4 py-3" style={{ borderTop: '1px solid var(--border-faint)' }}>
+                <p className="label-caps text-ink-muted">Total etapa</p>
+                <p className="font-mono text-sm font-bold text-ink">{formatMoney(String(total), currency)}</p>
               </div>
             </div>
           );
