@@ -116,7 +116,7 @@ export function AppShell({ children }: Readonly<{ children: React.ReactNode }>) 
       <div className="lg:pl-[128px]">
 
         {/* Top bar */}
-        <header className="sticky top-0 z-30 flex h-14 items-center gap-4 px-4 sm:px-6 lg:px-6"
+        <header className="sticky top-0 z-30 flex h-16 items-center gap-4 px-4 sm:px-6 lg:px-6"
                 style={{
                   background: 'var(--topbar-bg)',
                   backdropFilter: 'blur(12px)',
@@ -130,11 +130,11 @@ export function AppShell({ children }: Readonly<{ children: React.ReactNode }>) 
           </div>
 
           {/* Search bar */}
-          <div className="hidden flex-1 max-w-sm sm:flex">
+          <div className="hidden flex-1 max-w-md sm:flex">
             <div className="relative w-full">
-              <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-ink-muted" />
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-muted" />
               <input
-                className="h-8 w-full rounded-lg pl-8 pr-3 text-sm text-ink placeholder:text-ink-muted focus:outline-none focus:ring-1 focus:ring-amber/30"
+                className="h-10 w-full rounded-xl pl-9 pr-3 text-sm text-ink placeholder:text-ink-muted focus:outline-none focus:ring-1 focus:ring-amber/30"
                 placeholder="Buscar cotizaciones, clientes…"
                 readOnly
                 style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}
@@ -147,20 +147,20 @@ export function AppShell({ children }: Readonly<{ children: React.ReactNode }>) 
             {/* Notifications (visual only) */}
             <button
               aria-label="Notificaciones"
-              className="relative flex h-8 w-8 items-center justify-center rounded-lg text-ink-soft transition hover:bg-white/8 hover:text-ink"
+              className="relative flex h-9 w-9 items-center justify-center rounded-lg text-ink-soft transition hover:bg-white/8 hover:text-ink"
               type="button"
             >
-              <Bell className="h-4 w-4" />
-              <span className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-amber" />
+              <Bell className="h-[18px] w-[18px]" />
+              <span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-amber" />
             </button>
 
             {/* User info */}
             <div className="hidden flex-col items-end sm:flex">
               <p className="text-sm font-semibold leading-none text-ink">{user.name}</p>
-              <p className="mt-0.5 text-[11px] leading-none text-ink-soft">{user.roles[0]?.name ?? 'Miembro'}</p>
+              <p className="mt-0.5 text-xs leading-none text-ink-soft">{user.roles[0]?.name ?? 'Miembro'}</p>
             </div>
             <div
-              className="flex h-8 w-8 items-center justify-center rounded-full font-mono text-xs font-bold text-amber/90"
+              className="flex h-9 w-9 items-center justify-center rounded-full font-mono text-xs font-bold text-amber/90"
               style={{ background: 'color-mix(in srgb, var(--teal) 70%, transparent)', border: '1px solid rgba(254,178,59,0.25)' }}
             >
               {initials(user.name)}

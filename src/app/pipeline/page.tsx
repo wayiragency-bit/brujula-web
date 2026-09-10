@@ -175,10 +175,12 @@ function KanbanCard({ card, onDragStart }: { card: PipelineCard; onDragStart: (c
   );
 }
 
-function VencidasPanel({ cards, onClose }: { cards: PipelineCard[]; onClose: () => void }) {
+function SidePanel({
+  status, label, totalLabel, cards, onClose,
+}: { status: QuoteStatus; label: string; totalLabel: string; cards: PipelineCard[]; onClose: () => void }) {
   const total    = cards.reduce((sum, c) => sum + Number(c.total), 0);
   const currency = cards[0]?.currency ?? 'COP';
-  const sc       = STATUS_COLORS['VENCIDA'];
+  const sc       = STATUS_COLORS[status];
   return (
     <div className="fixed inset-0 z-50 flex" onClick={onClose}>
       <div className="flex-1" style={{ background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)' }} />
@@ -191,7 +193,7 @@ function VencidasPanel({ cards, onClose }: { cards: PipelineCard[]; onClose: () 
         <div className="flex items-center justify-between px-4 py-4" style={{ borderBottom: '1px solid var(--border)' }}>
           <div className="flex items-center gap-2">
             <span className="h-2 w-2 rounded-full" style={{ background: sc.dot }} />
-            <h3 className="text-sm font-bold uppercase tracking-wide text-ink">Vencidas</h3>
+            <h3 className="text-sm font-bold uppercase tracking-wide text-ink">{label}</h3>
             <span
               className="flex h-5 min-w-[20px] items-center justify-center rounded-full px-1.5 text-xs font-bold"
               style={{ background: sc.badge, color: sc.text }}
@@ -211,14 +213,14 @@ function VencidasPanel({ cards, onClose }: { cards: PipelineCard[]; onClose: () 
         {/* Cards list */}
         <div className="flex-1 overflow-y-auto space-y-2 p-3">
           {cards.length === 0 ? (
-            <p className="py-8 text-center text-sm text-ink-muted">Sin cotizaciones vencidas</p>
+            <p className="py-8 text-center text-sm text-ink-muted">Sin cotizaciones</p>
           ) : (
             cards.map((card) => <KanbanCard card={card} key={card.id} onDragStart={() => {}} />)
           )}
         </div>
         {/* Total */}
         <div className="px-4 py-3" style={{ borderTop: '1px solid var(--border)' }}>
-          <p className="label-caps text-ink-muted">Total vencidas</p>
+          <p className="label-caps text-ink-muted">{totalLabel}</p>
           <p className="font-mono text-sm font-bold text-ink">{formatMoney(String(total), currency)}</p>
         </div>
       </div>
@@ -405,17 +407,35 @@ function CalendarView() {
 }
 
 export default function PipelinePage() {
-  const [view, setView]             = useState<'kanban' | 'calendar'>('kanban');
+  const [view, setView]                 = useState<'kanban' | 'calendar'>('kanban');
   const [showVencidas, setShowVencidas] = useState(false);
-  const { data: pipelineData }      = usePipelineKanban();
-  const vencidasCards               = pipelineData?.data.find((c) => c.status === 'VENCIDA')?.cards ?? [];
-  const scV                         = STATUS_COLORS['VENCIDA'];
+  const [showBorrador, setShowBorrador] = useState(false);
+  const { data: pipelineData }          = usePipelineKanban();
+  const vencidasCards = pipelineData?.data.find((c) => c.status === 'VENCIDA')?.cards  ?? [];
+  const borradorCards = pipelineData?.data.find((c) => c.status === 'BORRADOR')?.cards ?? [];
+  const scV = STATUS_COLORS['VENCIDA'];
+  const scB = STATUS_COLORS['BORRADOR'];
 
   return (
     <AppShell>
       <div className="w-full space-y-5 px-4 pb-28 pt-7 lg:pl-6 lg:pr-10 lg:pb-10">
         {showVencidas && (
-          <VencidasPanel cards={vencidasCards} onClose={() => setShowVencidas(false)} />
+          <SidePanel
+            cards={vencidasCards}
+            label="Vencidas"
+            onClose={() => setShowVencidas(false)}
+            status="VENCIDA"
+            totalLabel="Total vencidas"
+          />
+        )}
+        {showBorrador && (
+          <SidePanel
+            cards={borradorCards}
+            label="Borrador"
+            onClose={() => setShowBorrador(false)}
+            status="BORRADOR"
+            totalLabel="Total en borrador"
+          />
         )}
 
         <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -423,48 +443,63 @@ export default function PipelinePage() {
             <h1 className="text-3xl font-bold text-ink">Estatus de Cotización</h1>
             <p className="mt-1 text-base text-ink-soft">Visualización estructurada del flujo y Seguimiento detallado.</p>
           </div>
-          <div className="flex items-center gap-2">
-            {/* Vencidas button — en el header junto a los toggles */}
+          <div className="flex gap-1 rounded-xl p-1" style={{ border: '1px solid var(--border)' }}>
             <button
+              className="inline-flex h-9 items-center gap-2 rounded-lg px-4 text-sm font-medium transition"
+              style={view === 'kanban'
+                ? { background: '#334155', color: '#ffffff' }
+                : { background: 'transparent', color: '#94a3b8' }}
+              onClick={() => setView('kanban')}
               type="button"
-              onClick={() => setShowVencidas(true)}
-              className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-bold uppercase transition hover:brightness-110"
-              style={{ background: scV.badge, color: scV.text, border: `1px solid ${scV.dot}40` }}
             >
-              <span className="h-1.5 w-1.5 rounded-full" style={{ background: scV.dot }} />
-              Vencidas
-              {vencidasCards.length > 0 && (
-                <span className="ml-0.5 rounded-full px-1.5 py-0.5 text-[10px] font-bold" style={{ background: scV.dot, color: '#fff' }}>
-                  {vencidasCards.length}
-                </span>
-              )}
+              <BarChart3 size={18} />
+              Tablero
             </button>
-            <div className="flex gap-1 rounded-xl p-1" style={{ border: '1px solid var(--border)' }}>
-              <button
-                className="inline-flex h-9 items-center gap-2 rounded-lg px-4 text-sm font-medium transition"
-                style={view === 'kanban'
-                  ? { background: '#334155', color: '#ffffff' }
-                  : { background: 'transparent', color: '#94a3b8' }}
-                onClick={() => setView('kanban')}
-                type="button"
-              >
-                <BarChart3 size={18} />
-                Tablero
-              </button>
-              <button
-                className="inline-flex h-9 items-center gap-2 rounded-lg px-4 text-sm font-medium transition"
-                style={view === 'calendar'
-                  ? { background: '#334155', color: '#ffffff' }
-                  : { background: 'transparent', color: '#94a3b8' }}
-                onClick={() => setView('calendar')}
-                type="button"
-              >
-                <CalendarDays size={18} />
-                Calendario
-              </button>
-            </div>
+            <button
+              className="inline-flex h-9 items-center gap-2 rounded-lg px-4 text-sm font-medium transition"
+              style={view === 'calendar'
+                ? { background: '#334155', color: '#ffffff' }
+                : { background: 'transparent', color: '#94a3b8' }}
+              onClick={() => setView('calendar')}
+              type="button"
+            >
+              <CalendarDays size={18} />
+              Calendario
+            </button>
           </div>
         </header>
+
+        {/* Secondary toolbar — hidden statuses */}
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setShowBorrador(true)}
+            className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium transition hover:brightness-110"
+            style={{ background: scB.badge, color: scB.text, border: `1px solid ${scB.dot}40` }}
+          >
+            <span className="h-1.5 w-1.5 rounded-full" style={{ background: scB.dot }} />
+            Borrador
+            {borradorCards.length > 0 && (
+              <span className="ml-1 rounded-full px-1.5 py-0.5 text-[10px] font-bold" style={{ background: scB.dot + '33', color: scB.text }}>
+                {borradorCards.length}
+              </span>
+            )}
+          </button>
+          <button
+            type="button"
+            onClick={() => setShowVencidas(true)}
+            className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium transition hover:brightness-110"
+            style={{ background: scV.badge, color: scV.text, border: `1px solid ${scV.dot}40` }}
+          >
+            <span className="h-1.5 w-1.5 rounded-full" style={{ background: scV.dot }} />
+            Vencidas
+            {vencidasCards.length > 0 && (
+              <span className="ml-1 rounded-full px-1.5 py-0.5 text-[10px] font-bold" style={{ background: scV.dot + '33', color: scV.text }}>
+                {vencidasCards.length}
+              </span>
+            )}
+          </button>
+        </div>
 
         {view === 'kanban' ? <KanbanBoard /> : <CalendarView />}
       </div>
