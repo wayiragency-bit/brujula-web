@@ -5,6 +5,9 @@ import type { CatalogProduct, Paginated, Quote, QuoteHeaderDraft, QuoteItemDraft
 export interface QuotesFilters {
   q?: string;
   status?: QuoteStatus;
+  statuses?: QuoteStatus[];
+  sort?: 'createdAt' | 'startDate' | 'total' | 'number' | 'updatedAt';
+  order?: 'ASC' | 'DESC';
   page: number;
   limit: number;
 }

@@ -6,6 +6,8 @@ export interface ClientsFilters {
   q?: string;
   type?: 'DIRECT' | 'AGENCY';
   active?: boolean;
+  createdFrom?: string;
+  createdTo?: string;
   page: number;
   limit: number;
 }
@@ -15,6 +17,8 @@ function buildQuery(filters: ClientsFilters): string {
   if (filters.q) params.set('q', filters.q);
   if (filters.type) params.set('type', filters.type);
   if (filters.active !== undefined) params.set('active', String(filters.active));
+  if (filters.createdFrom) params.set('createdFrom', filters.createdFrom);
+  if (filters.createdTo) params.set('createdTo', filters.createdTo);
   params.set('page', String(filters.page));
   params.set('limit', String(filters.limit));
   return params.toString();

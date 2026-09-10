@@ -275,6 +275,7 @@ export interface Agency {
   bankAccount: string | null;
   bankAccountHolder: string | null;
   termsText: string | null;
+  monthlySalesGoal: number;
 }
 
 export interface AgencyFormValues {
@@ -293,6 +294,7 @@ export interface AgencyFormValues {
   bankAccount?: string;
   bankAccountHolder?: string;
   termsText?: string;
+  monthlySalesGoal?: number;
 }
 
 export interface TeamMember {
@@ -307,4 +309,20 @@ export interface TeamMember {
   wonCount: number;
   sold: number;
   commission: number;
+}
+
+export type AnalyticsGranularity = 'day' | 'month';
+
+export interface QuoteAnalyticsBucket {
+  date: string;
+  cotizado: number;
+  aceptado: number;
+  enCurso: number;
+}
+
+export interface QuoteAnalytics {
+  currency: string;
+  granularity: AnalyticsGranularity;
+  window: number;
+  buckets: QuoteAnalyticsBucket[];
 }
