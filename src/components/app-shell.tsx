@@ -22,17 +22,17 @@ import { useEffect } from 'react';
 import { useAuth } from '@/lib/auth-context';
 
 const navigation = [
-  { label: 'Dashboard',       href: '/',                icon: LayoutDashboard },
-  { label: 'Estatus',         href: '/pipeline',        icon: BarChart3 },
-  { label: 'Cotizaciones',    href: '/quotes',          icon: FileText },
-  { label: 'Clientes',        href: '/clients',         icon: UsersRound },
-  { label: 'Productos',       href: '/products',        icon: Package },
-  { label: 'Calendario PMS',  href: '/pms',             icon: CalendarDays },
-  { label: 'Channel Manager', href: '/channel-manager', icon: Globe },
-  { label: 'Proveedores',     href: '/suppliers',       icon: Truck },
-  { label: 'Marketing',       href: '/marketing',       icon: Megaphone },
-  { label: 'Equipo',          href: '/team',            icon: UsersRound },
-  { label: 'Config',          href: '/settings',        icon: Settings },
+  { label: 'Dashboard',       short: 'Panel',    href: '/',                icon: LayoutDashboard },
+  { label: 'Estatus',         short: 'Estatus',  href: '/pipeline',        icon: BarChart3 },
+  { label: 'Cotizaciones',    short: 'Cotiza.',  href: '/quotes',          icon: FileText },
+  { label: 'Clientes',        short: 'Clientes', href: '/clients',         icon: UsersRound },
+  { label: 'Productos',       short: 'Produc.',  href: '/products',        icon: Package },
+  { label: 'Calendario PMS',  short: 'Cal.PMS',  href: '/pms',             icon: CalendarDays },
+  { label: 'Channel Manager', short: 'Channel',  href: '/channel-manager', icon: Globe },
+  { label: 'Proveedores',     short: 'Proveed.', href: '/suppliers',       icon: Truck },
+  { label: 'Marketing',       short: 'Market.',  href: '/marketing',       icon: Megaphone },
+  { label: 'Equipo',          short: 'Equipo',   href: '/team',            icon: UsersRound },
+  { label: 'Config',          short: 'Config',   href: '/settings',        icon: Settings },
 ];
 
 function isActive(pathname: string, href: string): boolean {
@@ -67,7 +67,7 @@ export function AppShell({ children }: Readonly<{ children: React.ReactNode }>) 
   return (
     <div className="min-h-screen bg-paper text-ink">
       {/* ── SIDEBAR (desktop) ── */}
-      <aside className="fixed inset-y-0 left-0 z-40 hidden w-[68px] flex-col items-center py-4 lg:flex"
+      <aside className="fixed inset-y-0 left-0 z-40 hidden w-[76px] flex-col items-center py-4 lg:flex"
              style={{ background: 'var(--sidebar-bg)', borderRight: '1px solid var(--border-faint)' }}>
 
         {/* Logo mark */}
@@ -80,26 +80,22 @@ export function AppShell({ children }: Readonly<{ children: React.ReactNode }>) 
         </Link>
 
         {/* Nav icons */}
-        <nav aria-label="Navegación principal" className="mt-8 flex flex-1 flex-col items-center gap-1">
-          {navigation.map(({ label, href, icon: Icon }) => {
+        <nav aria-label="Navegación principal" className="mt-6 flex flex-1 flex-col items-center gap-0.5 w-full px-2">
+          {navigation.map(({ label, short, href, icon: Icon }) => {
             const active = isActive(pathname, href);
             return (
               <Link
                 aria-label={label}
-                className={`group relative flex h-10 w-10 items-center justify-center rounded-xl transition-all ${
+                className={`flex w-full flex-col items-center gap-0.5 rounded-xl py-2 transition-all ${
                   active
                     ? 'bg-amber text-[var(--sidebar-bg)] shadow-[0_0_16px_rgba(254,178,59,0.25)]'
-                    : 'text-ink-muted hover:bg-white/8 hover:text-ink'
+                    : 'text-white/40 hover:bg-white/8 hover:text-white/80'
                 }`}
                 href={href}
                 key={label}
               >
-                <Icon className="h-4.5 w-4.5 h-[18px] w-[18px]" />
-                {/* Tooltip */}
-                <span className="pointer-events-none absolute left-[56px] z-50 whitespace-nowrap rounded-md bg-paper-elevated px-2.5 py-1.5 text-xs font-medium text-ink opacity-0 shadow-floating transition-opacity group-hover:opacity-100"
-                      style={{ border: '1px solid var(--border)' }}>
-                  {label}
-                </span>
+                <Icon className="h-[16px] w-[16px]" />
+                <span className="text-[8px] font-medium leading-none tracking-wide">{short}</span>
               </Link>
             );
           })}
@@ -113,7 +109,7 @@ export function AppShell({ children }: Readonly<{ children: React.ReactNode }>) 
           type="button"
         >
           <LogOut className="h-[18px] w-[18px]" />
-          <span className="pointer-events-none absolute left-[56px] z-50 flex items-center gap-1.5 whitespace-nowrap rounded-md bg-paper-elevated px-2.5 py-1.5 text-xs font-medium text-ink opacity-0 shadow-floating transition-opacity group-hover:opacity-100"
+          <span className="pointer-events-none absolute left-[64px] z-50 flex items-center gap-1.5 whitespace-nowrap rounded-md bg-paper-elevated px-2.5 py-1.5 text-xs font-medium text-ink opacity-0 shadow-floating transition-opacity group-hover:opacity-100"
                 style={{ border: '1px solid var(--border)' }}>
             Cerrar sesión
           </span>
@@ -121,7 +117,7 @@ export function AppShell({ children }: Readonly<{ children: React.ReactNode }>) 
       </aside>
 
       {/* ── CONTENT AREA ── */}
-      <div className="lg:pl-[68px]">
+      <div className="lg:pl-[76px]">
 
         {/* Top bar */}
         <header className="sticky top-0 z-30 flex h-14 items-center gap-4 px-4 sm:px-6 lg:px-6"
