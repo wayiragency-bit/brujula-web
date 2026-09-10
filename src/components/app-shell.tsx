@@ -79,13 +79,13 @@ export function AppShell({ children }: Readonly<{ children: React.ReactNode }>) 
         </Link>
 
         {/* Nav icons */}
-        <nav aria-label="Navegación principal" className="mt-4 flex flex-1 flex-col items-center gap-1 w-full px-2 overflow-y-auto">
+        <nav aria-label="Navegación principal" className="mt-2 flex flex-1 flex-col items-center justify-evenly w-full px-2 overflow-hidden">
           {navigation.map(({ label, href, icon: Icon }) => {
             const active = isActive(pathname, href);
             return (
               <Link
                 aria-label={label}
-                className={`flex w-full flex-col items-center justify-center gap-1 rounded-xl py-2 px-1 transition-all duration-200 ${
+                className={`flex w-full flex-col items-center justify-center gap-0.5 rounded-xl py-1 px-1 transition-all duration-200 ${
                   active
                     ? 'bg-amber text-[var(--sidebar-bg)] shadow-[0_0_16px_rgba(254,178,59,0.25)]'
                     : 'text-[var(--sidebar-nav-text)] hover:bg-[var(--sidebar-nav-hover-bg)] hover:text-[var(--sidebar-nav-text-active)]'
@@ -94,7 +94,7 @@ export function AppShell({ children }: Readonly<{ children: React.ReactNode }>) 
                 key={label}
               >
                 <Icon className="h-[22px] w-[22px]" />
-                <span className="text-[11px] font-medium leading-tight text-center break-words w-full">{label}</span>
+                <span className="text-[10px] font-medium leading-tight text-center break-words w-full">{label}</span>
               </Link>
             );
           })}
