@@ -119,6 +119,118 @@ export interface ProductFormValues {
   supplierId?: string;
 }
 
+export type QuoteStatus = 'BORRADOR' | 'ENVIADA' | 'ACEPTADA' | 'ABONADA' | 'PAGADA' | 'RECHAZADA' | 'VENCIDA';
+
+export interface QuoteItemDraft {
+  id?: string;
+  productId?: string;
+  name: string;
+  description?: string;
+  imageUrl?: string | null;
+  unit: ProductUnit;
+  quantity: string;
+  nights?: number;
+  adults?: number;
+  children?: number;
+  currency?: string;
+  fxRate?: string;
+  netCost?: string;
+  markupType?: MarkupType;
+  markupValue?: string;
+  discountItem?: string;
+  taxPct?: string;
+}
+
+export interface QuoteItemView extends QuoteItemDraft {
+  id: string;
+  sellPrice: string;
+  preTax: string;
+  tax: string;
+  marginItem?: string;
+  base?: string;
+}
+
+export interface QuoteRef { id: string; name: string }
+
+export interface Quote {
+  id: string;
+  number: string;
+  publicId: string;
+  clientId: string;
+  client?: QuoteRef;
+  sellerId: string;
+  seller?: QuoteRef;
+  destination: string;
+  startDate: string | null;
+  endDate: string | null;
+  adults: number;
+  children: number;
+  validityDays: number;
+  validUntil: string | null;
+  paidAt: string | null;
+  currency: string;
+  notes: string;
+  internalNotes?: string;
+  status: QuoteStatus;
+  version: number;
+  subtotal: string;
+  taxTotal: string;
+  total: string;
+  globalDiscount: string;
+  discountTotal: string;
+  depositAmount: string;
+  balanceDue: string;
+  costTotal?: string;
+  marginTotal?: string;
+  marginPct?: string;
+  commissionAmount?: string;
+  commissionBase?: 'MARGIN' | 'TOTAL';
+  commissionPct?: string;
+  createdAt: string;
+  updatedAt: string;
+  items: QuoteItemView[];
+  events?: { id: string; type: string; fromStatus: QuoteStatus | null; toStatus: QuoteStatus | null; createdAt: string }[];
+  payments?: { id: string; amount: string; createdAt: string }[];
+}
+
+export interface QuoteListSummaryRow {
+  currency: string;
+  status: QuoteStatus;
+  count: number;
+  total: string;
+  marginTotal?: string;
+}
+
+export interface QuoteHeaderDraft {
+  clientId: string;
+  sellerId?: string;
+  destination: string;
+  startDate?: string;
+  endDate?: string;
+  adults?: number;
+  children?: number;
+  validityDays?: number;
+  currency?: string;
+  notes?: string;
+  internalNotes?: string;
+  globalDiscount?: string;
+  commissionBase?: 'MARGIN' | 'TOTAL';
+  commissionPct?: string;
+}
+
+export interface CatalogProduct {
+  id: string;
+  name: string;
+  description: string | null;
+  imageUrl: string | null;
+  unit: ProductUnit;
+  currency: string;
+  netCost?: string;
+  markupType?: MarkupType;
+  markupValue?: string;
+  taxPct?: string;
+}
+
 export interface TeamMember {
   id: string;
   name: string;
