@@ -191,7 +191,11 @@ export default function TeamPage() {
               <button
                 className="inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-bold text-white bg-red-500 hover:bg-red-600 transition disabled:opacity-50"
                 disabled={deleteMember.isPending}
-                onClick={() => deleteMember.mutate(confirmDelete.id, { onSuccess: () => setConfirmDelete(null) })}
+                onClick={() => {
+                  const id = confirmDelete.id;
+                  setConfirmDelete(null);
+                  deleteMember.mutate(id);
+                }}
                 type="button"
               >
                 <Trash2 className="h-3.5 w-3.5" /> {deleteMember.isPending ? 'Eliminando…' : 'Eliminar'}
