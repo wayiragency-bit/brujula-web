@@ -14,10 +14,17 @@ import { useQuotes } from '@/hooks/use-quotes';
 import { useAuth } from '@/lib/auth-context';
 import { api } from '@/lib/api';
 import { formatMoney, formatMoneyFull } from '@/lib/format';
-import type { Paginated, Product, Quote, QuoteListSummaryRow, QuoteStatus } from '@/lib/types';
+import type { Paginated, Product, ProductType, Quote, QuoteListSummaryRow, QuoteStatus } from '@/lib/types';
 
 const ACCEPTED_LIKE = new Set<QuoteStatus>(['ACEPTADA', 'ABONADA', 'PAGADA']);
 const IN_PROGRESS: QuoteStatus[] = ['ENVIADA', 'ACEPTADA', 'ABONADA'];
+
+const PRODUCT_TYPE_LABEL: Record<ProductType, string> = {
+  HOTEL: 'Hotel', TOUR: 'Tour', TRANSPORT: 'Traslado', FLIGHT: 'Vuelo',
+  INSURANCE: 'Seguro', EXPERIENCE: 'Experiencia', OTHER: 'Servicio',
+};
+
+const RANK_COLORS = ['#f59e0b', '#94a3b8', '#fb923c'];
 
 /* Simple decorative SVG sparkline — takes 6 relative y-values 0-40 */
 function Sparkline({ points, color = '#feb23b' }: { points: number[]; color?: string }) {
@@ -266,27 +273,31 @@ export default function DashboardPage() {
                   <p className="px-3 py-6 text-center text-sm text-ink-soft">Aún no hay productos cotizados.</p>
                 ) : (
                   topProducts.map((product, i) => (
-                    <div className="overflow-hidden rounded-xl" key={product.id} style={{ background: 'var(--surface)', border: '1px solid var(--border-faint)' }}>
-                      <div className="relative h-24 w-full" style={{ background: 'var(--paper-elevated)' }}>
+                    <div className="rounded-xl p-3" key={product.id} style={{ background: 'var(--surface)', border: '1px solid var(--border-faint)' }}>
+                      <div className="mb-2 flex items-start justify-between gap-2">
+                        <div className="flex min-w-0 items-center gap-2">
+                          <span
+                            className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[10px] font-bold text-white"
+                            style={{ background: RANK_COLORS[i] ?? RANK_COLORS[2] }}
+                          >
+                            #{i + 1}
+                          </span>
+                          <span className="label-caps truncate text-ink-muted">{PRODUCT_TYPE_LABEL[product.type] ?? 'Servicio'}</span>
+                        </div>
+                        <Package className="h-5 w-5 shrink-0" style={{ color: 'var(--border)' }} />
+                      </div>
+                      <div className="relative h-24 w-full overflow-hidden rounded-lg" style={{ background: 'var(--paper-elevated)' }}>
                         {product.imageUrl ? (
                           // eslint-disable-next-line @next/next/no-img-element
                           <img alt={product.name} className="h-full w-full object-cover" src={product.imageUrl} />
                         ) : (
                           <div className="flex h-full items-center justify-center"><Package className="h-6 w-6 text-ink-muted" /></div>
                         )}
-                        <span
-                          className="absolute left-2 top-2 flex h-6 w-6 items-center justify-center rounded-full text-[10px] font-bold text-white"
-                          style={{ background: i === 0 ? '#f59e0b' : i === 1 ? '#94a3b8' : '#fb923c' }}
-                        >
-                          #{i + 1}
-                        </span>
                       </div>
-                      <div className="p-3">
-                        <p className="truncate text-sm font-medium text-ink">{product.name}</p>
-                        <div className="mt-1 flex items-center justify-between">
-                          <span className="text-xs text-ink-soft">{product.timesQuoted} veces cotizado</span>
-                          <span className="font-mono text-sm font-bold text-ink">{formatMoney(product.sellPrice, product.currency)}</span>
-                        </div>
+                      <p className="mt-3 truncate text-sm font-medium text-ink">{product.name}</p>
+                      <div className="mt-1 flex items-center justify-between">
+                        <span className="text-xs text-ink-soft">{product.timesQuoted} Ventas</span>
+                        <span className="font-mono text-sm font-bold text-ink">{formatMoney(product.sellPrice, product.currency)}</span>
                       </div>
                     </div>
                   ))
