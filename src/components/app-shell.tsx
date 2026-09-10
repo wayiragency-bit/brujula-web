@@ -67,7 +67,7 @@ export function AppShell({ children }: Readonly<{ children: React.ReactNode }>) 
   return (
     <div className="min-h-screen bg-paper text-ink">
       {/* ── SIDEBAR (desktop) ── */}
-      <aside className="glass-panel fixed top-4 bottom-4 left-4 z-40 hidden w-[108px] flex-col items-center py-2 rounded-2xl lg:flex">
+      <aside className="glass-panel fixed top-4 bottom-4 left-4 z-40 hidden w-[108px] flex-col items-center py-2 rounded-2xl overflow-hidden lg:flex">
 
         {/* Logo mark */}
         <Link
@@ -79,7 +79,7 @@ export function AppShell({ children }: Readonly<{ children: React.ReactNode }>) 
         </Link>
 
         {/* Nav icons */}
-        <nav aria-label="Navegación principal" className="mt-2 flex flex-1 flex-col items-center justify-evenly w-full px-2 overflow-hidden">
+        <nav aria-label="Navegación principal" className="mt-2 flex flex-1 min-h-0 flex-col items-center justify-evenly w-full px-2 overflow-hidden">
           {navigation.map(({ label, href, icon: Icon }) => {
             const active = isActive(pathname, href);
             return (
