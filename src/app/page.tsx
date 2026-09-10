@@ -26,32 +26,24 @@ const PRODUCT_TYPE_LABEL: Record<ProductType, string> = {
 
 const RANK_COLORS = ['#f59e0b', '#94a3b8', '#fb923c'];
 
-/* Decorative mini bar chart — takes 6 relative values 0-40, latest bar stands out */
+/* Decorative mini area line — takes 6 relative y-values 0-40, smooth curve with soft fill */
 function Sparkline({ points, color = '#feb23b' }: { points: number[]; color?: string }) {
   const w = 96; const h = 40; const n = points.length;
-  const gap = 5;
-  const barWidth = (w - gap * (n - 1)) / n;
-  const max = Math.max(...points, 1);
+  const xs = points.map((_, i) => (i / (n - 1)) * w);
+  const ys = points.map((v) => h - v);
+
+  let linePath = `M ${xs[0]},${ys[0]}`;
+  for (let i = 1; i < n; i++) {
+    const midX = (xs[i - 1] + xs[i]) / 2;
+    linePath += ` C ${midX},${ys[i - 1]} ${midX},${ys[i]} ${xs[i]},${ys[i]}`;
+  }
+  const areaPath = `${linePath} L ${xs[n - 1]},${h} L ${xs[0]},${h} Z`;
+
   return (
     <svg className="shrink-0" fill="none" height={h} viewBox={`0 0 ${w} ${h}`} width={w}>
-      {points.map((v, i) => {
-        const barHeight = Math.max(4, (v / max) * h);
-        const isLast = i === n - 1;
-        return (
-          <rect
-            className="metric-bar"
-            fill={color}
-            height={barHeight}
-            key={i}
-            opacity={isLast ? 1 : 0.25 + (i / (n - 1)) * 0.4}
-            rx={barWidth / 2}
-            style={{ animationDelay: `${i * 60}ms` }}
-            width={barWidth}
-            x={i * (barWidth + gap)}
-            y={h - barHeight}
-          />
-        );
-      })}
+      <path className="metric-area" d={areaPath} fill={color} stroke="none" />
+      <path className="metric-line" d={linePath} fill="none" pathLength={100} stroke={color} strokeLinecap="round" strokeWidth={2} />
+      <circle cx={xs[n - 1]} cy={ys[n - 1]} fill={color} r={3} />
     </svg>
   );
 }

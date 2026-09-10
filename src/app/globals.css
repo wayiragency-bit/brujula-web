@@ -185,12 +185,19 @@ input, textarea, select { color-scheme: dark; }
   }
 }
 
-/* Metric-card mini bar chart — grows up from the baseline on mount */
-@keyframes metric-bar-grow {
-  from { transform: scaleY(0); }
-  to   { transform: scaleY(1); }
+/* Metric-card mini area line — draws in on mount, fill fades in behind it */
+@keyframes metric-line-draw {
+  from { stroke-dashoffset: 100; }
+  to   { stroke-dashoffset: 0; }
 }
-.metric-bar {
-  transform-origin: bottom;
-  animation: metric-bar-grow 0.6s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+.metric-line {
+  stroke-dasharray: 100;
+  animation: metric-line-draw 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+@keyframes metric-area-fade {
+  from { opacity: 0; }
+  to   { opacity: 0.15; }
+}
+.metric-area {
+  animation: metric-area-fade 0.9s ease-out 0.2s backwards;
 }
