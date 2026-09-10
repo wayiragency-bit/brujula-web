@@ -180,5 +180,17 @@ input, textarea, select { color-scheme: dark; }
   *, *::before, *::after {
     scroll-behavior: auto !important;
     transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
   }
+}
+
+/* Metric-card mini bar chart — grows up from the baseline on mount */
+@keyframes metric-bar-grow {
+  from { transform: scaleY(0); }
+  to   { transform: scaleY(1); }
+}
+.metric-bar {
+  transform-origin: bottom;
+  animation: metric-bar-grow 0.6s cubic-bezier(0.16, 1, 0.3, 1) backwards;
 }

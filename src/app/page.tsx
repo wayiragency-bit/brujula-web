@@ -26,15 +26,32 @@ const PRODUCT_TYPE_LABEL: Record<ProductType, string> = {
 
 const RANK_COLORS = ['#f59e0b', '#94a3b8', '#fb923c'];
 
-/* Simple decorative SVG sparkline — takes 6 relative y-values 0-40 */
+/* Decorative mini bar chart — takes 6 relative values 0-40, latest bar stands out */
 function Sparkline({ points, color = '#feb23b' }: { points: number[]; color?: string }) {
   const w = 96; const h = 40; const n = points.length;
-  const xs = points.map((_, i) => (i / (n - 1)) * w);
-  const ys = points.map((v) => h - v);
-  const path = xs.map((x, i) => `${x},${ys[i]}`).join(' ');
+  const gap = 5;
+  const barWidth = (w - gap * (n - 1)) / n;
+  const max = Math.max(...points, 1);
   return (
-    <svg className="shrink-0 opacity-70" fill="none" height={h} viewBox={`0 0 ${w} ${h}`} width={w}>
-      <polyline fill="none" points={path} stroke={color} strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
+    <svg className="shrink-0" fill="none" height={h} viewBox={`0 0 ${w} ${h}`} width={w}>
+      {points.map((v, i) => {
+        const barHeight = Math.max(4, (v / max) * h);
+        const isLast = i === n - 1;
+        return (
+          <rect
+            className="metric-bar"
+            fill={color}
+            height={barHeight}
+            key={i}
+            opacity={isLast ? 1 : 0.25 + (i / (n - 1)) * 0.4}
+            rx={barWidth / 2}
+            style={{ animationDelay: `${i * 60}ms` }}
+            width={barWidth}
+            x={i * (barWidth + gap)}
+            y={h - barHeight}
+          />
+        );
+      })}
     </svg>
   );
 }
