@@ -7,8 +7,8 @@ import { SupplierFormModal } from '@/components/suppliers/supplier-form-modal';
 import { useCreateSupplier, useDeactivateSupplier, useSuppliers, useUpdateSupplier } from '@/hooks/use-suppliers';
 import type { Supplier, SupplierFormValues } from '@/lib/types';
 
-function formatPercent(value: number): string {
-  return `${Number(value.toFixed(2))}%`;
+function formatPercent(value: number | string): string {
+  return `${Number(Number(value).toFixed(2))}%`;
 }
 
 export default function SuppliersPage() {

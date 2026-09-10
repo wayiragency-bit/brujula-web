@@ -1,6 +1,6 @@
 'use client';
 
-import { Plus, Search, Trash2 } from 'lucide-react';
+import { ExternalLink, Plus, Search, Trash2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '@/lib/auth-context';
@@ -241,6 +241,16 @@ export function QuoteBuilder({ initial }: { initial?: Quote }) {
           {initial ? <span className={`rounded-full px-3 py-1 font-mono text-[11px] font-bold uppercase ${STATUS_COLORS[initial.status]}`}>{STATUS_LABELS[initial.status]}</span> : null}
         </div>
         <div className="flex flex-wrap gap-2">
+          {initial?.publicId ? (
+            <a
+              className="button-secondary inline-flex items-center gap-1.5"
+              href={`/q/${initial.publicId}`}
+              rel="noreferrer"
+              target="_blank"
+            >
+              <ExternalLink className="h-3.5 w-3.5" /> Página del cliente
+            </a>
+          ) : null}
           {editable ? (
             <button className="button-primary" disabled={submitting} onClick={handleSave} type="button">
               {submitting ? 'Guardando…' : 'Guardar Cotización'}
