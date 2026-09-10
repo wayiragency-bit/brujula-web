@@ -67,8 +67,8 @@ export function AppShell({ children }: Readonly<{ children: React.ReactNode }>) 
   return (
     <div className="min-h-screen bg-paper text-ink">
       {/* ── SIDEBAR (desktop) ── */}
-      <aside className="fixed inset-y-0 left-0 z-40 hidden w-[68px] flex-col items-center bg-[#0a1628] py-4 lg:flex"
-             style={{ borderRight: '1px solid var(--border-faint)' }}>
+      <aside className="fixed inset-y-0 left-0 z-40 hidden w-[68px] flex-col items-center py-4 lg:flex"
+             style={{ background: 'var(--sidebar-bg)', borderRight: '1px solid var(--border-faint)' }}>
 
         {/* Logo mark */}
         <Link
@@ -88,7 +88,7 @@ export function AppShell({ children }: Readonly<{ children: React.ReactNode }>) 
                 aria-label={label}
                 className={`group relative flex h-10 w-10 items-center justify-center rounded-xl transition-all ${
                   active
-                    ? 'bg-amber text-[#0a1628] shadow-[0_0_16px_rgba(254,178,59,0.25)]'
+                    ? 'bg-amber text-[var(--sidebar-bg)] shadow-[0_0_16px_rgba(254,178,59,0.25)]'
                     : 'text-ink-muted hover:bg-white/8 hover:text-ink'
                 }`}
                 href={href}
@@ -97,7 +97,7 @@ export function AppShell({ children }: Readonly<{ children: React.ReactNode }>) 
                 <Icon className="h-4.5 w-4.5 h-[18px] w-[18px]" />
                 {/* Tooltip */}
                 <span className="pointer-events-none absolute left-[56px] z-50 whitespace-nowrap rounded-md bg-paper-elevated px-2.5 py-1.5 text-xs font-medium text-ink opacity-0 shadow-floating transition-opacity group-hover:opacity-100"
-                      style={{ border: '1px solid rgba(255,255,255,0.1)' }}>
+                      style={{ border: '1px solid var(--border)' }}>
                   {label}
                 </span>
               </Link>
@@ -114,7 +114,7 @@ export function AppShell({ children }: Readonly<{ children: React.ReactNode }>) 
         >
           {initials(user.name)}
           <span className="pointer-events-none absolute left-[56px] z-50 flex items-center gap-1.5 whitespace-nowrap rounded-md bg-paper-elevated px-2.5 py-1.5 text-xs font-medium text-ink opacity-0 shadow-floating transition-opacity group-hover:opacity-100"
-                style={{ border: '1px solid rgba(255,255,255,0.1)' }}>
+                style={{ border: '1px solid var(--border)' }}>
             <LogOut className="h-3 w-3 text-red-400" /> Cerrar sesión
           </span>
         </button>
@@ -169,7 +169,7 @@ export function AppShell({ children }: Readonly<{ children: React.ReactNode }>) 
             </div>
             <div
               className="flex h-8 w-8 items-center justify-center rounded-full font-mono text-xs font-bold text-amber/90"
-              style={{ background: 'rgba(17,67,63,0.8)', border: '1px solid rgba(254,178,59,0.25)' }}
+              style={{ background: 'color-mix(in srgb, var(--teal) 70%, transparent)', border: '1px solid rgba(254,178,59,0.25)' }}
             >
               {initials(user.name)}
             </div>
@@ -184,7 +184,7 @@ export function AppShell({ children }: Readonly<{ children: React.ReactNode }>) 
         aria-label="Navegación móvil"
         className="fixed inset-x-0 bottom-0 z-50 grid grid-cols-5 px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2 lg:hidden"
         style={{
-          background: 'rgba(10,22,40,0.95)',
+          background: 'var(--mobile-nav-bg)',
           backdropFilter: 'blur(12px)',
           borderTop: '1px solid var(--border)',
         }}

@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   description: 'Cotizador y operación comercial para agencias de viajes.',
 };
 
-const themeScript = `(function(){var t=localStorage.getItem('brujula-theme')||'dark';if(t!=='auto')document.documentElement.setAttribute('data-theme',t);})()`;
+const themeScript = `(function(){var t=localStorage.getItem('brujula-theme')||'light';if(t!=='auto')document.documentElement.setAttribute('data-theme',t);})()`;
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
