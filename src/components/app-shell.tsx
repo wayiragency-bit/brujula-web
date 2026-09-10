@@ -3,10 +3,13 @@
 import {
   BarChart3,
   Bell,
+  CalendarDays,
   Compass,
   FileText,
+  Globe,
   LayoutDashboard,
   LogOut,
+  Megaphone,
   Package,
   Search,
   Settings,
@@ -19,14 +22,17 @@ import { useEffect } from 'react';
 import { useAuth } from '@/lib/auth-context';
 
 const navigation = [
-  { label: 'Dashboard',    href: '/',          icon: LayoutDashboard },
-  { label: 'Estatus',      href: '/pipeline',  icon: BarChart3 },
-  { label: 'Cotizaciones', href: '/quotes',    icon: FileText },
-  { label: 'Clientes',     href: '/clients',   icon: UsersRound },
-  { label: 'Productos',    href: '/products',  icon: Package },
-  { label: 'Proveedores',  href: '/suppliers', icon: Truck },
-  { label: 'Equipo',       href: '/team',      icon: UsersRound },
-  { label: 'Config',       href: '/settings',  icon: Settings },
+  { label: 'Dashboard',       href: '/',                icon: LayoutDashboard },
+  { label: 'Estatus',         href: '/pipeline',        icon: BarChart3 },
+  { label: 'Cotizaciones',    href: '/quotes',          icon: FileText },
+  { label: 'Clientes',        href: '/clients',         icon: UsersRound },
+  { label: 'Productos',       href: '/products',        icon: Package },
+  { label: 'Calendario PMS',  href: '/pms',             icon: CalendarDays },
+  { label: 'Channel Manager', href: '/channel-manager', icon: Globe },
+  { label: 'Proveedores',     href: '/suppliers',       icon: Truck },
+  { label: 'Marketing',       href: '/marketing',       icon: Megaphone },
+  { label: 'Equipo',          href: '/team',            icon: UsersRound },
+  { label: 'Config',          href: '/settings',        icon: Settings },
 ];
 
 function isActive(pathname: string, href: string): boolean {

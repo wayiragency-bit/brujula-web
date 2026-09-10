@@ -1,6 +1,6 @@
 'use client';
 
-import { Plus, SquarePen } from 'lucide-react';
+import { Plus, SquarePen, TrendingUp } from 'lucide-react';
 import { useState } from 'react';
 import { AppShell } from '@/components/app-shell';
 import { TeamMemberFormModal } from '@/components/team/team-member-form-modal';
@@ -16,6 +16,14 @@ function initials(name: string): string {
   const parts = name.trim().split(/\s+/);
   return ((parts[0]?.[0] ?? '') + (parts[1]?.[0] ?? '')).toUpperCase();
 }
+
+const AVATAR_COLORS = [
+  { bg: 'rgba(17,67,63,0.9)', text: '#feb23b' },
+  { bg: 'rgba(14,165,233,0.2)', text: '#38bdf8' },
+  { bg: 'rgba(192,132,252,0.2)', text: '#c084fc' },
+  { bg: 'rgba(34,197,94,0.2)', text: '#4ade80' },
+  { bg: 'rgba(249,115,22,0.2)', text: '#fb923c' },
+];
 
 export default function TeamPage() {
   const { data: members, isLoading } = useTeam();
@@ -59,45 +67,101 @@ export default function TeamPage() {
           {isLoading ? (
             <p className="text-ink-soft">Cargando equipo…</p>
           ) : (
-            members?.map((member) => (
-              <article className="flex flex-col gap-4 rounded-2xl border border-ink/10 bg-paper-card p-5 shadow-card" key={member.id}>
-                <div className="flex items-start justify-between gap-2">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-teal font-mono text-xs font-bold text-[#a0d0ca]">
+            members?.map((member, idx) => {
+              const avatarStyle = AVATAR_COLORS[idx % AVATAR_COLORS.length];
+              const winRate = member.quotesCount > 0 ? ((member.wonCount / member.quotesCount) * 100).toFixed(0) : '0';
+              return (
+                <article
+                  className="flex flex-col rounded-2xl overflow-hidden transition"
+                  key={member.id}
+                  style={{ background: '#111827', border: '1px solid rgba(255,255,255,0.08)' }}
+                >
+                  {/* Card header */}
+                  <div
+                    className="flex flex-col items-center px-6 pb-5 pt-7"
+                    style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}
+                  >
+                    {/* Avatar */}
+                    <div
+                      className="flex h-16 w-16 items-center justify-center rounded-full font-mono text-xl font-bold ring-4"
+                      style={{
+                        background: avatarStyle.bg,
+                        color: avatarStyle.text,
+                        ringColor: 'rgba(255,255,255,0.06)',
+                        boxShadow: '0 0 0 4px rgba(255,255,255,0.06)',
+                      }}
+                    >
                       {initials(member.name)}
                     </div>
-                    <div>
-                      <p className="font-semibold text-ink">{member.name}</p>
-                      <p className="label-caps text-ink-soft">{member.roles[0]?.name ?? 'Sin rol'}</p>
+                    <h2 className="mt-3 font-semibold text-ink">{member.name}</h2>
+                    <span
+                      className="mt-1 rounded-full px-2.5 py-0.5 label-caps"
+                      style={{ background: 'rgba(14,165,233,0.12)', color: '#38bdf8' }}
+                    >
+                      {member.roles[0]?.name ?? 'Agente'}
+                    </span>
+                    {!member.active && (
+                      <span
+                        className="mt-2 rounded-full px-2.5 py-0.5 label-caps"
+                        style={{ background: 'rgba(239,68,68,0.12)', color: '#f87171' }}
+                      >
+                        Inactivo
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Stats grid */}
+                  <div className="grid grid-cols-2 gap-0 flex-1">
+                    {[
+                      { label: 'COTIZACIONES', value: String(member.quotesCount) },
+                      { label: 'GANADAS',       value: String(member.wonCount),   accent: '#4ade80' },
+                      { label: 'COMISIÓN',      value: `${winRate}%` },
+                      { label: 'VENDIDO',       value: formatMoney(member.sold) },
+                    ].map((stat, i) => (
+                      <div
+                        className="flex flex-col items-center justify-center py-4"
+                        key={stat.label}
+                        style={{
+                          borderRight: i % 2 === 0 ? '1px solid rgba(255,255,255,0.06)' : undefined,
+                          borderBottom: i < 2 ? '1px solid rgba(255,255,255,0.06)' : undefined,
+                        }}
+                      >
+                        <p
+                          className="font-mono text-2xl font-bold"
+                          style={{ color: stat.accent ?? 'var(--ink)' }}
+                        >
+                          {stat.value}
+                        </p>
+                        <p className="label-caps text-ink-muted">{stat.label}</p>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Commission earned */}
+                  <div
+                    className="flex items-center justify-between px-5 py-3"
+                    style={{ borderTop: '1px solid rgba(255,255,255,0.06)', background: 'rgba(34,197,94,0.05)' }}
+                  >
+                    <div className="flex items-center gap-1.5">
+                      <TrendingUp className="h-3.5 w-3.5 text-green-400" />
+                      <span className="label-caps text-green-400">COMISIÓN GENERADA</span>
                     </div>
+                    <span className="font-mono text-sm font-bold text-green-400">{formatMoney(member.commission)}</span>
                   </div>
-                  <button aria-label="Editar" className="rounded-lg p-1.5 text-ink-soft transition hover:bg-ink/5 hover:text-teal" onClick={() => openEdit(member)} type="button">
-                    <SquarePen className="h-4 w-4" />
-                  </button>
-                </div>
-                {!member.active ? (
-                  <span className="w-fit rounded-full bg-red-100 px-2.5 py-1 font-mono text-[10px] font-bold uppercase text-red-600">Inactivo</span>
-                ) : null}
-                <div className="grid grid-cols-4 gap-2 border-t border-ink/10 pt-4 font-mono text-xs">
-                  <div>
-                    <p className="label-caps text-ink-soft">Cotiz.</p>
-                    <p className="font-bold text-ink">{member.quotesCount}</p>
+
+                  {/* Actions */}
+                  <div className="px-4 py-3" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+                    <button
+                      className="button-secondary w-full inline-flex items-center justify-center gap-2"
+                      onClick={() => openEdit(member)}
+                      type="button"
+                    >
+                      <SquarePen className="h-3.5 w-3.5" /> Ver Perfil Completo
+                    </button>
                   </div>
-                  <div>
-                    <p className="label-caps text-ink-soft">Ganadas</p>
-                    <p className="font-bold text-ink">{member.wonCount}</p>
-                  </div>
-                  <div>
-                    <p className="label-caps text-ink-soft">Vendido</p>
-                    <p className="font-bold text-ink">{formatMoney(member.sold)}</p>
-                  </div>
-                  <div>
-                    <p className="label-caps text-ink-soft">Comisión</p>
-                    <p className="font-bold text-status-accepted">{formatMoney(member.commission)}</p>
-                  </div>
-                </div>
-              </article>
-            ))
+                </article>
+              );
+            })
           )}
         </div>
       </div>
