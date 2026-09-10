@@ -21,7 +21,7 @@ const IN_PROGRESS: QuoteStatus[] = ['ENVIADA', 'ACEPTADA', 'ABONADA'];
 
 /* Simple decorative SVG sparkline — takes 6 relative y-values 0-40 */
 function Sparkline({ points, color = '#feb23b' }: { points: number[]; color?: string }) {
-  const w = 80; const h = 36; const n = points.length;
+  const w = 96; const h = 40; const n = points.length;
   const xs = points.map((_, i) => (i / (n - 1)) * w);
   const ys = points.map((v) => h - v);
   const path = xs.map((x, i) => `${x},${ys[i]}`).join(' ');
@@ -141,25 +141,28 @@ export default function DashboardPage() {
         </header>
 
         {/* Metric cards */}
-        <section aria-label="Indicadores principales" className="grid grid-cols-2 gap-4 xl:grid-cols-4">
+        <section
+          aria-label="Indicadores principales"
+          className={`grid grid-cols-2 gap-5 sm:grid-cols-3 ${metrics.length === 5 ? 'xl:grid-cols-5' : 'xl:grid-cols-4'}`}
+        >
           {metrics.map((metric) => {
             const Icon = metric.icon;
             return (
-              <article className="glass-card rounded-2xl p-4 transition hover:brightness-110" key={metric.label}>
-                <div className="mb-3 flex items-center gap-3">
+              <article className="glass-card rounded-2xl p-6 transition hover:brightness-110" key={metric.label}>
+                <div className="mb-4 flex items-center gap-4">
                   <div
-                    className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl text-white transition-transform duration-300 hover:scale-110"
+                    className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl text-white transition-transform duration-300 hover:scale-110"
                     style={{ background: metric.iconBg, boxShadow: `0 4px 12px ${metric.iconShadow}` }}
                   >
-                    <Icon className="h-6 w-6" />
+                    <Icon className="h-7 w-7" />
                   </div>
                   <div className="min-w-0">
-                    <p className="label-caps text-ink-soft">{metric.label}</p>
-                    <strong className="font-mono text-2xl font-bold leading-tight text-ink">{metric.value}</strong>
+                    <p className="label-caps text-[11px] text-ink-soft">{metric.label}</p>
+                    <strong className="font-mono text-3xl font-bold leading-tight text-ink">{metric.value}</strong>
                   </div>
                 </div>
                 <div className="flex items-center justify-between gap-2">
-                  <span className="rounded-md px-1.5 py-0.5 text-[10px] font-semibold text-ink-soft" style={{ background: 'var(--surface)' }}>
+                  <span className="rounded-md px-2 py-1 text-xs font-semibold text-ink-soft" style={{ background: 'var(--surface)' }}>
                     ↗ {metric.sub}
                   </span>
                   <Sparkline color={metric.iconBg} points={metric.spark} />
