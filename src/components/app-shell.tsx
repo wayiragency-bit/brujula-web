@@ -108,7 +108,7 @@ export function AppShell({ children }: Readonly<{ children: React.ReactNode }>) 
           type="button"
         >
           <LogOut className="h-[22px] w-[22px]" />
-          <span className="text-[9px] font-medium leading-tight text-center">Salir</span>
+          <span className="text-[11px] font-medium leading-tight text-center">Salir</span>
         </button>
       </aside>
 
