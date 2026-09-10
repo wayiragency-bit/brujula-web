@@ -26,24 +26,23 @@ const PRODUCT_TYPE_LABEL: Record<ProductType, string> = {
 
 const RANK_COLORS = ['#f59e0b', '#94a3b8', '#fb923c'];
 
-/* Decorative mini area line — takes 6 relative y-values 0-40, smooth curve with soft fill */
+/* Decorative connected-dots sparkline — the latest point gets a live pulse ring */
 function Sparkline({ points, color = '#feb23b' }: { points: number[]; color?: string }) {
   const w = 96; const h = 40; const n = points.length;
   const xs = points.map((_, i) => (i / (n - 1)) * w);
   const ys = points.map((v) => h - v);
-
-  let linePath = `M ${xs[0]},${ys[0]}`;
-  for (let i = 1; i < n; i++) {
-    const midX = (xs[i - 1] + xs[i]) / 2;
-    linePath += ` C ${midX},${ys[i - 1]} ${midX},${ys[i]} ${xs[i]},${ys[i]}`;
-  }
-  const areaPath = `${linePath} L ${xs[n - 1]},${h} L ${xs[0]},${h} Z`;
+  const linePoints = xs.map((x, i) => `${x},${ys[i]}`).join(' ');
+  const lastX = xs[n - 1];
+  const lastY = ys[n - 1];
 
   return (
     <svg className="shrink-0" fill="none" height={h} viewBox={`0 0 ${w} ${h}`} width={w}>
-      <path className="metric-area" d={areaPath} fill={color} stroke="none" />
-      <path className="metric-line" d={linePath} fill="none" pathLength={100} stroke={color} strokeLinecap="round" strokeWidth={2} />
-      <circle cx={xs[n - 1]} cy={ys[n - 1]} fill={color} r={3} />
+      <polyline fill="none" opacity={0.5} points={linePoints} stroke={color} strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} />
+      {xs.slice(0, -1).map((x, i) => (
+        <circle cx={x} cy={ys[i]} fill={color} key={i} opacity={0.5} r={2} />
+      ))}
+      <circle className="metric-pulse-ring" cx={lastX} cy={lastY} fill={color} opacity={0.35} r={5} />
+      <circle cx={lastX} cy={lastY} fill={color} r={3.5} />
     </svg>
   );
 }
