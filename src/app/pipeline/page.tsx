@@ -1,7 +1,7 @@
 'use client';
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, X } from 'lucide-react';
 import Link from 'next/link';
 import { useMemo, useState } from 'react';
 import { AppShell } from '@/components/app-shell';
@@ -63,6 +63,8 @@ function useRecordPaymentMutation() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['pipeline'] }),
   });
 }
+
+const MAIN_STATUSES: QuoteStatus[] = ['ENVIADA', 'ACEPTADA', 'ABONADA', 'PAGADA', 'RECHAZADA'];
 
 type PaymentPending = { card: PipelineCard; prefill: string };
 
@@ -168,13 +170,65 @@ function KanbanCard({ card, onDragStart }: { card: PipelineCard; onDragStart: (c
   );
 }
 
+function VencidasPanel({ cards, onClose }: { cards: PipelineCard[]; onClose: () => void }) {
+  const total    = cards.reduce((sum, c) => sum + Number(c.total), 0);
+  const currency = cards[0]?.currency ?? 'COP';
+  const sc       = STATUS_COLORS['VENCIDA'];
+  return (
+    <div className="fixed inset-0 z-50 flex" onClick={onClose}>
+      <div className="flex-1" style={{ background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)' }} />
+      <div
+        className="flex h-full w-full max-w-sm flex-col overflow-hidden"
+        style={{ background: 'var(--paper-card)', borderLeft: '1px solid var(--border)' }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Panel header */}
+        <div className="flex items-center justify-between px-4 py-4" style={{ borderBottom: '1px solid var(--border)' }}>
+          <div className="flex items-center gap-2">
+            <span className="h-2 w-2 rounded-full" style={{ background: sc.dot }} />
+            <h3 className="text-sm font-bold uppercase tracking-wide text-ink">Vencidas</h3>
+            <span
+              className="flex h-5 min-w-[20px] items-center justify-center rounded-full px-1.5 text-xs font-bold"
+              style={{ background: sc.badge, color: sc.text }}
+            >
+              {cards.length}
+            </span>
+          </div>
+          <button
+            aria-label="Cerrar"
+            className="rounded-lg p-1.5 text-ink-soft transition hover:bg-ink/10 hover:text-ink"
+            onClick={onClose}
+            type="button"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+        {/* Cards list */}
+        <div className="flex-1 overflow-y-auto space-y-2 p-3">
+          {cards.length === 0 ? (
+            <p className="py-8 text-center text-sm text-ink-muted">Sin cotizaciones vencidas</p>
+          ) : (
+            cards.map((card) => <KanbanCard card={card} key={card.id} onDragStart={() => {}} />)
+          )}
+        </div>
+        {/* Total */}
+        <div className="px-4 py-3" style={{ borderTop: '1px solid var(--border)' }}>
+          <p className="label-caps text-ink-muted">Total vencidas</p>
+          <p className="font-mono text-sm font-bold text-ink">{formatMoney(String(total), currency)}</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function KanbanBoard() {
   const { data, isLoading } = usePipelineKanban();
   const changeStatus   = useChangeStatusMutation();
   const recordPayment  = useRecordPaymentMutation();
-  const [dragging, setDragging]         = useState<PipelineCard | null>(null);
-  const [error, setError]               = useState<string | null>(null);
+  const [dragging, setDragging]             = useState<PipelineCard | null>(null);
+  const [error, setError]                   = useState<string | null>(null);
   const [paymentPending, setPaymentPending] = useState<PaymentPending | null>(null);
+  const [showVencidas, setShowVencidas]     = useState(false);
 
   const PAYMENT_TARGETS = new Set<QuoteStatus>(['ABONADA', 'PAGADA']);
 
@@ -209,8 +263,16 @@ function KanbanBoard() {
 
   if (isLoading) return <p className="text-ink-soft">Cargando pipeline…</p>;
 
+  const mainColumns  = (data?.data ?? []).filter((c) => MAIN_STATUSES.includes(c.status));
+  const vencidasCol  = data?.data.find((c) => c.status === 'VENCIDA');
+  const vencidasCards = vencidasCol?.cards ?? [];
+  const scVencida    = STATUS_COLORS['VENCIDA'];
+
   return (
     <div>
+      {showVencidas && (
+        <VencidasPanel cards={vencidasCards} onClose={() => setShowVencidas(false)} />
+      )}
       {paymentPending && (
         <PaymentModal
           loading={recordPayment.isPending}
@@ -219,14 +281,37 @@ function KanbanBoard() {
           pending={paymentPending}
         />
       )}
+
+      {/* Toolbar: Vencidas button */}
+      <div className="mb-4 flex items-center justify-end">
+        <button
+          type="button"
+          onClick={() => setShowVencidas(true)}
+          className="flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition hover:brightness-110"
+          style={{ background: scVencida.badge, color: scVencida.text, border: `1px solid ${scVencida.dot}30` }}
+        >
+          <span className="h-2 w-2 rounded-full" style={{ background: scVencida.dot }} />
+          Vencidas
+          {vencidasCards.length > 0 && (
+            <span
+              className="flex h-5 min-w-[20px] items-center justify-center rounded-full px-1.5 text-xs font-bold"
+              style={{ background: scVencida.dot, color: '#fff' }}
+            >
+              {vencidasCards.length}
+            </span>
+          )}
+        </button>
+      </div>
+
       {error ? <p className="mb-3 rounded-lg px-4 py-2 text-sm text-red-400" style={{ background: 'rgba(248,113,113,0.10)' }} onClick={() => setError(null)}>{error} ✕</p> : null}
+
       <div className="flex gap-4 overflow-x-auto pb-4">
-        {data?.data.map((column) => {
+        {mainColumns.map((column) => {
           const total    = column.cards.reduce((sum, c) => sum + Number(c.total), 0);
           const currency = column.cards[0]?.currency ?? 'COP';
           const sc       = STATUS_COLORS[column.status];
           return (
-            <div className="flex w-72 shrink-0 flex-col gap-2" key={column.status}>
+            <div className="flex w-64 shrink-0 flex-col gap-2" key={column.status}>
 
               {/* Column header — outside/above the card area */}
               <div className="flex items-center justify-between px-1">
