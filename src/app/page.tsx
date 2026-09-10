@@ -170,217 +170,225 @@ export default function DashboardPage() {
           })}
         </section>
 
-        {/* Ventas del mes */}
-        <article
-          className="rounded-2xl p-6 sm:p-7"
-          style={{ background: 'var(--paper-card)', border: '1px solid var(--border)' }}
-        >
-          <div className="flex flex-wrap items-start justify-between gap-4">
-            <div>
-              <p className="label-caps text-ink-soft">
-                VENTAS DE {new Date().toLocaleDateString('es-CO', { month: 'long' }).toUpperCase()}
-              </p>
-              <p className="mt-2 font-mono text-3xl font-extrabold text-ink">{formatMoneyFull(totalAccepted, currency)}</p>
-              <p className="mt-1 text-sm text-ink-soft">de {formatMoneyFull(totalQuoted, currency)} cotizados</p>
-            </div>
-            <div className="flex items-center gap-2">
-              <SalesGoalEditor canEdit={hasPermission('settings.edit_agency')} currency={currency} goal={goal} />
-              <Link
-                className="inline-flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold text-amber transition"
-                href="/pipeline"
-                style={{ background: 'rgba(254,178,59,0.10)' }}
-              >
-                Pipeline <ArrowUpRight className="h-3.5 w-3.5" />
-              </Link>
-            </div>
-          </div>
+        {/* Cuerpo principal: columna izquierda (ventas/gráfico/en curso) + derecha (productos/cotizaciones/agentes) */}
+        <section className="grid items-start gap-6 xl:grid-cols-[1fr_1.6fr]">
 
-          {/* Progress bar */}
-          <div className="mt-5">
-            <div className="h-2.5 w-full overflow-hidden rounded-full" style={{ background: 'var(--border-faint)' }}>
-              <div
-                className="h-full rounded-full transition-all duration-700"
-                style={{ width: `${pct}%`, background: 'linear-gradient(90deg, #6366f1, #a855f7, #ec4899)' }}
-              />
-            </div>
-            <div className="mt-2 flex justify-between">
-              <span className="font-mono text-xs font-bold" style={{ color: '#a855f7' }}>{pct.toFixed(1)}% de la meta</span>
-              <span className="label-caps text-ink-muted">meta {formatMoneyFull(goal, currency)}</span>
-            </div>
-          </div>
+          {/* Columna izquierda */}
+          <div className="space-y-6">
 
-          {/* Mini stats */}
-          <div className="mt-5 grid grid-cols-3 gap-3 rounded-xl p-3" style={{ background: 'var(--surface)' }}>
-            {[
-              { label: 'Enviadas', value: String(pendingCount), color: '#feb23b' },
-              { label: 'Aceptadas', value: String(acceptedCount), color: '#22c55e' },
-              { label: 'Total', value: String(totalQuoteCount), color: 'var(--ink)' },
-            ].map((stat) => (
-              <div className="text-center" key={stat.label}>
-                <p className="font-mono text-xl font-bold" style={{ color: stat.color }}>{stat.value}</p>
-                <p className="label-caps text-ink-muted">{stat.label}</p>
-              </div>
-            ))}
-          </div>
-        </article>
-
-        {/* Análisis de cotizaciones */}
-        <QuotesAnalyticsChart />
-
-        {/* En Curso + Top Products */}
-        <section className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
-
-          {/* En Curso */}
-          <article className="overflow-hidden rounded-2xl" style={{ background: 'var(--paper-card)', border: '1px solid var(--border)' }}>
-            <div className="flex items-center justify-between px-6 py-4" style={{ borderBottom: '1px solid var(--border-faint)' }}>
-              <h2 className="font-semibold text-ink">En Curso</h2>
-              <Pager onChange={setInProgressPage} page={inProgressPage} totalPages={inProgressQuotes?.meta.totalPages ?? 1} />
-            </div>
-            <div className="divide-y" style={{ '--tw-divide-opacity': 1 } as React.CSSProperties}>
-              {(inProgressQuotes?.data.length ?? 0) === 0 ? (
-                <p className="px-6 py-8 text-center text-sm text-ink-soft">No hay cotizaciones en curso.</p>
-              ) : (
-                inProgressQuotes!.data.map((q) => (
+            {/* Ventas del mes */}
+            <article
+              className="rounded-2xl p-6 sm:p-7"
+              style={{ background: 'var(--paper-card)', border: '1px solid var(--border)' }}
+            >
+              <div className="flex flex-wrap items-start justify-between gap-4">
+                <div>
+                  <p className="label-caps text-ink-soft">
+                    VENTAS DE {new Date().toLocaleDateString('es-CO', { month: 'long' }).toUpperCase()}
+                  </p>
+                  <p className="mt-2 font-mono text-3xl font-extrabold text-ink">{formatMoneyFull(totalAccepted, currency)}</p>
+                  <p className="mt-1 text-sm text-ink-soft">de {formatMoneyFull(totalQuoted, currency)} cotizados</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <SalesGoalEditor canEdit={hasPermission('settings.edit_agency')} currency={currency} goal={goal} />
                   <Link
-                    className="flex items-center justify-between gap-3 px-6 py-3.5 transition hover:bg-white/[0.03]"
-                    href={`/quotes/${q.id}`}
-                    key={q.id}
-                    style={{ borderColor: 'var(--border-faint)' }}
+                    className="inline-flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold text-amber transition"
+                    href="/pipeline"
+                    style={{ background: 'rgba(254,178,59,0.10)' }}
                   >
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-medium text-ink">{q.number} · {q.client?.name ?? '—'}</p>
-                      <p className="truncate text-xs text-ink-soft">{q.destination}</p>
-                    </div>
-                    <div className="flex shrink-0 items-center gap-2">
-                      <span className="font-mono text-sm font-semibold text-ink">{formatMoneyFull(Number(q.total), q.currency)}</span>
-                      <span className={`${STATUS_COLOR[q.status] ?? 'chip-borrador'} rounded-full px-2 py-0.5 text-[10px] font-semibold`}>
-                        {STATUS_LABEL[q.status] ?? q.status}
-                      </span>
-                    </div>
+                    Pipeline <ArrowUpRight className="h-3.5 w-3.5" />
                   </Link>
-                ))
-              )}
-            </div>
-            <div className="flex items-center justify-between px-6 py-3.5" style={{ borderTop: '1px solid var(--border-faint)', background: 'var(--surface)' }}>
-              <span className="label-caps text-ink-muted">Total en curso</span>
-              <span className="font-mono text-sm font-bold text-ink">
-                {formatMoneyFull(summaryInCurrency.filter((r) => IN_PROGRESS.includes(r.status)).reduce((s, r) => s + Number(r.total), 0), currency)}
-              </span>
-            </div>
-          </article>
-
-          {/* Top productos */}
-          <article className="overflow-hidden rounded-2xl" style={{ background: 'var(--paper-card)', border: '1px solid var(--border)' }}>
-            <div className="px-6 py-4" style={{ borderBottom: '1px solid var(--border-faint)' }}>
-              <div className="flex items-center justify-between">
-                <h2 className="font-semibold text-ink">Top 3 Productos del Mes</h2>
-                <Link className="label-caps text-amber" href="/products">Ver Inventario</Link>
+                </div>
               </div>
-              <p className="mt-1 text-xs text-ink-soft">Los servicios más solicitados en tus cotizaciones.</p>
-            </div>
-            <div className="grid grid-cols-1 gap-3 p-4 sm:grid-cols-3 xl:grid-cols-1">
-              {topProducts.length === 0 ? (
-                <p className="px-3 py-6 text-center text-sm text-ink-soft">Aún no hay productos cotizados.</p>
-              ) : (
-                topProducts.map((product, i) => (
-                  <div className="overflow-hidden rounded-xl" key={product.id} style={{ background: 'var(--surface)', border: '1px solid var(--border-faint)' }}>
-                    <div className="relative h-24 w-full" style={{ background: 'var(--paper-elevated)' }}>
-                      {product.imageUrl ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img alt={product.name} className="h-full w-full object-cover" src={product.imageUrl} />
-                      ) : (
-                        <div className="flex h-full items-center justify-center"><Package className="h-6 w-6 text-ink-muted" /></div>
-                      )}
-                      <span
-                        className="absolute left-2 top-2 flex h-6 w-6 items-center justify-center rounded-full text-[10px] font-bold text-white"
-                        style={{ background: i === 0 ? '#f59e0b' : i === 1 ? '#94a3b8' : '#fb923c' }}
-                      >
-                        #{i + 1}
-                      </span>
-                    </div>
-                    <div className="p-3">
-                      <p className="truncate text-sm font-medium text-ink">{product.name}</p>
-                      <div className="mt-1 flex items-center justify-between">
-                        <span className="text-xs text-ink-soft">{product.timesQuoted} veces cotizado</span>
-                        <span className="font-mono text-sm font-bold text-ink">{formatMoney(product.sellPrice, product.currency)}</span>
+
+              {/* Progress bar */}
+              <div className="mt-5">
+                <div className="h-2.5 w-full overflow-hidden rounded-full" style={{ background: 'var(--border-faint)' }}>
+                  <div
+                    className="h-full rounded-full transition-all duration-700"
+                    style={{ width: `${pct}%`, background: 'linear-gradient(90deg, #6366f1, #a855f7, #ec4899)' }}
+                  />
+                </div>
+                <div className="mt-2 flex justify-between">
+                  <span className="font-mono text-xs font-bold" style={{ color: '#a855f7' }}>{pct.toFixed(1)}% de la meta</span>
+                  <span className="label-caps text-ink-muted">meta {formatMoneyFull(goal, currency)}</span>
+                </div>
+              </div>
+
+              {/* Mini stats */}
+              <div className="mt-5 grid grid-cols-3 gap-3 rounded-xl p-3" style={{ background: 'var(--surface)' }}>
+                {[
+                  { label: 'Enviadas', value: String(pendingCount), color: '#feb23b' },
+                  { label: 'Aceptadas', value: String(acceptedCount), color: '#22c55e' },
+                  { label: 'Total', value: String(totalQuoteCount), color: 'var(--ink)' },
+                ].map((stat) => (
+                  <div className="text-center" key={stat.label}>
+                    <p className="font-mono text-xl font-bold" style={{ color: stat.color }}>{stat.value}</p>
+                    <p className="label-caps text-ink-muted">{stat.label}</p>
+                  </div>
+                ))}
+              </div>
+            </article>
+
+            {/* Análisis de cotizaciones */}
+            <QuotesAnalyticsChart />
+
+            {/* En Curso */}
+            <article className="overflow-hidden rounded-2xl" style={{ background: 'var(--paper-card)', border: '1px solid var(--border)' }}>
+              <div className="flex items-center justify-between px-6 py-4" style={{ borderBottom: '1px solid var(--border-faint)' }}>
+                <h2 className="font-semibold text-ink">En Curso</h2>
+                <Pager onChange={setInProgressPage} page={inProgressPage} totalPages={inProgressQuotes?.meta.totalPages ?? 1} />
+              </div>
+              <div className="divide-y" style={{ '--tw-divide-opacity': 1 } as React.CSSProperties}>
+                {(inProgressQuotes?.data.length ?? 0) === 0 ? (
+                  <p className="px-6 py-8 text-center text-sm text-ink-soft">No hay cotizaciones en curso.</p>
+                ) : (
+                  inProgressQuotes!.data.map((q) => (
+                    <Link
+                      className="flex items-center justify-between gap-3 px-6 py-3.5 transition hover:bg-white/[0.03]"
+                      href={`/quotes/${q.id}`}
+                      key={q.id}
+                      style={{ borderColor: 'var(--border-faint)' }}
+                    >
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-medium text-ink">{q.number} · {q.client?.name ?? '—'}</p>
+                        <p className="truncate text-xs text-ink-soft">{q.destination}</p>
+                      </div>
+                      <div className="flex shrink-0 items-center gap-2">
+                        <span className="font-mono text-sm font-semibold text-ink">{formatMoneyFull(Number(q.total), q.currency)}</span>
+                        <span className={`${STATUS_COLOR[q.status] ?? 'chip-borrador'} rounded-full px-2 py-0.5 text-[10px] font-semibold`}>
+                          {STATUS_LABEL[q.status] ?? q.status}
+                        </span>
+                      </div>
+                    </Link>
+                  ))
+                )}
+              </div>
+              <div className="flex items-center justify-between px-6 py-3.5" style={{ borderTop: '1px solid var(--border-faint)', background: 'var(--surface)' }}>
+                <span className="label-caps text-ink-muted">Total en curso</span>
+                <span className="font-mono text-sm font-bold text-ink">
+                  {formatMoneyFull(summaryInCurrency.filter((r) => IN_PROGRESS.includes(r.status)).reduce((s, r) => s + Number(r.total), 0), currency)}
+                </span>
+              </div>
+            </article>
+          </div>
+
+          {/* Columna derecha */}
+          <div className="space-y-6">
+
+            {/* Top productos */}
+            <article className="overflow-hidden rounded-2xl" style={{ background: 'var(--paper-card)', border: '1px solid var(--border)' }}>
+              <div className="px-6 py-4" style={{ borderBottom: '1px solid var(--border-faint)' }}>
+                <div className="flex items-center justify-between">
+                  <h2 className="font-semibold text-ink">Top 3 Productos del Mes</h2>
+                  <Link className="label-caps text-amber" href="/products">Ver Inventario</Link>
+                </div>
+                <p className="mt-1 text-xs text-ink-soft">Los servicios más solicitados en tus cotizaciones.</p>
+              </div>
+              <div className="grid grid-cols-1 gap-3 p-4 sm:grid-cols-3">
+                {topProducts.length === 0 ? (
+                  <p className="px-3 py-6 text-center text-sm text-ink-soft">Aún no hay productos cotizados.</p>
+                ) : (
+                  topProducts.map((product, i) => (
+                    <div className="overflow-hidden rounded-xl" key={product.id} style={{ background: 'var(--surface)', border: '1px solid var(--border-faint)' }}>
+                      <div className="relative h-24 w-full" style={{ background: 'var(--paper-elevated)' }}>
+                        {product.imageUrl ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img alt={product.name} className="h-full w-full object-cover" src={product.imageUrl} />
+                        ) : (
+                          <div className="flex h-full items-center justify-center"><Package className="h-6 w-6 text-ink-muted" /></div>
+                        )}
+                        <span
+                          className="absolute left-2 top-2 flex h-6 w-6 items-center justify-center rounded-full text-[10px] font-bold text-white"
+                          style={{ background: i === 0 ? '#f59e0b' : i === 1 ? '#94a3b8' : '#fb923c' }}
+                        >
+                          #{i + 1}
+                        </span>
+                      </div>
+                      <div className="p-3">
+                        <p className="truncate text-sm font-medium text-ink">{product.name}</p>
+                        <div className="mt-1 flex items-center justify-between">
+                          <span className="text-xs text-ink-soft">{product.timesQuoted} veces cotizado</span>
+                          <span className="font-mono text-sm font-bold text-ink">{formatMoney(product.sellPrice, product.currency)}</span>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))
-              )}
-            </div>
-          </article>
-        </section>
+                  ))
+                )}
+              </div>
+            </article>
 
-        {/* Últimas cotizaciones + Top agentes */}
-        <section className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
+            {/* Últimas cotizaciones + Top agentes */}
+            <div className="grid gap-6 sm:grid-cols-2">
 
-          {/* Últimas cotizaciones */}
-          <article className="overflow-hidden rounded-2xl" style={{ background: 'var(--paper-card)', border: '1px solid var(--border)' }}>
-            <div className="flex items-center justify-between px-6 py-4" style={{ borderBottom: '1px solid var(--border-faint)' }}>
-              <h2 className="font-semibold text-ink">Últimas Cotizaciones</h2>
-              <Pager onChange={setRecentPage} page={recentPage} totalPages={recentQuotes?.meta.totalPages ?? 1} />
-            </div>
-            <div className="divide-y" style={{ '--tw-divide-opacity': 1 } as React.CSSProperties}>
-              {(recentQuotes?.data.length ?? 0) === 0 ? (
-                <p className="px-6 py-8 text-center text-sm text-ink-soft">Aún no hay cotizaciones.</p>
-              ) : (
-                recentQuotes!.data.map((q) => (
-                  <Link
-                    className="flex items-center gap-3 px-6 py-3.5 transition hover:bg-white/[0.03]"
-                    href={`/quotes/${q.id}`}
-                    key={q.id}
-                  >
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg" style={{ background: 'var(--surface)' }}>
-                      <FileText className="h-4 w-4 text-ink-soft" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-medium text-ink">{q.client?.name ?? '—'}</p>
-                      <p className="text-xs text-ink-soft">{q.number} · {new Date(q.updatedAt).toLocaleDateString('es-CO')}</p>
-                    </div>
-                    <div className="flex shrink-0 flex-col items-end gap-1">
-                      <span className="font-mono text-sm font-semibold text-ink">{formatMoneyFull(Number(q.total), q.currency)}</span>
-                      <span className={`${STATUS_COLOR[q.status] ?? 'chip-borrador'} rounded-full px-2 py-0.5 text-[10px] font-semibold`}>
-                        {STATUS_LABEL[q.status] ?? q.status}
-                      </span>
-                    </div>
-                  </Link>
-                ))
-              )}
-            </div>
-          </article>
+              {/* Últimas cotizaciones */}
+              <article className="overflow-hidden rounded-2xl" style={{ background: 'var(--paper-card)', border: '1px solid var(--border)' }}>
+                <div className="flex items-center justify-between px-6 py-4" style={{ borderBottom: '1px solid var(--border-faint)' }}>
+                  <h2 className="font-semibold text-ink">Últimas Cotizaciones</h2>
+                  <Pager onChange={setRecentPage} page={recentPage} totalPages={recentQuotes?.meta.totalPages ?? 1} />
+                </div>
+                <div className="divide-y" style={{ '--tw-divide-opacity': 1 } as React.CSSProperties}>
+                  {(recentQuotes?.data.length ?? 0) === 0 ? (
+                    <p className="px-6 py-8 text-center text-sm text-ink-soft">Aún no hay cotizaciones.</p>
+                  ) : (
+                    recentQuotes!.data.map((q) => (
+                      <Link
+                        className="flex items-center gap-3 px-6 py-3.5 transition hover:bg-white/[0.03]"
+                        href={`/quotes/${q.id}`}
+                        key={q.id}
+                      >
+                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg" style={{ background: 'var(--surface)' }}>
+                          <FileText className="h-4 w-4 text-ink-soft" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-sm font-medium text-ink">{q.client?.name ?? '—'}</p>
+                          <p className="text-xs text-ink-soft">{q.number} · {new Date(q.updatedAt).toLocaleDateString('es-CO')}</p>
+                        </div>
+                        <div className="flex shrink-0 flex-col items-end gap-1">
+                          <span className="font-mono text-sm font-semibold text-ink">{formatMoneyFull(Number(q.total), q.currency)}</span>
+                          <span className={`${STATUS_COLOR[q.status] ?? 'chip-borrador'} rounded-full px-2 py-0.5 text-[10px] font-semibold`}>
+                            {STATUS_LABEL[q.status] ?? q.status}
+                          </span>
+                        </div>
+                      </Link>
+                    ))
+                  )}
+                </div>
+              </article>
 
-          {/* Top agentes */}
-          <article className="overflow-hidden rounded-2xl" style={{ background: 'var(--paper-card)', border: '1px solid var(--border)' }}>
-            <div className="flex items-center justify-between px-6 py-4" style={{ borderBottom: '1px solid var(--border-faint)' }}>
-              <h2 className="font-semibold text-ink">Top Agentes</h2>
-              <Pager onChange={setAgentsPage} page={agentsPage} totalPages={agentsTotalPages} />
+              {/* Top agentes */}
+              <article className="overflow-hidden rounded-2xl" style={{ background: 'var(--paper-card)', border: '1px solid var(--border)' }}>
+                <div className="flex items-center justify-between px-6 py-4" style={{ borderBottom: '1px solid var(--border-faint)' }}>
+                  <h2 className="font-semibold text-ink">Top Agentes</h2>
+                  <Pager onChange={setAgentsPage} page={agentsPage} totalPages={agentsTotalPages} />
+                </div>
+                <div className="divide-y" style={{ '--tw-divide-opacity': 1 } as React.CSSProperties}>
+                  {visibleAgents.length === 0 ? (
+                    <p className="px-6 py-8 text-center text-sm text-ink-soft">Aún no hay agentes con ventas.</p>
+                  ) : (
+                    visibleAgents.map((agent, i) => (
+                      <div className="flex items-center gap-3 px-6 py-3" key={agent.id}>
+                        <div
+                          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white"
+                          style={{ background: AVATAR_COLORS[(agentsPage - 1) * agentsPerPage + i] ?? AVATAR_COLORS[0] }}
+                        >
+                          {initials(agent.name)}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-sm font-medium text-ink">{agent.name}</p>
+                          <p className="text-xs text-ink-soft">Agente</p>
+                        </div>
+                        <div className="shrink-0 text-right">
+                          <p className="font-mono text-sm font-bold" style={{ color: '#22c55e' }}>{formatMoney(agent.sold, currency)}</p>
+                          <p className="label-caps text-ink-muted">Generado</p>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </article>
             </div>
-            <div className="divide-y" style={{ '--tw-divide-opacity': 1 } as React.CSSProperties}>
-              {visibleAgents.length === 0 ? (
-                <p className="px-6 py-8 text-center text-sm text-ink-soft">Aún no hay agentes con ventas.</p>
-              ) : (
-                visibleAgents.map((agent, i) => (
-                  <div className="flex items-center gap-3 px-6 py-3" key={agent.id}>
-                    <div
-                      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white"
-                      style={{ background: AVATAR_COLORS[(agentsPage - 1) * agentsPerPage + i] ?? AVATAR_COLORS[0] }}
-                    >
-                      {initials(agent.name)}
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-medium text-ink">{agent.name}</p>
-                      <p className="text-xs text-ink-soft">Agente</p>
-                    </div>
-                    <div className="shrink-0 text-right">
-                      <p className="font-mono text-sm font-bold" style={{ color: '#22c55e' }}>{formatMoney(agent.sold, currency)}</p>
-                      <p className="label-caps text-ink-muted">Generado</p>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-          </article>
+          </div>
         </section>
 
       </div>
