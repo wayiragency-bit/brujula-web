@@ -255,6 +255,46 @@ export interface PipelineColumn {
   cards: PipelineCard[];
 }
 
+export type PaymentMethod = 'BANK_TRANSFER' | 'CARD' | 'CASH';
+
+export interface Agency {
+  id: string;
+  name: string;
+  slug: string;
+  logoUrl: string | null;
+  primaryColor: string;
+  baseCurrency: string;
+  taxId: string | null;
+  contactEmail: string | null;
+  contactPhone: string | null;
+  address: string | null;
+  taxName: string | null;
+  taxPct: number;
+  paymentMethod: PaymentMethod;
+  bankName: string | null;
+  bankAccount: string | null;
+  bankAccountHolder: string | null;
+  termsText: string | null;
+}
+
+export interface AgencyFormValues {
+  name?: string;
+  logoUrl?: string;
+  primaryColor?: string;
+  baseCurrency?: string;
+  taxId?: string;
+  contactEmail?: string;
+  contactPhone?: string;
+  address?: string;
+  taxName?: string;
+  taxPct?: number;
+  paymentMethod?: PaymentMethod;
+  bankName?: string;
+  bankAccount?: string;
+  bankAccountHolder?: string;
+  termsText?: string;
+}
+
 export interface TeamMember {
   id: string;
   name: string;
