@@ -226,15 +226,10 @@ function KanbanBoard() {
           const currency = column.cards[0]?.currency ?? 'COP';
           const sc       = STATUS_COLORS[column.status];
           return (
-            <div
-              className="flex w-72 shrink-0 flex-col rounded-2xl"
-              key={column.status}
-              style={{ background: 'var(--surface)', border: '1px solid var(--border-faint)' }}
-              onDragOver={(e) => e.preventDefault()}
-              onDrop={() => handleDrop(column.status)}
-            >
-              {/* Column header */}
-              <div className="flex items-center justify-between px-4 py-3" style={{ borderBottom: '1px solid var(--border-faint)' }}>
+            <div className="flex w-72 shrink-0 flex-col gap-2" key={column.status}>
+
+              {/* Column header — outside/above the card area */}
+              <div className="flex items-center justify-between px-1">
                 <div className="flex items-center gap-2">
                   <span className="h-2 w-2 rounded-full" style={{ background: sc.dot }} />
                   <h3 className="text-sm font-bold uppercase tracking-wide text-ink">{STATUS_LABELS[column.status]}</h3>
@@ -247,8 +242,13 @@ function KanbanBoard() {
                 </span>
               </div>
 
-              {/* Cards */}
-              <div className="flex flex-1 flex-col gap-2 p-3 min-h-[80px]">
+              {/* Cards area */}
+              <div
+                className="flex flex-1 flex-col gap-2 rounded-2xl p-2 min-h-[80px]"
+                style={{ background: 'var(--surface)', border: '1px solid var(--border-faint)' }}
+                onDragOver={(e) => e.preventDefault()}
+                onDrop={() => handleDrop(column.status)}
+              >
                 {column.cards.length === 0 ? (
                   <p className="rounded-lg border border-dashed py-6 text-center text-xs text-ink-muted" style={{ borderColor: 'var(--border)' }}>Arrastra aquí</p>
                 ) : (
@@ -256,8 +256,8 @@ function KanbanBoard() {
                 )}
               </div>
 
-              {/* Column total */}
-              <div className="px-4 py-3" style={{ borderTop: '1px solid var(--border-faint)' }}>
+              {/* Column total — outside/below the card area */}
+              <div className="px-1">
                 <p className="label-caps text-ink-muted">Total etapa</p>
                 <p className="font-mono text-sm font-bold text-ink">{formatMoney(String(total), currency)}</p>
               </div>
