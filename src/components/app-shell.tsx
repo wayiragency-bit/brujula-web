@@ -22,17 +22,17 @@ import { useEffect } from 'react';
 import { useAuth } from '@/lib/auth-context';
 
 const navigation = [
-  { label: 'Dashboard',       short: 'Panel',    href: '/',                icon: LayoutDashboard },
-  { label: 'Estatus',         short: 'Estatus',  href: '/pipeline',        icon: BarChart3 },
-  { label: 'Cotizaciones',    short: 'Cotiza.',  href: '/quotes',          icon: FileText },
-  { label: 'Clientes',        short: 'Clientes', href: '/clients',         icon: UsersRound },
-  { label: 'Productos',       short: 'Produc.',  href: '/products',        icon: Package },
-  { label: 'Calendario PMS',  short: 'Cal.PMS',  href: '/pms',             icon: CalendarDays },
-  { label: 'Channel Manager', short: 'Channel',  href: '/channel-manager', icon: Globe },
-  { label: 'Proveedores',     short: 'Proveed.', href: '/suppliers',       icon: Truck },
-  { label: 'Marketing',       short: 'Market.',  href: '/marketing',       icon: Megaphone },
-  { label: 'Equipo',          short: 'Equipo',   href: '/team',            icon: UsersRound },
-  { label: 'Config',          short: 'Config',   href: '/settings',        icon: Settings },
+  { label: 'Dashboard',       href: '/',                icon: LayoutDashboard },
+  { label: 'Estatus',         href: '/pipeline',        icon: BarChart3 },
+  { label: 'Cotizaciones',    href: '/quotes',          icon: FileText },
+  { label: 'Clientes',        href: '/clients',         icon: UsersRound },
+  { label: 'Productos',       href: '/products',        icon: Package },
+  { label: 'Calendario PMS',  href: '/pms',             icon: CalendarDays },
+  { label: 'Channel Manager', href: '/channel-manager', icon: Globe },
+  { label: 'Proveedores',     href: '/suppliers',       icon: Truck },
+  { label: 'Marketing',       href: '/marketing',       icon: Megaphone },
+  { label: 'Equipo',          href: '/team',            icon: UsersRound },
+  { label: 'Configuración',   href: '/settings',        icon: Settings },
 ];
 
 function isActive(pathname: string, href: string): boolean {
@@ -67,7 +67,7 @@ export function AppShell({ children }: Readonly<{ children: React.ReactNode }>) 
   return (
     <div className="min-h-screen bg-paper text-ink">
       {/* ── SIDEBAR (desktop) ── */}
-      <aside className="glass-panel fixed top-4 bottom-4 left-4 z-40 hidden w-24 flex-col items-center py-2 rounded-2xl lg:flex">
+      <aside className="glass-panel fixed top-4 bottom-4 left-4 z-40 hidden w-[108px] flex-col items-center py-2 rounded-2xl lg:flex">
 
         {/* Logo mark */}
         <Link
@@ -79,22 +79,22 @@ export function AppShell({ children }: Readonly<{ children: React.ReactNode }>) 
         </Link>
 
         {/* Nav icons */}
-        <nav aria-label="Navegación principal" className="mt-4 flex flex-1 flex-col items-center gap-1.5 w-full px-3 overflow-y-auto">
-          {navigation.map(({ label, short, href, icon: Icon }) => {
+        <nav aria-label="Navegación principal" className="mt-4 flex flex-1 flex-col items-center gap-1 w-full px-2 overflow-y-auto">
+          {navigation.map(({ label, href, icon: Icon }) => {
             const active = isActive(pathname, href);
             return (
               <Link
                 aria-label={label}
-                className={`flex w-full flex-col items-center justify-center gap-1 rounded-2xl py-2 px-2 transition-all duration-200 ${
+                className={`flex w-full flex-col items-center justify-center gap-1 rounded-xl py-2 px-1 transition-all duration-200 ${
                   active
                     ? 'bg-amber text-[var(--sidebar-bg)] shadow-[0_0_16px_rgba(254,178,59,0.25)]'
-                    : 'text-white/40 hover:bg-white/8 hover:text-white/80'
+                    : 'text-[var(--sidebar-nav-text)] hover:bg-[var(--sidebar-nav-hover-bg)] hover:text-[var(--sidebar-nav-text-active)]'
                 }`}
                 href={href}
                 key={label}
               >
-                <Icon className="h-[22px] w-[22px]" />
-                <span className="text-[9px] font-medium leading-tight text-center">{short}</span>
+                <Icon className="h-5 w-5" />
+                <span className="text-[10px] font-medium leading-tight text-center break-words w-full">{label}</span>
               </Link>
             );
           })}
@@ -113,7 +113,7 @@ export function AppShell({ children }: Readonly<{ children: React.ReactNode }>) 
       </aside>
 
       {/* ── CONTENT AREA ── */}
-      <div className="lg:pl-[128px]">
+      <div className="lg:pl-[140px]">
 
         {/* Top bar */}
         <header className="sticky top-0 z-30 flex h-16 items-center gap-4 px-4 sm:px-6 lg:px-6"

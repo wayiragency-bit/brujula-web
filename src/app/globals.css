@@ -22,8 +22,11 @@
   --topbar-bg:      rgba(15, 23, 42, 0.85);
   --status-accepted: #22c55e;
   --status-expired:  #f59e0b;
-  --sidebar-bg:      rgba(15, 23, 42, 0.7);
-  --mobile-nav-bg:   rgba(15, 23, 42, 0.95);
+  --sidebar-bg:               rgba(15, 23, 42, 0.7);
+  --sidebar-nav-text:         rgba(255, 255, 255, 0.4);
+  --sidebar-nav-text-active:  rgba(255, 255, 255, 0.85);
+  --sidebar-nav-hover-bg:     rgba(255, 255, 255, 0.08);
+  --mobile-nav-bg:            rgba(15, 23, 42, 0.95);
   --font-display: 'Inter', system-ui, sans-serif;
   --font-ui:      'Inter', system-ui, sans-serif;
   --font-data:    'Space Mono', Consolas, monospace;
@@ -43,8 +46,11 @@
   --surface:        rgba(0, 0, 0, 0.04);
   --surface-hover:  rgba(0, 0, 0, 0.07);
   --topbar-bg:      rgba(241, 245, 249, 0.92);
-  --sidebar-bg:     rgba(36, 60, 96, 0.85);
-  --mobile-nav-bg:  rgba(241, 245, 249, 0.95);
+  --sidebar-bg:               rgba(255, 255, 255, 0.97);
+  --sidebar-nav-text:         rgba(15, 23, 42, 0.45);
+  --sidebar-nav-text-active:  rgba(15, 23, 42, 0.9);
+  --sidebar-nav-hover-bg:     rgba(15, 23, 42, 0.05);
+  --mobile-nav-bg:            rgba(241, 245, 249, 0.95);
 }
 
 * { box-sizing: border-box; }
@@ -137,6 +143,10 @@ input, textarea, select { color-scheme: dark; }
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.05);
+}
+[data-theme="light"] .glass-panel {
+  border-color: rgba(0, 0, 0, 0.08);
+  box-shadow: 2px 0 12px rgba(0, 0, 0, 0.06);
 }
 .glass-card {
   background: rgba(30, 41, 59, 0.5);
