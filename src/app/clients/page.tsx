@@ -50,17 +50,20 @@ export default function ClientsPage() {
 
   const createClient = useCreateClient();
   const [modalOpen, setModalOpen] = useState(false);
+  const [modalKey, setModalKey] = useState(0);
   const [editing, setEditing] = useState<Client | null>(null);
   const updateClient = useUpdateClient(editing?.id ?? 'none');
   const deactivateClient = useDeactivateClient();
 
   function openCreate() {
     setEditing(null);
+    setModalKey((k) => k + 1);
     setModalOpen(true);
   }
 
   function openEdit(client: Client) {
     setEditing(client);
+    setModalKey((k) => k + 1);
     setModalOpen(true);
   }
 
@@ -218,6 +221,7 @@ export default function ClientsPage() {
 
       <ClientFormModal
         initial={editing ?? undefined}
+        key={modalKey}
         onClose={() => setModalOpen(false)}
         onSubmit={handleSubmit}
         open={modalOpen}

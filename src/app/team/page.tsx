@@ -21,16 +21,19 @@ export default function TeamPage() {
   const { data: members, isLoading } = useTeam();
   const inviteMember = useInviteMember();
   const [modalOpen, setModalOpen] = useState(false);
+  const [modalKey, setModalKey] = useState(0);
   const [editing, setEditing] = useState<TeamMember | null>(null);
   const updateMember = useUpdateMember(editing?.id ?? 'none');
 
   function openCreate() {
     setEditing(null);
+    setModalKey((k) => k + 1);
     setModalOpen(true);
   }
 
   function openEdit(member: TeamMember) {
     setEditing(member);
+    setModalKey((k) => k + 1);
     setModalOpen(true);
   }
 
@@ -99,7 +102,7 @@ export default function TeamPage() {
         </div>
       </div>
 
-      <TeamMemberFormModal initial={editing ?? undefined} onClose={() => setModalOpen(false)} onSubmit={handleSubmit} open={modalOpen} />
+      <TeamMemberFormModal key={modalKey} initial={editing ?? undefined} onClose={() => setModalOpen(false)} onSubmit={handleSubmit} open={modalOpen} />
     </AppShell>
   );
 }

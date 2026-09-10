@@ -56,6 +56,28 @@ function newKey(): string {
   return typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2);
 }
 
+/** The API rejects unknown properties, so only DTO fields may travel. */
+function toPayloadItem(item: DraftItem): QuoteItemDraft {
+  return {
+    id: item.id,
+    productId: item.productId,
+    name: item.name,
+    description: item.description,
+    unit: item.unit,
+    quantity: item.quantity,
+    nights: item.nights,
+    adults: item.adults,
+    children: item.children,
+    currency: item.currency,
+    fxRate: item.fxRate,
+    netCost: item.netCost,
+    markupType: item.markupType,
+    markupValue: item.markupValue,
+    discountItem: item.discountItem,
+    taxPct: item.taxPct,
+  };
+}
+
 function draftFromQuote(quote?: Quote): { header: QuoteHeaderDraft; items: DraftItem[] } {
   if (!quote) {
     return {
@@ -93,9 +115,8 @@ export function QuoteBuilder({ initial }: { initial?: Quote }) {
   const isNew = !initial;
   const editable = !initial || initial.status === 'BORRADOR';
 
-  const seed = useMemo(() => draftFromQuote(initial), [initial]);
-  const [header, setHeader] = useState<QuoteHeaderDraft>(seed.header);
-  const [items, setItems] = useState<DraftItem[]>(seed.items);
+  const [header, setHeader] = useState<QuoteHeaderDraft>(() => draftFromQuote(initial).header);
+  const [items, setItems] = useState<DraftItem[]>(() => draftFromQuote(initial).items);
   const [preview, setPreview] = useState<Quote | null>(initial ?? null);
   const [catalogSearch, setCatalogSearch] = useState('');
   const [showCatalog, setShowCatalog] = useState(false);
@@ -114,12 +135,6 @@ export function QuoteBuilder({ initial }: { initial?: Quote }) {
   const updateQuote = useUpdateQuote(initial?.id ?? 'none');
   const changeStatus = useChangeQuoteStatus(initial?.id ?? 'none');
   const recordPayment = useRecordPayment(initial?.id ?? 'none');
-
-  useEffect(() => {
-    setHeader(seed.header);
-    setItems(seed.items);
-    setPreview(initial ?? null);
-  }, [seed, initial]);
 
   useEffect(() => {
     if (!editable) return;
@@ -142,10 +157,6 @@ export function QuoteBuilder({ initial }: { initial?: Quote }) {
     setItems((prev) => [...prev, { key: newKey(), productId: product.id, name: product.name, unit: product.unit, quantity: '1' }]);
     setShowCatalog(false);
     setCatalogSearch('');
-  }
-
-  function toPayloadItem({ key: _key, imageUrl: _imageUrl, ...rest }: DraftItem): QuoteItemDraft {
-    return rest;
   }
 
   function addManualItem() {
@@ -185,7 +196,12 @@ export function QuoteBuilder({ initial }: { initial?: Quote }) {
         const created = await createQuote.mutateAsync(payload);
         router.push(`/quotes/${created.id}`);
       } else {
-        await updateQuote.mutateAsync({ ...payload, version: initial.version });
+        // Adopt the saved snapshot so persisted item ids replace the client-side drafts.
+        const saved = await updateQuote.mutateAsync({ ...payload, version: initial.version });
+        const draft = draftFromQuote(saved);
+        setHeader(draft.header);
+        setItems(draft.items);
+        setPreview(saved);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'No se pudo guardar la cotización.');

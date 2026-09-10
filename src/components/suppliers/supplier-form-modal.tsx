@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, type FormEvent } from 'react';
+import { useState, type FormEvent } from 'react';
 import type { Supplier, SupplierFormValues } from '@/lib/types';
 import { Modal } from '@/components/ui/modal';
 import { inputClass, labelClass } from '@/components/ui/form';
@@ -14,27 +14,22 @@ interface SupplierFormModalProps {
 
 const EMPTY: SupplierFormValues = { name: '', contact: '', email: '', phone: '', commissionPct: 0, notes: '' };
 
+function valuesFrom(initial?: Supplier): SupplierFormValues {
+  if (!initial) return EMPTY;
+  return {
+    name: initial.name,
+    contact: initial.contact ?? '',
+    email: initial.email ?? '',
+    phone: initial.phone ?? '',
+    commissionPct: Number(initial.commissionPct),
+    notes: initial.notes ?? '',
+  };
+}
+
 export function SupplierFormModal({ open, onClose, onSubmit, initial }: SupplierFormModalProps) {
-  const [values, setValues] = useState<SupplierFormValues>(EMPTY);
+  const [values, setValues] = useState<SupplierFormValues>(() => valuesFrom(initial));
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
-
-  useEffect(() => {
-    if (!open) return;
-    setError(null);
-    setValues(
-      initial
-        ? {
-            name: initial.name,
-            contact: initial.contact ?? '',
-            email: initial.email ?? '',
-            phone: initial.phone ?? '',
-            commissionPct: initial.commissionPct,
-            notes: initial.notes ?? '',
-          }
-        : EMPTY,
-    );
-  }, [open, initial]);
 
   function set<K extends keyof SupplierFormValues>(key: K, value: SupplierFormValues[K]) {
     setValues((prev) => ({ ...prev, [key]: value }));

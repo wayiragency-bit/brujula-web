@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState, type FormEvent } from 'react';
+import { useMemo, useState, type FormEvent } from 'react';
 import { useProductCategories } from '@/hooks/use-products';
 import { useSuppliers } from '@/hooks/use-suppliers';
 import type { MarkupType, Product, ProductFormValues, ProductType, ProductUnit } from '@/lib/types';
@@ -50,39 +50,32 @@ function formatMoney(value: number, currency: string): string {
   return new Intl.NumberFormat('es-CO', { style: 'currency', currency, maximumFractionDigits: 0 }).format(value);
 }
 
+function valuesFrom(initial?: Product): ProductFormValues {
+  if (!initial) return EMPTY;
+  return {
+    name: initial.name,
+    description: initial.description ?? '',
+    imageUrl: initial.imageUrl ?? '',
+    type: initial.type,
+    category: initial.category ?? '',
+    tags: initial.tags,
+    netCost: initial.netCost,
+    currency: initial.currency,
+    unit: initial.unit,
+    markupType: initial.markupType,
+    markupValue: initial.markupValue,
+    taxPct: initial.taxPct,
+    supplierId: initial.supplierId ?? '',
+  };
+}
+
 export function ProductFormModal({ open, onClose, onSubmit, initial }: ProductFormModalProps) {
   const { data: categories } = useProductCategories();
   const { data: suppliers } = useSuppliers();
-  const [values, setValues] = useState<ProductFormValues>(EMPTY);
-  const [tagsInput, setTagsInput] = useState('');
+  const [values, setValues] = useState<ProductFormValues>(() => valuesFrom(initial));
+  const [tagsInput, setTagsInput] = useState(() => initial?.tags.join(', ') ?? '');
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
-
-  useEffect(() => {
-    if (!open) return;
-    setError(null);
-    if (initial) {
-      setValues({
-        name: initial.name,
-        description: initial.description ?? '',
-        imageUrl: initial.imageUrl ?? '',
-        type: initial.type,
-        category: initial.category ?? '',
-        tags: initial.tags,
-        netCost: initial.netCost,
-        currency: initial.currency,
-        unit: initial.unit,
-        markupType: initial.markupType,
-        markupValue: initial.markupValue,
-        taxPct: initial.taxPct,
-        supplierId: initial.supplierId ?? '',
-      });
-      setTagsInput(initial.tags.join(', '));
-    } else {
-      setValues(EMPTY);
-      setTagsInput('');
-    }
-  }, [open, initial]);
 
   function set<K extends keyof ProductFormValues>(key: K, value: ProductFormValues[K]) {
     setValues((prev) => ({ ...prev, [key]: value }));

@@ -17,7 +17,7 @@ export default function QuoteDetailPage({ params }: { params: Promise<{ id: stri
         <Link className="inline-flex items-center gap-2 text-sm font-semibold text-teal hover:underline" href="/quotes">
           <ArrowLeft className="h-4 w-4" /> Volver
         </Link>
-        {isLoading || !quote ? <p className="text-ink-soft">Cargando cotización…</p> : <QuoteBuilder initial={quote} />}
+        {isLoading || !quote ? <p className="text-ink-soft">Cargando cotización…</p> : <QuoteBuilder initial={quote} key={quote.id} />}
       </div>
     </AppShell>
   );

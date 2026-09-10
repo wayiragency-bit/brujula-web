@@ -21,16 +21,19 @@ export default function ProductsPage() {
   const createProduct = useCreateProduct();
   const deactivateProduct = useDeactivateProduct();
   const [modalOpen, setModalOpen] = useState(false);
+  const [modalKey, setModalKey] = useState(0);
   const [editing, setEditing] = useState<Product | null>(null);
   const updateProduct = useUpdateProduct(editing?.id ?? 'none');
 
   function openCreate() {
     setEditing(null);
+    setModalKey((k) => k + 1);
     setModalOpen(true);
   }
 
   function openEdit(product: Product) {
     setEditing(product);
+    setModalKey((k) => k + 1);
     setModalOpen(true);
   }
 
@@ -134,7 +137,7 @@ export default function ProductsPage() {
         ) : null}
       </div>
 
-      <ProductFormModal initial={editing ?? undefined} onClose={() => setModalOpen(false)} onSubmit={handleSubmit} open={modalOpen} />
+      <ProductFormModal key={modalKey} initial={editing ?? undefined} onClose={() => setModalOpen(false)} onSubmit={handleSubmit} open={modalOpen} />
     </AppShell>
   );
 }

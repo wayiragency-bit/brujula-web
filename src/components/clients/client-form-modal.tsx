@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, type FormEvent } from 'react';
+import { useState, type FormEvent } from 'react';
 import { useTeam } from '@/hooks/use-team';
 import { COUNTRIES } from '@/lib/countries';
 import type { Client, ClientFormValues } from '@/lib/types';
@@ -27,32 +27,27 @@ const EMPTY: ClientFormValues = {
   notes: '',
 };
 
+function valuesFrom(initial?: Client): ClientFormValues {
+  if (!initial) return EMPTY;
+  return {
+    name: initial.name,
+    type: initial.type,
+    phone: initial.phone,
+    phoneCountry: initial.phoneCountry,
+    email: initial.email ?? '',
+    document: initial.document ?? '',
+    country: initial.country ?? '',
+    city: initial.city ?? '',
+    sellerId: initial.sellerId ?? '',
+    notes: initial.notes ?? '',
+  };
+}
+
 export function ClientFormModal({ open, onClose, onSubmit, initial }: ClientFormModalProps) {
   const { data: team } = useTeam();
-  const [values, setValues] = useState<ClientFormValues>(EMPTY);
+  const [values, setValues] = useState<ClientFormValues>(() => valuesFrom(initial));
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
-
-  useEffect(() => {
-    if (!open) return;
-    setError(null);
-    setValues(
-      initial
-        ? {
-            name: initial.name,
-            type: initial.type,
-            phone: initial.phone,
-            phoneCountry: initial.phoneCountry,
-            email: initial.email ?? '',
-            document: initial.document ?? '',
-            country: initial.country ?? '',
-            city: initial.city ?? '',
-            sellerId: initial.sellerId ?? '',
-            notes: initial.notes ?? '',
-          }
-        : EMPTY,
-    );
-  }, [open, initial]);
 
   function set<K extends keyof ClientFormValues>(key: K, value: ClientFormValues[K]) {
     setValues((prev) => ({ ...prev, [key]: value }));

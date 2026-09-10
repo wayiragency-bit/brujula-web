@@ -16,16 +16,19 @@ export default function SuppliersPage() {
   const createSupplier = useCreateSupplier();
   const deactivateSupplier = useDeactivateSupplier();
   const [modalOpen, setModalOpen] = useState(false);
+  const [modalKey, setModalKey] = useState(0);
   const [editing, setEditing] = useState<Supplier | null>(null);
   const updateSupplier = useUpdateSupplier(editing?.id ?? 'none');
 
   function openCreate() {
     setEditing(null);
+    setModalKey((k) => k + 1);
     setModalOpen(true);
   }
 
   function openEdit(supplier: Supplier) {
     setEditing(supplier);
+    setModalKey((k) => k + 1);
     setModalOpen(true);
   }
 
@@ -99,7 +102,7 @@ export default function SuppliersPage() {
         {data ? <p className="text-sm text-ink-soft">Total registrados: {data.meta.total} proveedores</p> : null}
       </div>
 
-      <SupplierFormModal initial={editing ?? undefined} onClose={() => setModalOpen(false)} onSubmit={handleSubmit} open={modalOpen} />
+      <SupplierFormModal key={modalKey} initial={editing ?? undefined} onClose={() => setModalOpen(false)} onSubmit={handleSubmit} open={modalOpen} />
     </AppShell>
   );
 }

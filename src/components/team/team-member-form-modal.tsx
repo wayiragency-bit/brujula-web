@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, type FormEvent } from 'react';
+import { useState, type FormEvent } from 'react';
 import { useTeamRoles } from '@/hooks/use-team';
 import type { InviteMemberValues, UpdateMemberValues } from '@/hooks/use-team';
 import type { TeamMember } from '@/lib/types';
@@ -23,25 +23,17 @@ function generatePassword(): string {
 
 export function TeamMemberFormModal({ open, onClose, onSubmit, initial }: TeamMemberFormModalProps) {
   const { data: roles } = useTeamRoles();
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [phone, setPhone] = useState('');
-  const [roleId, setRoleId] = useState('');
-  const [password, setPassword] = useState('');
-  const [active, setActive] = useState(true);
+  const [name, setName] = useState(() => initial?.name ?? '');
+  const [email, setEmail] = useState(() => initial?.email ?? '');
+  const [phone, setPhone] = useState(() => initial?.phone ?? '');
+  const [pickedRoleId, setPickedRoleId] = useState(() => initial?.roles[0]?.id ?? '');
+  const [password, setPassword] = useState(() => (initial ? '' : generatePassword()));
+  const [active, setActive] = useState(() => initial?.active ?? true);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  useEffect(() => {
-    if (!open) return;
-    setError(null);
-    setName(initial?.name ?? '');
-    setEmail(initial?.email ?? '');
-    setPhone(initial?.phone ?? '');
-    setRoleId(initial?.roles[0]?.id ?? roles?.[0]?.id ?? '');
-    setActive(initial?.active ?? true);
-    setPassword(initial ? '' : generatePassword());
-  }, [open, initial, roles]);
+  // Roles arrive asynchronously, so fall back to the first one until the user picks.
+  const roleId = pickedRoleId || roles?.[0]?.id || '';
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -71,7 +63,7 @@ export function TeamMemberFormModal({ open, onClose, onSubmit, initial }: TeamMe
         <div className="grid gap-5 sm:grid-cols-2">
           <div>
             <label className={labelClass} htmlFor="role">Rol de Usuario</label>
-            <select className={selectClass} id="role" onChange={(e) => setRoleId(e.target.value)} value={roleId}>
+            <select className={selectClass} id="role" onChange={(e) => setPickedRoleId(e.target.value)} value={roleId}>
               {roles?.map((role) => <option key={role.id} value={role.id}>{role.name}</option>)}
             </select>
           </div>

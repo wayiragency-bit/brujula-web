@@ -14,6 +14,7 @@ export default function ClientDetailPage({ params }: { params: Promise<{ id: str
   const { data: client, isLoading } = useClient(id);
   const updateClient = useUpdateClient(id);
   const [editing, setEditing] = useState(false);
+  const [modalKey, setModalKey] = useState(0);
 
   if (isLoading || !client) {
     return (
@@ -54,7 +55,7 @@ export default function ClientDetailPage({ params }: { params: Promise<{ id: str
               {client.seller ? ` · Vendedor: ${client.seller.name}` : ''}
             </p>
           </div>
-          <button className="button-secondary inline-flex items-center gap-2 self-start" onClick={() => setEditing(true)} type="button">
+          <button className="button-secondary inline-flex items-center gap-2 self-start" onClick={() => { setModalKey((k) => k + 1); setEditing(true); }} type="button">
             <SquarePen className="h-4 w-4" /> Editar
           </button>
         </div>
@@ -119,7 +120,7 @@ export default function ClientDetailPage({ params }: { params: Promise<{ id: str
         </div>
       </div>
 
-      <ClientFormModal initial={client} onClose={() => setEditing(false)} onSubmit={handleSubmit} open={editing} />
+      <ClientFormModal initial={client} key={modalKey} onClose={() => setEditing(false)} onSubmit={handleSubmit} open={editing} />
     </AppShell>
   );
 }

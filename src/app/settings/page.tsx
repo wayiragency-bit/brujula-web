@@ -1,10 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { AppShell } from '@/components/app-shell';
 import { useAgency, useUpdateAgency } from '@/hooks/use-agency';
 import { useAuth } from '@/lib/auth-context';
-import type { AgencyFormValues, PaymentMethod } from '@/lib/types';
+import type { Agency, AgencyFormValues, PaymentMethod } from '@/lib/types';
 import { inputClass, labelClass, selectClass } from '@/components/ui/form';
 
 const PAYMENT_LABELS: Record<PaymentMethod, string> = {
@@ -13,34 +13,44 @@ const PAYMENT_LABELS: Record<PaymentMethod, string> = {
   CASH: 'Efectivo',
 };
 
-const EMPTY: AgencyFormValues = {
-  name: '', logoUrl: '', primaryColor: '#0C4A6E', baseCurrency: 'COP',
-  taxId: '', contactEmail: '', contactPhone: '', address: '',
-  taxName: '', taxPct: 0,
-  paymentMethod: 'BANK_TRANSFER', bankName: '', bankAccount: '', bankAccountHolder: '',
-  termsText: '',
-};
+function valuesFrom(agency: Agency): AgencyFormValues {
+  return {
+    name: agency.name, logoUrl: agency.logoUrl ?? '', primaryColor: agency.primaryColor, baseCurrency: agency.baseCurrency,
+    taxId: agency.taxId ?? '', contactEmail: agency.contactEmail ?? '', contactPhone: agency.contactPhone ?? '', address: agency.address ?? '',
+    taxName: agency.taxName ?? '', taxPct: Number(agency.taxPct),
+    paymentMethod: agency.paymentMethod, bankName: agency.bankName ?? '', bankAccount: agency.bankAccount ?? '', bankAccountHolder: agency.bankAccountHolder ?? '',
+    termsText: agency.termsText ?? '',
+  };
+}
 
 export default function SettingsPage() {
+  const { data: agency, isLoading } = useAgency();
+
+  return (
+    <AppShell>
+      <div className="mx-auto w-full max-w-content space-y-6 px-4 pb-28 pt-7 sm:px-6 lg:px-8 lg:pb-10">
+        <header>
+          <h1 className="font-display text-3xl font-extrabold text-ink">Configuración</h1>
+          <p className="mt-1 text-sm text-ink-soft">Gestiona tu cuenta, empresa y datos de facturación.</p>
+        </header>
+        {isLoading || !agency ? (
+          <p className="text-ink-soft">Cargando configuración…</p>
+        ) : (
+          <AgencySettingsForm agency={agency} key={agency.id} />
+        )}
+      </div>
+    </AppShell>
+  );
+}
+
+function AgencySettingsForm({ agency }: { agency: Agency }) {
   const { hasPermission } = useAuth();
   const canEdit = hasPermission('settings.edit_agency');
-  const { data: agency, isLoading } = useAgency();
   const updateAgency = useUpdateAgency();
-  const [values, setValues] = useState<AgencyFormValues>(EMPTY);
+  const [values, setValues] = useState<AgencyFormValues>(() => valuesFrom(agency));
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
-
-  useEffect(() => {
-    if (!agency) return;
-    setValues({
-      name: agency.name, logoUrl: agency.logoUrl ?? '', primaryColor: agency.primaryColor, baseCurrency: agency.baseCurrency,
-      taxId: agency.taxId ?? '', contactEmail: agency.contactEmail ?? '', contactPhone: agency.contactPhone ?? '', address: agency.address ?? '',
-      taxName: agency.taxName ?? '', taxPct: Number(agency.taxPct),
-      paymentMethod: agency.paymentMethod, bankName: agency.bankName ?? '', bankAccount: agency.bankAccount ?? '', bankAccountHolder: agency.bankAccountHolder ?? '',
-      termsText: agency.termsText ?? '',
-    });
-  }, [agency]);
 
   function set<K extends keyof AgencyFormValues>(key: K, value: AgencyFormValues[K]) {
     setValues((prev) => ({ ...prev, [key]: value }));
@@ -72,25 +82,9 @@ export default function SettingsPage() {
     }
   }
 
-  if (isLoading) {
-    return (
-      <AppShell>
-        <div className="mx-auto w-full max-w-content px-4 py-10 sm:px-6 lg:px-8">
-          <p className="text-ink-soft">Cargando configuración…</p>
-        </div>
-      </AppShell>
-    );
-  }
-
   return (
-    <AppShell>
-      <div className="mx-auto w-full max-w-content space-y-6 px-4 pb-28 pt-7 sm:px-6 lg:px-8 lg:pb-10">
-        <header>
-          <h1 className="font-display text-3xl font-extrabold text-ink">Configuración</h1>
-          <p className="mt-1 text-sm text-ink-soft">Gestiona tu cuenta, empresa y datos de facturación.</p>
-        </header>
-
-        {!canEdit ? (
+    <>
+      {!canEdit ? (
           <p className="rounded-lg bg-amber/10 px-4 py-3 text-sm text-amber">Tu rol solo permite ver esta configuración. Pide a un administrador que la edite.</p>
         ) : null}
 
@@ -193,14 +187,13 @@ export default function SettingsPage() {
         {error ? <p className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-600">{error}</p> : null}
         {saved ? <p className="rounded-lg bg-status-accepted/10 px-4 py-3 text-sm text-status-accepted">Cambios guardados.</p> : null}
 
-        {canEdit ? (
-          <div className="flex justify-end">
-            <button className="button-primary" disabled={submitting} onClick={handleSave} type="button">
-              {submitting ? 'Guardando…' : 'Guardar Cambios'}
-            </button>
-          </div>
-        ) : null}
-      </div>
-    </AppShell>
+      {canEdit ? (
+        <div className="flex justify-end">
+          <button className="button-primary" disabled={submitting} onClick={handleSave} type="button">
+            {submitting ? 'Guardando…' : 'Guardar Cambios'}
+          </button>
+        </div>
+      ) : null}
+    </>
   );
 }
