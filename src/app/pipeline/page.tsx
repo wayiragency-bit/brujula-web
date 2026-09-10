@@ -129,43 +129,48 @@ function KanbanCard({ card, onDragStart }: { card: PipelineCard; onDragStart: (c
   const clientName = card.client?.name ?? 'Sin cliente';
   const agentName  = (card as unknown as { agent?: { name: string } }).agent?.name;
   const color      = avatarColor(clientName);
+  const sc         = STATUS_COLORS[card.status];
 
   return (
     <Link
-      className="glass-card block cursor-grab rounded-xl p-3 transition hover:-translate-y-0.5 active:cursor-grabbing"
+      className="relative block cursor-grab overflow-hidden rounded-xl p-3 transition hover:-translate-y-0.5 active:cursor-grabbing"
+      style={{ background: 'rgb(30,41,59)', border: '1px solid rgba(255,255,255,0.05)' }}
       draggable
       href={`/quotes/${card.id}`}
       onDragStart={(e) => { e.dataTransfer.setData('text/plain', card.id); onDragStart(card); }}
     >
+      {/* Colored left stripe */}
+      <span className="absolute left-0 top-0 bottom-0 w-[3px]" style={{ background: sc.dot }} />
+
       {/* Quote number + date */}
-      <div className="flex items-center justify-between gap-1">
-        <p className="font-mono text-[9px] font-bold" style={{ color: STATUS_COLORS[card.status].text }}>{card.number}</p>
+      <div className="flex items-center justify-between gap-1 pl-2">
+        <p className="text-[9px] font-bold" style={{ color: sc.text }}>{card.number}</p>
         {(card as unknown as { startDate?: string }).startDate && (
-          <span className="rounded px-1 text-[9px] font-medium text-ink-muted" style={{ background: 'var(--surface)' }}>
+          <span className="rounded px-1 text-[9px] font-medium" style={{ background: 'rgb(51,65,85)', color: 'rgb(100,116,139)' }}>
             {new Date((card as unknown as { startDate: string }).startDate).toLocaleDateString('es-CO', { day: 'numeric', month: 'numeric', year: 'numeric' })}
           </span>
         )}
       </div>
 
       {/* Client row */}
-      <div className="mt-1.5 flex items-center gap-1.5">
+      <div className="mt-1.5 flex items-center gap-1.5 pl-2">
         <div
-          className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full font-mono text-[9px] font-bold text-white"
-          style={{ background: color }}
+          className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[9px] font-bold"
+          style={{ background: color + '33', color }}
         >
           {clientInitials(clientName).charAt(0)}
         </div>
         <div className="min-w-0">
-          <p className="truncate text-xs font-bold text-ink leading-tight">{clientName}</p>
-          {agentName && <p className="truncate text-[9px] font-medium text-ink-soft leading-tight">{agentName}</p>}
+          <p className="truncate text-xs font-bold leading-tight" style={{ color: 'rgb(255,255,255)' }}>{clientName}</p>
+          {agentName && <p className="truncate text-[9px] font-medium leading-tight" style={{ color: 'rgb(148,163,184)' }}>{agentName}</p>}
         </div>
       </div>
 
       {/* Destination */}
-      {card.destination && <p className="mt-1 truncate text-[9px] text-ink-muted">{card.destination}</p>}
+      {card.destination && <p className="mt-1 truncate pl-2 text-[9px]" style={{ color: 'rgb(100,116,139)' }}>{card.destination}</p>}
 
       {/* Amount */}
-      <p className="mt-1.5 font-mono text-[10px] font-medium text-ink">{formatMoney(card.total, card.currency)}</p>
+      <p className="mt-1.5 pl-2 text-[10px] font-medium" style={{ color: 'rgb(203,213,225)' }}>{formatMoney(card.total, card.currency)}</p>
     </Link>
   );
 }
@@ -228,7 +233,6 @@ function KanbanBoard() {
   const [dragging, setDragging]             = useState<PipelineCard | null>(null);
   const [error, setError]                   = useState<string | null>(null);
   const [paymentPending, setPaymentPending] = useState<PaymentPending | null>(null);
-  const [showVencidas, setShowVencidas]     = useState(false);
 
   const PAYMENT_TARGETS = new Set<QuoteStatus>(['ABONADA', 'PAGADA']);
 
@@ -263,16 +267,11 @@ function KanbanBoard() {
 
   if (isLoading) return <p className="text-ink-soft">Cargando pipeline…</p>;
 
-  const mainColumns  = (data?.data ?? []).filter((c) => MAIN_STATUSES.includes(c.status));
-  const vencidasCol  = data?.data.find((c) => c.status === 'VENCIDA');
-  const vencidasCards = vencidasCol?.cards ?? [];
-  const scVencida    = STATUS_COLORS['VENCIDA'];
+  const mainColumns   = (data?.data ?? []).filter((c) => MAIN_STATUSES.includes(c.status));
+  const vencidasCards = data?.data.find((c) => c.status === 'VENCIDA')?.cards ?? [];
 
   return (
     <div>
-      {showVencidas && (
-        <VencidasPanel cards={vencidasCards} onClose={() => setShowVencidas(false)} />
-      )}
       {paymentPending && (
         <PaymentModal
           loading={recordPayment.isPending}
@@ -281,28 +280,6 @@ function KanbanBoard() {
           pending={paymentPending}
         />
       )}
-
-      {/* Toolbar: Vencidas button */}
-      <div className="mb-4 flex items-center justify-end">
-        <button
-          type="button"
-          onClick={() => setShowVencidas(true)}
-          className="flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition hover:brightness-110"
-          style={{ background: scVencida.badge, color: scVencida.text, border: `1px solid ${scVencida.dot}30` }}
-        >
-          <span className="h-2 w-2 rounded-full" style={{ background: scVencida.dot }} />
-          Vencidas
-          {vencidasCards.length > 0 && (
-            <span
-              className="flex h-5 min-w-[20px] items-center justify-center rounded-full px-1.5 text-xs font-bold"
-              style={{ background: scVencida.dot, color: '#fff' }}
-            >
-              {vencidasCards.length}
-            </span>
-          )}
-        </button>
-      </div>
-
       {error ? <p className="mb-3 rounded-lg px-4 py-2 text-sm text-red-400" style={{ background: 'rgba(248,113,113,0.10)' }} onClick={() => setError(null)}>{error} ✕</p> : null}
 
       <div className="grid grid-cols-5 gap-4">
@@ -428,19 +405,52 @@ function CalendarView() {
 }
 
 export default function PipelinePage() {
-  const [view, setView] = useState<'kanban' | 'calendar'>('kanban');
+  const [view, setView]             = useState<'kanban' | 'calendar'>('kanban');
+  const [showVencidas, setShowVencidas] = useState(false);
+  const { data: pipelineData }      = usePipelineKanban();
+  const vencidasCards               = pipelineData?.data.find((c) => c.status === 'VENCIDA')?.cards ?? [];
+  const scV                         = STATUS_COLORS['VENCIDA'];
 
   return (
     <AppShell>
       <div className="mx-auto w-full max-w-content space-y-6 px-4 pb-28 pt-7 sm:px-6 lg:px-8 lg:pb-10">
-        <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        {showVencidas && (
+          <VencidasPanel cards={vencidasCards} onClose={() => setShowVencidas(false)} />
+        )}
+
+        <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="font-display text-3xl font-bold text-ink">Estatus de Cotización</h1>
+            <h1 className="text-3xl font-bold text-ink">Estatus de Cotización</h1>
             <p className="mt-1 text-base text-ink-soft">Visualización estructurada del flujo y Seguimiento detallado.</p>
           </div>
-          <div className="flex gap-2">
-            <button className={`rounded-lg px-3 py-2 text-xs font-bold uppercase transition ${view === 'kanban' ? 'bg-teal text-paper' : 'bg-paper-card text-ink-soft'}`} onClick={() => setView('kanban')} type="button">Tablero</button>
-            <button className={`rounded-lg px-3 py-2 text-xs font-bold uppercase transition ${view === 'calendar' ? 'bg-teal text-paper' : 'bg-paper-card text-ink-soft'}`} onClick={() => setView('calendar')} type="button">Calendario</button>
+          <div className="flex items-center gap-2">
+            {/* Vencidas button — en el header junto a los toggles */}
+            <button
+              type="button"
+              onClick={() => setShowVencidas(true)}
+              className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-bold uppercase transition hover:brightness-110"
+              style={{ background: scV.badge, color: scV.text, border: `1px solid ${scV.dot}40` }}
+            >
+              <span className="h-1.5 w-1.5 rounded-full" style={{ background: scV.dot }} />
+              Vencidas
+              {vencidasCards.length > 0 && (
+                <span className="ml-0.5 rounded-full px-1.5 py-0.5 text-[10px] font-bold" style={{ background: scV.dot, color: '#fff' }}>
+                  {vencidasCards.length}
+                </span>
+              )}
+            </button>
+            <div className="flex gap-1" style={{ background: 'var(--surface)', borderRadius: 8, padding: 3 }}>
+              <button
+                className={`rounded-md px-3 py-1.5 text-xs font-bold uppercase transition ${view === 'kanban' ? 'bg-teal text-paper shadow-sm' : 'text-ink-soft hover:text-ink'}`}
+                onClick={() => setView('kanban')}
+                type="button"
+              >Tablero</button>
+              <button
+                className={`rounded-md px-3 py-1.5 text-xs font-bold uppercase transition ${view === 'calendar' ? 'bg-teal text-paper shadow-sm' : 'text-ink-soft hover:text-ink'}`}
+                onClick={() => setView('calendar')}
+                type="button"
+              >Calendario</button>
+            </div>
           </div>
         </header>
 
