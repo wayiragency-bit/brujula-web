@@ -1,23 +1,59 @@
-import Link from 'next/link';
+'use client';
+
 import {
   BarChart3,
   Compass,
   FileText,
   LayoutDashboard,
+  LogOut,
   Menu,
+  Package,
   Settings,
+  Truck,
   UsersRound,
 } from 'lucide-react';
+import Link from 'next/link';
+import { usePathname, useRouter } from 'next/navigation';
+import { useEffect } from 'react';
+import { useAuth } from '@/lib/auth-context';
 
 const navigation = [
-  { label: 'Dashboard', href: '/', icon: LayoutDashboard, active: true },
+  { label: 'Dashboard', href: '/', icon: LayoutDashboard },
   { label: 'Estatus', href: '/pipeline', icon: BarChart3 },
   { label: 'Cotizaciones', href: '/quotes', icon: FileText },
   { label: 'Clientes', href: '/clients', icon: UsersRound },
+  { label: 'Productos', href: '/products', icon: Package },
+  { label: 'Proveedores', href: '/suppliers', icon: Truck },
+  { label: 'Equipo', href: '/team', icon: UsersRound },
   { label: 'Config', href: '/settings', icon: Settings },
 ];
 
+function isActive(pathname: string, href: string): boolean {
+  return href === '/' ? pathname === '/' : pathname.startsWith(href);
+}
+
+function initials(name: string): string {
+  const parts = name.trim().split(/\s+/);
+  return ((parts[0]?.[0] ?? '') + (parts[1]?.[0] ?? '')).toUpperCase() || 'JC';
+}
+
 export function AppShell({ children }: Readonly<{ children: React.ReactNode }>) {
+  const pathname = usePathname();
+  const router = useRouter();
+  const { user, status, logout } = useAuth();
+
+  useEffect(() => {
+    if (status === 'unauthenticated') router.replace('/login');
+  }, [status, router]);
+
+  if (status !== 'authenticated' || !user) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-paper">
+        <p className="label-caps text-ink-soft">Cargando…</p>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-paper text-ink">
       <aside className="fixed inset-y-0 left-0 z-40 hidden w-[72px] flex-col items-center bg-teal py-5 text-paper lg:flex">
@@ -25,23 +61,36 @@ export function AppShell({ children }: Readonly<{ children: React.ReactNode }>) 
           <Compass className="h-6 w-6" />
         </Link>
         <nav aria-label="Navegación principal" className="mt-10 flex flex-1 flex-col gap-3">
-          {navigation.map(({ label, href, icon: Icon, active }) => (
-            <Link
-              aria-label={label}
-              className={`group relative flex h-11 w-11 items-center justify-center rounded-xl transition ${
-                active ? 'bg-[#feb23b] text-teal' : 'text-paper/65 hover:bg-white/10 hover:text-paper'
-              }`}
-              href={href}
-              key={label}
-            >
-              <Icon className="h-5 w-5" />
-              <span className="pointer-events-none absolute left-14 rounded-md bg-ink px-2 py-1 text-xs text-paper opacity-0 shadow-lg transition group-hover:opacity-100">
-                {label}
-              </span>
-            </Link>
-          ))}
+          {navigation.map(({ label, href, icon: Icon }) => {
+            const active = isActive(pathname, href);
+            return (
+              <Link
+                aria-label={label}
+                className={`group relative flex h-11 w-11 items-center justify-center rounded-xl transition ${
+                  active ? 'bg-[#feb23b] text-teal' : 'text-paper/65 hover:bg-white/10 hover:text-paper'
+                }`}
+                href={href}
+                key={label}
+              >
+                <Icon className="h-5 w-5" />
+                <span className="pointer-events-none absolute left-14 z-50 rounded-md bg-ink px-2 py-1 text-xs text-paper opacity-0 shadow-lg transition group-hover:opacity-100">
+                  {label}
+                </span>
+              </Link>
+            );
+          })}
         </nav>
-        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#feb23b] font-mono text-xs font-bold text-teal">JC</div>
+        <button
+          aria-label="Cerrar sesión"
+          className="group relative flex h-10 w-10 items-center justify-center rounded-full bg-[#feb23b] font-mono text-xs font-bold text-teal transition hover:bg-white"
+          onClick={() => logout().then(() => router.replace('/login'))}
+          type="button"
+        >
+          {initials(user.name)}
+          <span className="pointer-events-none absolute left-14 z-50 flex items-center gap-1 rounded-md bg-ink px-2 py-1 text-xs text-paper opacity-0 shadow-lg transition group-hover:opacity-100">
+            <LogOut className="h-3 w-3" /> Salir
+          </span>
+        </button>
       </aside>
 
       <div className="lg:pl-[72px]">
@@ -55,28 +104,33 @@ export function AppShell({ children }: Readonly<{ children: React.ReactNode }>) 
           </div>
           <div className="flex items-center gap-3">
             <div className="hidden text-right sm:block">
-              <p className="text-sm font-semibold text-ink">Juan Carcamo</p>
-              <p className="text-xs text-ink-soft">Administrador</p>
+              <p className="text-sm font-semibold text-ink">{user.name}</p>
+              <p className="text-xs text-ink-soft">{user.roles[0]?.name ?? 'Miembro'}</p>
             </div>
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-teal font-mono text-xs font-bold text-[#a0d0ca]">JC</div>
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-teal font-mono text-xs font-bold text-[#a0d0ca]">
+              {initials(user.name)}
+            </div>
           </div>
         </header>
         <main>{children}</main>
       </div>
 
       <nav aria-label="Navegación móvil" className="fixed inset-x-0 bottom-0 z-50 grid grid-cols-5 border-t border-ink/10 bg-paper/90 px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2 backdrop-blur lg:hidden">
-        {navigation.map(({ label, href, icon: Icon, active }) => (
-          <Link
-            className={`flex min-w-0 flex-col items-center gap-1 rounded-xl px-1 py-2 text-[11px] transition ${
-              active ? 'bg-teal text-[#feb23b]' : 'text-ink-soft'
-            }`}
-            href={href}
-            key={label}
-          >
-            <Icon className="h-5 w-5" />
-            <span className="truncate">{label}</span>
-          </Link>
-        ))}
+        {navigation.slice(0, 5).map(({ label, href, icon: Icon }) => {
+          const active = isActive(pathname, href);
+          return (
+            <Link
+              className={`flex min-w-0 flex-col items-center gap-1 rounded-xl px-1 py-2 text-[11px] transition ${
+                active ? 'bg-teal text-[#feb23b]' : 'text-ink-soft'
+              }`}
+              href={href}
+              key={label}
+            >
+              <Icon className="h-5 w-5" />
+              <span className="truncate">{label}</span>
+            </Link>
+          );
+        })}
       </nav>
     </div>
   );
