@@ -27,7 +27,6 @@ export function Modal({ open, onClose, title, subtitle, wide, children }: ModalP
   return (
     <div
       className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-ink/40 p-4 py-10 backdrop-blur-sm"
-      onClick={onClose}
     >
       <div
         className={`w-full ${wide ? 'max-w-2xl' : 'max-w-lg'} rounded-2xl bg-paper-card p-6 shadow-floating sm:p-8`}
