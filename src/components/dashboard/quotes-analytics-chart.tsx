@@ -2,9 +2,9 @@
 
 import { useMemo, useState } from 'react';
 import {
-  Bar,
-  BarChart,
   CartesianGrid,
+  Line,
+  LineChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -21,6 +21,22 @@ const SERIES = [
   { key: 'aceptado', label: 'Total Aceptado', color: '#10b981' },
   { key: 'cotizado', label: 'Total Cotizado', color: '#6366f1' },
 ] as const;
+
+/* Same connected-dots-with-pulse language as the metric-card sparklines */
+function renderSparklineDot(color: string, lastIndex: number) {
+  function SparklineDot({ cx = 0, cy = 0, index = -1 }: { cx?: number; cy?: number; index?: number }) {
+    if (index === lastIndex) {
+      return (
+        <g>
+          <circle className="metric-pulse-ring" cx={cx} cy={cy} fill={color} opacity={0.35} r={5} />
+          <circle cx={cx} cy={cy} fill={color} r={4} />
+        </g>
+      );
+    }
+    return <circle cx={cx} cy={cy} fill={color} opacity={0.5} r={2.5} />;
+  }
+  return SparklineDot;
+}
 
 function bucketLabel(iso: string, granularity: AnalyticsGranularity): string {
   const d = new Date(iso);
@@ -115,7 +131,7 @@ export function QuotesAnalyticsChart() {
           <div className="flex h-full items-center justify-center text-sm text-ink-soft">Aún no hay cotizaciones en este período.</div>
         ) : (
           <ResponsiveContainer height="100%" width="100%">
-            <BarChart barCategoryGap="24%" barGap={3} data={chartData} margin={{ top: 4, right: 4, bottom: 0, left: 0 }}>
+            <LineChart data={chartData} margin={{ top: 4, right: 4, bottom: 0, left: 0 }}>
               <CartesianGrid stroke="var(--border-faint)" strokeDasharray="3 3" vertical={false} />
               <XAxis axisLine={false} dataKey="label" tick={{ fill: 'var(--ink-muted)', fontSize: 11 }} tickLine={false} />
               <YAxis
@@ -125,11 +141,19 @@ export function QuotesAnalyticsChart() {
                 tickLine={false}
                 width={56}
               />
-              <Tooltip content={<ChartTooltip currency={currency} />} cursor={{ fill: 'var(--surface)' }} />
+              <Tooltip content={<ChartTooltip currency={currency} />} cursor={{ stroke: 'var(--border)', strokeDasharray: '3 3' }} />
               {SERIES.map((s) => (
-                <Bar animationDuration={600} dataKey={s.key} fill={s.color} key={s.key} maxBarSize={16} radius={[4, 4, 0, 0]} />
+                <Line
+                  dataKey={s.key}
+                  dot={renderSparklineDot(s.color, chartData.length - 1)}
+                  key={s.key}
+                  stroke={s.color}
+                  strokeOpacity={0.7}
+                  strokeWidth={2}
+                  type="linear"
+                />
               ))}
-            </BarChart>
+            </LineChart>
           </ResponsiveContainer>
         )}
       </div>
