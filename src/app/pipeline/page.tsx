@@ -447,7 +447,7 @@ export default function PipelinePage() {
             <button
               className="inline-flex h-9 items-center gap-2 rounded-lg px-4 text-sm font-medium transition"
               style={view === 'kanban'
-                ? { background: '#334155', color: '#ffffff' }
+                ? { background: 'var(--teal)', color: '#ffffff' }
                 : { background: 'transparent', color: '#94a3b8' }}
               onClick={() => setView('kanban')}
               type="button"
@@ -458,7 +458,7 @@ export default function PipelinePage() {
             <button
               className="inline-flex h-9 items-center gap-2 rounded-lg px-4 text-sm font-medium transition"
               style={view === 'calendar'
-                ? { background: '#334155', color: '#ffffff' }
+                ? { background: 'var(--teal)', color: '#ffffff' }
                 : { background: 'transparent', color: '#94a3b8' }}
               onClick={() => setView('calendar')}
               type="button"
