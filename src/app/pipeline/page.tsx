@@ -29,6 +29,74 @@ function useChangeStatusMutation() {
   });
 }
 
+function useRecordPaymentMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, version, amount }: { id: string; version: number; amount: string }) =>
+      api.post(`/quotes/${id}/payments`, { version, amount }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['pipeline'] }),
+  });
+}
+
+type PaymentPending = { card: PipelineCard; prefill: string };
+
+function PaymentModal({
+  pending, onClose, onConfirm, loading,
+}: {
+  pending: PaymentPending;
+  onClose: () => void;
+  onConfirm: (amount: string) => void;
+  loading: boolean;
+}) {
+  const [amount, setAmount] = useState(pending.prefill);
+  const isToPayada = pending.prefill === pending.card.balanceDue;
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)' }}
+      onClick={onClose}
+    >
+      <div
+        className="w-full max-w-sm rounded-2xl p-6 space-y-4"
+        style={{ background: 'var(--paper-card)', border: '1px solid var(--border)' }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div>
+          <p className="label-caps text-ink-muted">Registrar pago</p>
+          <h3 className="font-display text-lg font-extrabold text-ink mt-1">{pending.card.number} · {pending.card.client?.name ?? '—'}</h3>
+          <p className="text-xs text-ink-soft mt-0.5">
+            {isToPayada ? 'Saldo pendiente completo — quedará como PAGADA.' : 'Monto del anticipo — quedará como ABONADA.'}
+          </p>
+        </div>
+        <div>
+          <label className="label-caps text-ink-soft block mb-1">Monto ({pending.card.currency})</label>
+          <input
+            autoFocus
+            className="h-10 w-full rounded-lg px-3 text-sm text-ink focus:outline-none focus:ring-2 focus:ring-amber/50"
+            inputMode="decimal"
+            onChange={(e) => setAmount(e.target.value)}
+            style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}
+            type="text"
+            value={amount}
+          />
+        </div>
+        <div className="flex gap-2 justify-end">
+          <button className="button-secondary" onClick={onClose} type="button">Cancelar</button>
+          <button
+            className="button-primary"
+            disabled={loading || !amount || Number(amount) <= 0}
+            onClick={() => onConfirm(amount)}
+            type="button"
+          >
+            {loading ? 'Guardando…' : 'Confirmar Pago'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function KanbanCard({ card, onDragStart }: { card: PipelineCard; onDragStart: (card: PipelineCard) => void }) {
   return (
     <Link
@@ -47,15 +115,28 @@ function KanbanCard({ card, onDragStart }: { card: PipelineCard; onDragStart: (c
 
 function KanbanBoard() {
   const { data, isLoading } = usePipelineKanban();
-  const changeStatus = useChangeStatusMutation();
-  const [dragging, setDragging] = useState<PipelineCard | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const changeStatus   = useChangeStatusMutation();
+  const recordPayment  = useRecordPaymentMutation();
+  const [dragging, setDragging]         = useState<PipelineCard | null>(null);
+  const [error, setError]               = useState<string | null>(null);
+  const [paymentPending, setPaymentPending] = useState<PaymentPending | null>(null);
+
+  const PAYMENT_TARGETS = new Set<QuoteStatus>(['ABONADA', 'PAGADA']);
 
   function handleDrop(status: QuoteStatus) {
     if (!dragging) return;
-    if (dragging.status === status) return;
+    if (dragging.status === status) { setDragging(null); return; }
+
+    // Financial transitions go through the payment endpoint
+    if (PAYMENT_TARGETS.has(status) && dragging.canRecordPayment) {
+      const prefill = status === 'PAGADA' ? dragging.balanceDue : '';
+      setPaymentPending({ card: dragging, prefill });
+      setDragging(null);
+      return;
+    }
+
     if (!dragging.availableTransitions.includes(status)) {
-      setError(`No puedes mover ${dragging.number} de ${STATUS_LABELS[dragging.status]} a ${STATUS_LABELS[status]}.`);
+      setError(`No se puede mover ${dragging.number} de ${STATUS_LABELS[dragging.status]} a ${STATUS_LABELS[status]}.`);
       setDragging(null);
       return;
     }
@@ -63,11 +144,27 @@ function KanbanBoard() {
     setDragging(null);
   }
 
+  function handlePaymentConfirm(amount: string) {
+    if (!paymentPending) return;
+    recordPayment.mutate(
+      { id: paymentPending.card.id, version: paymentPending.card.version, amount },
+      { onSuccess: () => setPaymentPending(null), onError: (e) => { setError(e instanceof Error ? e.message : 'Error al registrar pago'); setPaymentPending(null); } },
+    );
+  }
+
   if (isLoading) return <p className="text-ink-soft">Cargando pipeline…</p>;
 
   return (
     <div>
-      {error ? <p className="mb-3 rounded-lg bg-red-50 px-4 py-2 text-sm text-red-600">{error}</p> : null}
+      {paymentPending && (
+        <PaymentModal
+          loading={recordPayment.isPending}
+          onClose={() => setPaymentPending(null)}
+          onConfirm={handlePaymentConfirm}
+          pending={paymentPending}
+        />
+      )}
+      {error ? <p className="mb-3 rounded-lg px-4 py-2 text-sm text-red-400" style={{ background: 'rgba(248,113,113,0.10)' }} onClick={() => setError(null)}>{error} ✕</p> : null}
       <div className="flex gap-4 overflow-x-auto pb-4">
         {data?.data.map((column) => {
           const total = column.cards.reduce((sum, c) => sum + Number(c.total), 0);
