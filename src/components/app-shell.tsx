@@ -72,10 +72,10 @@ export function AppShell({ children }: Readonly<{ children: React.ReactNode }>) 
         {/* Logo mark */}
         <Link
           aria-label="Brújula"
-          className="flex h-14 w-14 items-center justify-center rounded-2xl bg-amber/15 text-amber transition hover:bg-amber/25"
+          className="flex h-16 w-16 items-center justify-center rounded-2xl bg-amber/15 text-amber transition hover:bg-amber/25"
           href="/"
         >
-          <Compass className="h-7 w-7" />
+          <Compass className="h-8 w-8" />
         </Link>
 
         {/* Nav icons */}
