@@ -1,7 +1,7 @@
 'use client';
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { ChevronLeft, ChevronRight, X } from 'lucide-react';
+import { BarChart3, CalendarDays, ChevronLeft, ChevronRight, X } from 'lucide-react';
 import Link from 'next/link';
 import { useMemo, useState } from 'react';
 import { AppShell } from '@/components/app-shell';
@@ -439,17 +439,29 @@ export default function PipelinePage() {
                 </span>
               )}
             </button>
-            <div className="flex gap-1" style={{ background: 'var(--surface)', borderRadius: 8, padding: 3 }}>
+            <div className="flex gap-1">
               <button
-                className={`rounded-md px-3 py-1.5 text-xs font-bold uppercase transition ${view === 'kanban' ? 'bg-teal text-paper shadow-sm' : 'text-ink-soft hover:text-ink'}`}
+                className="inline-flex h-9 items-center gap-2 rounded-lg px-4 text-sm font-medium transition"
+                style={view === 'kanban'
+                  ? { background: '#334155', color: '#ffffff' }
+                  : { background: 'transparent', color: '#94a3b8' }}
                 onClick={() => setView('kanban')}
                 type="button"
-              >Tablero</button>
+              >
+                <BarChart3 size={18} />
+                Tablero
+              </button>
               <button
-                className={`rounded-md px-3 py-1.5 text-xs font-bold uppercase transition ${view === 'calendar' ? 'bg-teal text-paper shadow-sm' : 'text-ink-soft hover:text-ink'}`}
+                className="inline-flex h-9 items-center gap-2 rounded-lg px-4 text-sm font-medium transition"
+                style={view === 'calendar'
+                  ? { background: '#334155', color: '#ffffff' }
+                  : { background: 'transparent', color: '#94a3b8' }}
                 onClick={() => setView('calendar')}
                 type="button"
-              >Calendario</button>
+              >
+                <CalendarDays size={18} />
+                Calendario
+              </button>
             </div>
           </div>
         </header>
