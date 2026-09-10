@@ -1,10 +1,10 @@
 'use client';
 
-import { Plus, SquarePen, TrendingUp } from 'lucide-react';
+import { Plus, SquarePen, Trash2, TrendingUp } from 'lucide-react';
 import { useState } from 'react';
 import { AppShell } from '@/components/app-shell';
 import { TeamMemberFormModal } from '@/components/team/team-member-form-modal';
-import { useInviteMember, useTeam, useUpdateMember } from '@/hooks/use-team';
+import { useDeleteMember, useInviteMember, useTeam, useUpdateMember } from '@/hooks/use-team';
 import type { InviteMemberValues, UpdateMemberValues } from '@/hooks/use-team';
 import type { TeamMember } from '@/lib/types';
 
@@ -32,6 +32,8 @@ export default function TeamPage() {
   const [modalKey, setModalKey] = useState(0);
   const [editing, setEditing] = useState<TeamMember | null>(null);
   const updateMember = useUpdateMember(editing?.id ?? 'none');
+  const deleteMember = useDeleteMember();
+  const [confirmDelete, setConfirmDelete] = useState<TeamMember | null>(null);
 
   function openCreate() {
     setEditing(null);
@@ -149,13 +151,22 @@ export default function TeamPage() {
                   </div>
 
                   {/* Actions */}
-                  <div className="px-4 py-3" style={{ borderTop: '1px solid var(--border-faint)' }}>
+                  <div className="px-4 py-3 flex gap-2" style={{ borderTop: '1px solid var(--border-faint)' }}>
                     <button
-                      className="button-secondary w-full inline-flex items-center justify-center gap-2"
+                      className="button-secondary flex-1 inline-flex items-center justify-center gap-2"
                       onClick={() => openEdit(member)}
                       type="button"
                     >
-                      <SquarePen className="h-3.5 w-3.5" /> Ver Perfil Completo
+                      <SquarePen className="h-3.5 w-3.5" /> Editar
+                    </button>
+                    <button
+                      className="inline-flex items-center justify-center rounded-lg px-3 py-2 text-red-400 transition hover:bg-red-400/10"
+                      onClick={() => setConfirmDelete(member)}
+                      style={{ border: '1px solid var(--border)' }}
+                      title="Eliminar asesor"
+                      type="button"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
                     </button>
                   </div>
                 </article>
@@ -166,6 +177,29 @@ export default function TeamPage() {
       </div>
 
       <TeamMemberFormModal key={modalKey} initial={editing ?? undefined} onClose={() => setModalOpen(false)} onSubmit={handleSubmit} open={modalOpen} />
+
+      {confirmDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)' }} onClick={() => setConfirmDelete(null)}>
+          <div className="w-full max-w-sm rounded-2xl p-6 space-y-4" style={{ background: 'var(--paper-card)', border: '1px solid var(--border)' }} onClick={(e) => e.stopPropagation()}>
+            <div>
+              <p className="label-caps text-red-400">Eliminar asesor</p>
+              <h3 className="font-display text-lg font-extrabold text-ink mt-1">{confirmDelete.name}</h3>
+              <p className="text-sm text-ink-soft mt-1">Esta acción eliminará al asesor permanentemente. Sus cotizaciones se conservarán.</p>
+            </div>
+            <div className="flex gap-2 justify-end">
+              <button className="button-secondary" onClick={() => setConfirmDelete(null)} type="button">Cancelar</button>
+              <button
+                className="inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-bold text-white bg-red-500 hover:bg-red-600 transition disabled:opacity-50"
+                disabled={deleteMember.isPending}
+                onClick={() => deleteMember.mutate(confirmDelete.id, { onSuccess: () => setConfirmDelete(null) })}
+                type="button"
+              >
+                <Trash2 className="h-3.5 w-3.5" /> {deleteMember.isPending ? 'Eliminando…' : 'Eliminar'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </AppShell>
   );
 }

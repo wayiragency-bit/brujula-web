@@ -46,3 +46,11 @@ export function useUpdateMember(id: string) {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['team'] }),
   });
 }
+
+export function useDeleteMember() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => api.delete(`/team/${id}`),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['team'] }),
+  });
+}
