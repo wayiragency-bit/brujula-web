@@ -32,8 +32,10 @@ function useChangeStatusMutation() {
 function useRecordPaymentMutation() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, version, amount }: { id: string; version: number; amount: string }) =>
-      api.post(`/quotes/${id}/payments`, { version, amount }),
+    mutationFn: ({ id, version, amount }: { id: string; version: number; amount: string }) => {
+      const idempotencyKey = `pay-${id}-${Date.now()}`;
+      return api.post(`/quotes/${id}/payments`, { version, amount, idempotencyKey });
+    },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['pipeline'] }),
   });
 }
