@@ -439,7 +439,7 @@ export default function PipelinePage() {
                 </span>
               )}
             </button>
-            <div className="flex gap-1">
+            <div className="flex gap-1 rounded-xl p-1" style={{ border: '1px solid var(--border)' }}>
               <button
                 className="inline-flex h-9 items-center gap-2 rounded-lg px-4 text-sm font-medium transition"
                 style={view === 'kanban'
