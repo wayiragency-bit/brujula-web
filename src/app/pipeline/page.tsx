@@ -135,28 +135,35 @@ function KanbanCard({ card, onDragStart }: { card: PipelineCard; onDragStart: (c
       href={`/quotes/${card.id}`}
       onDragStart={(e) => { e.dataTransfer.setData('text/plain', card.id); onDragStart(card); }}
     >
-      {/* Quote number */}
-      <p className="font-mono text-[10px] font-bold" style={{ color: STATUS_COLORS[card.status].text }}>{card.number}</p>
+      {/* Quote number + date */}
+      <div className="flex items-center justify-between gap-1">
+        <p className="font-mono text-[9px] font-bold" style={{ color: STATUS_COLORS[card.status].text }}>{card.number}</p>
+        {(card as unknown as { startDate?: string }).startDate && (
+          <span className="rounded px-1 text-[9px] font-medium text-ink-muted" style={{ background: 'var(--surface)' }}>
+            {new Date((card as unknown as { startDate: string }).startDate).toLocaleDateString('es-CO', { day: 'numeric', month: 'numeric', year: 'numeric' })}
+          </span>
+        )}
+      </div>
 
       {/* Client row */}
-      <div className="mt-1.5 flex items-center gap-2">
+      <div className="mt-1.5 flex items-center gap-1.5">
         <div
-          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full font-mono text-[11px] font-bold text-white"
-          style={{ background: color, boxShadow: `0 2px 8px ${color}66` }}
+          className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full font-mono text-[9px] font-bold text-white"
+          style={{ background: color }}
         >
-          {clientInitials(clientName)}
+          {clientInitials(clientName).charAt(0)}
         </div>
         <div className="min-w-0">
-          <p className="truncate text-sm font-semibold text-ink leading-tight">{clientName}</p>
-          {agentName && <p className="truncate text-[10px] text-ink-soft leading-tight">{agentName}</p>}
+          <p className="truncate text-xs font-bold text-ink leading-tight">{clientName}</p>
+          {agentName && <p className="truncate text-[9px] font-medium text-ink-soft leading-tight">{agentName}</p>}
         </div>
       </div>
 
       {/* Destination */}
-      {card.destination && <p className="mt-1.5 truncate text-[11px] text-ink-soft">{card.destination}</p>}
+      {card.destination && <p className="mt-1 truncate text-[9px] text-ink-muted">{card.destination}</p>}
 
       {/* Amount */}
-      <p className="mt-2 font-mono text-sm font-bold text-ink">{formatMoney(card.total, card.currency)}</p>
+      <p className="mt-1.5 font-mono text-[10px] font-medium text-ink">{formatMoney(card.total, card.currency)}</p>
     </Link>
   );
 }
@@ -230,10 +237,10 @@ function KanbanBoard() {
               <div className="flex items-center justify-between px-4 py-3" style={{ borderBottom: '1px solid var(--border-faint)' }}>
                 <div className="flex items-center gap-2">
                   <span className="h-2 w-2 rounded-full" style={{ background: sc.dot }} />
-                  <h3 className="label-caps text-ink">{STATUS_LABELS[column.status]}</h3>
+                  <h3 className="text-sm font-bold uppercase tracking-wide text-ink">{STATUS_LABELS[column.status]}</h3>
                 </div>
                 <span
-                  className="flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 font-mono text-[10px] font-bold"
+                  className="flex h-5 min-w-[20px] items-center justify-center rounded-full px-1.5 text-xs font-bold"
                   style={{ background: sc.badge, color: sc.text }}
                 >
                   {column.cards.length}
@@ -343,8 +350,8 @@ export default function PipelinePage() {
       <div className="mx-auto w-full max-w-content space-y-6 px-4 pb-28 pt-7 sm:px-6 lg:px-8 lg:pb-10">
         <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <h1 className="font-display text-3xl font-extrabold text-ink">Estatus de Cotización</h1>
-            <p className="mt-1 text-sm text-ink-soft">Visualización estructurada del flujo y seguimiento detallado.</p>
+            <h1 className="font-display text-3xl font-bold text-ink">Estatus de Cotización</h1>
+            <p className="mt-1 text-base text-ink-soft">Visualización estructurada del flujo y Seguimiento detallado.</p>
           </div>
           <div className="flex gap-2">
             <button className={`rounded-lg px-3 py-2 text-xs font-bold uppercase transition ${view === 'kanban' ? 'bg-teal text-paper' : 'bg-paper-card text-ink-soft'}`} onClick={() => setView('kanban')} type="button">Tablero</button>
