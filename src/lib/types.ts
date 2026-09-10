@@ -231,6 +231,30 @@ export interface CatalogProduct {
   taxPct?: string;
 }
 
+export interface PipelineCard {
+  id: string;
+  version: number;
+  number: string;
+  status: QuoteStatus;
+  client?: QuoteRef;
+  seller?: QuoteRef;
+  destination: string;
+  total: string;
+  currency: string;
+  startDate: string | null;
+  validUntil: string | null;
+  depositAmount: string;
+  balanceDue: string;
+  availableTransitions: QuoteStatus[];
+  canRecordPayment: boolean;
+  canReopen: boolean;
+}
+
+export interface PipelineColumn {
+  status: QuoteStatus;
+  cards: PipelineCard[];
+}
+
 export interface TeamMember {
   id: string;
   name: string;
