@@ -103,7 +103,16 @@ export function AppShell({ children }: Readonly<{ children: React.ReactNode }>) 
         {/* Logout */}
         <button
           aria-label="Cerrar sesión"
-          className="group relative flex flex-col items-center justify-center gap-1 w-full rounded-2xl py-2 px-2 text-red-400 transition hover:bg-red-500/15 hover:text-red-300"
+          className="flex flex-col items-center justify-center gap-1 w-full rounded-xl py-2 px-1 transition-all duration-200"
+          style={{ color: '#f87171' }}
+          onMouseEnter={e => {
+            (e.currentTarget as HTMLButtonElement).style.background = 'rgba(239,68,68,0.12)';
+            (e.currentTarget as HTMLButtonElement).style.color = '#ef4444';
+          }}
+          onMouseLeave={e => {
+            (e.currentTarget as HTMLButtonElement).style.background = 'transparent';
+            (e.currentTarget as HTMLButtonElement).style.color = '#f87171';
+          }}
           onClick={() => logout().then(() => router.replace('/login'))}
           type="button"
         >
