@@ -2,12 +2,13 @@
 
 import {
   BarChart3,
+  Bell,
   Compass,
   FileText,
   LayoutDashboard,
   LogOut,
-  Menu,
   Package,
+  Search,
   Settings,
   Truck,
   UsersRound,
@@ -18,14 +19,14 @@ import { useEffect } from 'react';
 import { useAuth } from '@/lib/auth-context';
 
 const navigation = [
-  { label: 'Dashboard', href: '/', icon: LayoutDashboard },
-  { label: 'Estatus', href: '/pipeline', icon: BarChart3 },
-  { label: 'Cotizaciones', href: '/quotes', icon: FileText },
-  { label: 'Clientes', href: '/clients', icon: UsersRound },
-  { label: 'Productos', href: '/products', icon: Package },
-  { label: 'Proveedores', href: '/suppliers', icon: Truck },
-  { label: 'Equipo', href: '/team', icon: UsersRound },
-  { label: 'Config', href: '/settings', icon: Settings },
+  { label: 'Dashboard',    href: '/',          icon: LayoutDashboard },
+  { label: 'Estatus',      href: '/pipeline',  icon: BarChart3 },
+  { label: 'Cotizaciones', href: '/quotes',    icon: FileText },
+  { label: 'Clientes',     href: '/clients',   icon: UsersRound },
+  { label: 'Productos',    href: '/products',  icon: Package },
+  { label: 'Proveedores',  href: '/suppliers', icon: Truck },
+  { label: 'Equipo',       href: '/team',      icon: UsersRound },
+  { label: 'Config',       href: '/settings',  icon: Settings },
 ];
 
 function isActive(pathname: string, href: string): boolean {
@@ -39,7 +40,7 @@ function initials(name: string): string {
 
 export function AppShell({ children }: Readonly<{ children: React.ReactNode }>) {
   const pathname = usePathname();
-  const router = useRouter();
+  const router   = useRouter();
   const { user, status, logout } = useAuth();
 
   useEffect(() => {
@@ -49,84 +50,150 @@ export function AppShell({ children }: Readonly<{ children: React.ReactNode }>) 
   if (status !== 'authenticated' || !user) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-paper">
-        <p className="label-caps text-ink-soft">Cargando…</p>
+        <div className="flex flex-col items-center gap-3">
+          <Compass className="h-8 w-8 animate-pulse text-amber" />
+          <p className="label-caps text-ink-soft">Cargando…</p>
+        </div>
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-paper text-ink">
-      <aside className="fixed inset-y-0 left-0 z-40 hidden w-[72px] flex-col items-center bg-teal py-5 text-paper lg:flex">
-        <Link aria-label="Brújula" className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/10 text-[#feb23b]" href="/">
-          <Compass className="h-6 w-6" />
+      {/* ── SIDEBAR (desktop) ── */}
+      <aside className="fixed inset-y-0 left-0 z-40 hidden w-[68px] flex-col items-center bg-[#0a1628] py-4 lg:flex"
+             style={{ borderRight: '1px solid rgba(255,255,255,0.06)' }}>
+
+        {/* Logo mark */}
+        <Link
+          aria-label="Brújula"
+          className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber/15 text-amber transition hover:bg-amber/25"
+          href="/"
+        >
+          <Compass className="h-5 w-5" />
         </Link>
-        <nav aria-label="Navegación principal" className="mt-10 flex flex-1 flex-col gap-3">
+
+        {/* Nav icons */}
+        <nav aria-label="Navegación principal" className="mt-8 flex flex-1 flex-col items-center gap-1">
           {navigation.map(({ label, href, icon: Icon }) => {
             const active = isActive(pathname, href);
             return (
               <Link
                 aria-label={label}
-                className={`group relative flex h-11 w-11 items-center justify-center rounded-xl transition ${
-                  active ? 'bg-[#feb23b] text-teal' : 'text-paper/65 hover:bg-white/10 hover:text-paper'
+                className={`group relative flex h-10 w-10 items-center justify-center rounded-xl transition-all ${
+                  active
+                    ? 'bg-amber text-[#0a1628] shadow-[0_0_16px_rgba(254,178,59,0.25)]'
+                    : 'text-ink-muted hover:bg-white/8 hover:text-ink'
                 }`}
                 href={href}
                 key={label}
               >
-                <Icon className="h-5 w-5" />
-                <span className="pointer-events-none absolute left-14 z-50 rounded-md bg-ink px-2 py-1 text-xs text-paper opacity-0 shadow-lg transition group-hover:opacity-100">
+                <Icon className="h-4.5 w-4.5 h-[18px] w-[18px]" />
+                {/* Tooltip */}
+                <span className="pointer-events-none absolute left-[56px] z-50 whitespace-nowrap rounded-md bg-paper-elevated px-2.5 py-1.5 text-xs font-medium text-ink opacity-0 shadow-floating transition-opacity group-hover:opacity-100"
+                      style={{ border: '1px solid rgba(255,255,255,0.1)' }}>
                   {label}
                 </span>
               </Link>
             );
           })}
         </nav>
+
+        {/* Avatar / logout */}
         <button
           aria-label="Cerrar sesión"
-          className="group relative flex h-10 w-10 items-center justify-center rounded-full bg-[#feb23b] font-mono text-xs font-bold text-teal transition hover:bg-white"
+          className="group relative flex h-10 w-10 items-center justify-center rounded-full bg-teal/60 font-mono text-xs font-bold text-amber/90 ring-2 ring-white/10 transition hover:ring-amber/40"
           onClick={() => logout().then(() => router.replace('/login'))}
           type="button"
         >
           {initials(user.name)}
-          <span className="pointer-events-none absolute left-14 z-50 flex items-center gap-1 rounded-md bg-ink px-2 py-1 text-xs text-paper opacity-0 shadow-lg transition group-hover:opacity-100">
-            <LogOut className="h-3 w-3" /> Salir
+          <span className="pointer-events-none absolute left-[56px] z-50 flex items-center gap-1.5 whitespace-nowrap rounded-md bg-paper-elevated px-2.5 py-1.5 text-xs font-medium text-ink opacity-0 shadow-floating transition-opacity group-hover:opacity-100"
+                style={{ border: '1px solid rgba(255,255,255,0.1)' }}>
+            <LogOut className="h-3 w-3 text-red-400" /> Cerrar sesión
           </span>
         </button>
       </aside>
 
-      <div className="lg:pl-[72px]">
-        <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-ink/5 bg-paper/90 px-4 backdrop-blur sm:px-6 lg:px-8">
-          <div className="flex items-center gap-3">
-            <button aria-label="Abrir menú" className="rounded-lg p-2 text-teal lg:hidden">
-              <Menu className="h-6 w-6" />
-            </button>
-            <Compass className="h-6 w-6 text-teal lg:hidden" />
-            <Link className="font-display text-xl font-extrabold text-teal" href="/">Brújula</Link>
+      {/* ── CONTENT AREA ── */}
+      <div className="lg:pl-[68px]">
+
+        {/* Top bar */}
+        <header className="sticky top-0 z-30 flex h-14 items-center gap-4 px-4 sm:px-6 lg:px-6"
+                style={{
+                  background: 'rgba(13,17,23,0.85)',
+                  backdropFilter: 'blur(12px)',
+                  borderBottom: '1px solid rgba(255,255,255,0.07)',
+                }}>
+
+          {/* Mobile: logo */}
+          <div className="flex items-center gap-2 lg:hidden">
+            <Compass className="h-5 w-5 text-amber" />
+            <span className="font-display text-base font-bold text-ink">Brújula</span>
           </div>
-          <div className="flex items-center gap-3">
-            <div className="hidden text-right sm:block">
-              <p className="text-sm font-semibold text-ink">{user.name}</p>
-              <p className="text-xs text-ink-soft">{user.roles[0]?.name ?? 'Miembro'}</p>
+
+          {/* Search bar */}
+          <div className="hidden flex-1 max-w-sm sm:flex">
+            <div className="relative w-full">
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-ink-muted" />
+              <input
+                className="h-8 w-full rounded-lg pl-8 pr-3 text-sm text-ink placeholder:text-ink-muted focus:outline-none focus:ring-1 focus:ring-amber/30"
+                placeholder="Buscar cotizaciones, clientes…"
+                readOnly
+                style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}
+                type="search"
+              />
             </div>
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-teal font-mono text-xs font-bold text-[#a0d0ca]">
+          </div>
+
+          <div className="ml-auto flex items-center gap-3">
+            {/* Notifications (visual only) */}
+            <button
+              aria-label="Notificaciones"
+              className="relative flex h-8 w-8 items-center justify-center rounded-lg text-ink-soft transition hover:bg-white/8 hover:text-ink"
+              type="button"
+            >
+              <Bell className="h-4 w-4" />
+              <span className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-amber" />
+            </button>
+
+            {/* User info */}
+            <div className="hidden flex-col items-end sm:flex">
+              <p className="text-sm font-semibold leading-none text-ink">{user.name}</p>
+              <p className="mt-0.5 text-[11px] leading-none text-ink-soft">{user.roles[0]?.name ?? 'Miembro'}</p>
+            </div>
+            <div
+              className="flex h-8 w-8 items-center justify-center rounded-full font-mono text-xs font-bold text-amber/90"
+              style={{ background: 'rgba(17,67,63,0.8)', border: '1px solid rgba(254,178,59,0.25)' }}
+            >
               {initials(user.name)}
             </div>
           </div>
         </header>
+
         <main>{children}</main>
       </div>
 
-      <nav aria-label="Navegación móvil" className="fixed inset-x-0 bottom-0 z-50 grid grid-cols-5 border-t border-ink/10 bg-paper/90 px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2 backdrop-blur lg:hidden">
+      {/* ── MOBILE NAV BAR ── */}
+      <nav
+        aria-label="Navegación móvil"
+        className="fixed inset-x-0 bottom-0 z-50 grid grid-cols-5 px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2 lg:hidden"
+        style={{
+          background: 'rgba(10,22,40,0.95)',
+          backdropFilter: 'blur(12px)',
+          borderTop: '1px solid rgba(255,255,255,0.08)',
+        }}
+      >
         {navigation.slice(0, 5).map(({ label, href, icon: Icon }) => {
           const active = isActive(pathname, href);
           return (
             <Link
-              className={`flex min-w-0 flex-col items-center gap-1 rounded-xl px-1 py-2 text-[11px] transition ${
-                active ? 'bg-teal text-[#feb23b]' : 'text-ink-soft'
+              className={`flex min-w-0 flex-col items-center gap-1 rounded-xl px-1 py-2 text-[10px] font-medium transition ${
+                active ? 'text-amber' : 'text-ink-muted'
               }`}
               href={href}
               key={label}
             >
-              <Icon className="h-5 w-5" />
+              <Icon className={`h-5 w-5 ${active ? 'text-amber' : ''}`} />
               <span className="truncate">{label}</span>
             </Link>
           );
