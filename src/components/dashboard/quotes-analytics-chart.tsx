@@ -2,8 +2,8 @@
 
 import { useMemo, useState } from 'react';
 import {
-  Area,
-  AreaChart,
+  Bar,
+  BarChart,
   CartesianGrid,
   ResponsiveContainer,
   Tooltip,
@@ -115,15 +115,7 @@ export function QuotesAnalyticsChart() {
           <div className="flex h-full items-center justify-center text-sm text-ink-soft">Aún no hay cotizaciones en este período.</div>
         ) : (
           <ResponsiveContainer height="100%" width="100%">
-            <AreaChart data={chartData} margin={{ top: 4, right: 4, bottom: 0, left: 0 }}>
-              <defs>
-                {SERIES.map((s) => (
-                  <linearGradient id={`grad-${s.key}`} key={s.key} x1="0" x2="0" y1="0" y2="1">
-                    <stop offset="5%" stopColor={s.color} stopOpacity={0.35} />
-                    <stop offset="95%" stopColor={s.color} stopOpacity={0} />
-                  </linearGradient>
-                ))}
-              </defs>
+            <BarChart barCategoryGap="24%" barGap={3} data={chartData} margin={{ top: 4, right: 4, bottom: 0, left: 0 }}>
               <CartesianGrid stroke="var(--border-faint)" strokeDasharray="3 3" vertical={false} />
               <XAxis axisLine={false} dataKey="label" tick={{ fill: 'var(--ink-muted)', fontSize: 11 }} tickLine={false} />
               <YAxis
@@ -133,18 +125,11 @@ export function QuotesAnalyticsChart() {
                 tickLine={false}
                 width={56}
               />
-              <Tooltip content={<ChartTooltip currency={currency} />} />
+              <Tooltip content={<ChartTooltip currency={currency} />} cursor={{ fill: 'var(--surface)' }} />
               {SERIES.map((s) => (
-                <Area
-                  dataKey={s.key}
-                  fill={`url(#grad-${s.key})`}
-                  key={s.key}
-                  stroke={s.color}
-                  strokeWidth={2}
-                  type="monotone"
-                />
+                <Bar animationDuration={600} dataKey={s.key} fill={s.color} key={s.key} maxBarSize={16} radius={[4, 4, 0, 0]} />
               ))}
-            </AreaChart>
+            </BarChart>
           </ResponsiveContainer>
         )}
       </div>
