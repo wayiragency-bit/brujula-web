@@ -96,7 +96,6 @@ export default function DashboardPage() {
     : null;
   const totalLeads    = leads?.meta.total ?? 0;
   const totalClients  = clients?.meta.total ?? 0;
-  const totalProducts = products?.meta.total ?? 0;
   const totalQuoteCount = quotes?.meta.total ?? 0;
 
   const topProducts = [...(products?.data ?? [])].sort((a, b) => b.timesQuoted - a.timesQuoted).slice(0, 3);
@@ -113,7 +112,6 @@ export default function DashboardPage() {
     { label: 'Nuevos Leads', value: String(totalLeads),    icon: UserPlus, spark: SPARKLINES[0], iconBg: '#06b6d4', iconShadow: 'rgba(6,182,212,0.4)', sub: 'Este mes' },
     { label: 'Total Clientes', value: String(totalClients), icon: Users,   spark: SPARKLINES[1], iconBg: '#10b981', iconShadow: 'rgba(16,185,129,0.4)', sub: 'Cartera activa' },
     { label: 'Cotizaciones',  value: String(totalQuoteCount), icon: FileText, spark: SPARKLINES[2], iconBg: '#f59e0b', iconShadow: 'rgba(245,158,11,0.4)', sub: `${pendingCount} enviadas` },
-    { label: 'Inventario',    value: String(totalProducts),   icon: Package,  spark: SPARKLINES[3], iconBg: '#a855f7', iconShadow: 'rgba(168,85,247,0.4)', sub: 'Productos' },
     ...(totalMargin !== null
       ? [{ label: 'Ganancia', value: formatMoney(totalMargin, currency), icon: TrendingUp, spark: SPARKLINES[4], iconBg: '#ec4899', iconShadow: 'rgba(236,72,153,0.4)', sub: 'Cotizaciones aceptadas' }]
       : []),
@@ -143,7 +141,7 @@ export default function DashboardPage() {
         {/* Metric cards */}
         <section
           aria-label="Indicadores principales"
-          className={`grid grid-cols-2 gap-5 sm:grid-cols-3 ${metrics.length === 5 ? 'xl:grid-cols-5' : 'xl:grid-cols-4'}`}
+          className={`grid grid-cols-2 gap-5 sm:grid-cols-3 ${metrics.length === 4 ? 'xl:grid-cols-4' : 'xl:grid-cols-3'}`}
         >
           {metrics.map((metric) => {
             const Icon = metric.icon;
