@@ -274,17 +274,14 @@ export default function DashboardPage() {
                 ) : (
                   topProducts.map((product, i) => (
                     <div className="rounded-xl p-3" key={product.id} style={{ background: 'var(--surface)', border: '1px solid var(--border-faint)' }}>
-                      <div className="mb-2 flex items-start justify-between gap-2">
-                        <div className="flex min-w-0 items-center gap-2">
-                          <span
-                            className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[10px] font-bold text-white"
-                            style={{ background: RANK_COLORS[i] ?? RANK_COLORS[2] }}
-                          >
-                            #{i + 1}
-                          </span>
-                          <span className="label-caps truncate text-ink-muted">{PRODUCT_TYPE_LABEL[product.type] ?? 'Servicio'}</span>
-                        </div>
-                        <Package className="h-5 w-5 shrink-0" style={{ color: 'var(--border)' }} />
+                      <div className="mb-2 flex min-w-0 items-center gap-2">
+                        <span
+                          className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[10px] font-bold text-white"
+                          style={{ background: RANK_COLORS[i] ?? RANK_COLORS[2] }}
+                        >
+                          #{i + 1}
+                        </span>
+                        <span className="label-caps truncate text-ink-muted">{PRODUCT_TYPE_LABEL[product.type] ?? 'Servicio'}</span>
                       </div>
                       <div className="relative h-24 w-full overflow-hidden rounded-lg" style={{ background: 'var(--paper-elevated)' }}>
                         {product.imageUrl ? (
