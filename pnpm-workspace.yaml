@@ -1,0 +1,4 @@
+# pnpm 11 stores per-project security settings in this file.
+# No child packages are included; this repository remains standalone.
+allowBuilds:
+  unrs-resolver: true

@@ -1,0 +1,106 @@
+@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@700;800&family=Hanken+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --paper: #fdf9ee;
+  --paper-card: #fbf9f3;
+  --ink: #15302c;
+  --ink-soft: #5c6b66;
+  --teal: #11433f;
+  --amber: #e29a22;
+  --line: #c0c8c6;
+  --status-accepted: #16a34a;
+  --status-expired: #d97706;
+  --font-display: 'Bricolage Grotesque', 'Arial Black', sans-serif;
+  --font-ui: 'Hanken Grotesk', Arial, sans-serif;
+  --font-data: 'Space Mono', Consolas, monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--paper);
+}
+
+body {
+  margin: 0;
+  background:
+    radial-gradient(circle at 12% 12%, rgba(226, 154, 34, 0.05), transparent 24rem),
+    var(--paper);
+  color: var(--ink);
+  font-family: var(--font-ui);
+  -webkit-font-smoothing: antialiased;
+}
+
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+@layer components {
+  .label-caps {
+    @apply font-mono text-[10px] font-bold uppercase tracking-[0.12em];
+  }
+
+  .button-primary {
+    @apply rounded-lg bg-[#feb23b] px-4 py-2.5 text-sm font-bold text-teal shadow-card transition hover:-translate-y-0.5 hover:bg-[#f7a91f] focus:outline-none focus:ring-2 focus:ring-amber focus:ring-offset-2 focus:ring-offset-paper;
+  }
+
+  .button-secondary {
+    @apply rounded-lg bg-teal px-4 py-2.5 text-sm font-semibold text-paper shadow-card transition hover:-translate-y-0.5 hover:bg-[#0b3834] focus:outline-none focus:ring-2 focus:ring-teal focus:ring-offset-2 focus:ring-offset-paper;
+  }
+
+  .metric-card {
+    @apply flex min-h-32 flex-col justify-between rounded-2xl border border-ink/10 bg-paper-card p-5 shadow-card transition hover:bg-[#f4f0e5];
+  }
+
+  .product-row {
+    @apply flex min-w-0 items-center gap-4 rounded-2xl border border-ink/10 bg-paper-card p-4 shadow-card transition hover:bg-[#f4f0e5];
+  }
+}
+
+.boarding-pass {
+  position: relative;
+}
+
+.boarding-pass::before,
+.boarding-pass::after {
+  position: absolute;
+  top: calc(100% - 73px);
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--paper);
+  content: '';
+  transform: translateY(-50%);
+}
+
+.boarding-pass::before {
+  left: -13px;
+}
+
+.boarding-pass::after {
+  right: -13px;
+}
+
+@media (max-width: 640px) {
+  .button-primary,
+  .button-secondary {
+    flex: 1;
+    padding-inline: 0.75rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}
