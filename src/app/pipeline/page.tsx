@@ -413,7 +413,7 @@ export default function PipelinePage() {
 
   return (
     <AppShell>
-      <div className="w-full space-y-5 px-4 pb-28 pt-7 lg:px-6 lg:pb-10">
+      <div className="w-full space-y-5 px-4 pb-28 pt-7 lg:pl-6 lg:pr-10 lg:pb-10">
         {showVencidas && (
           <VencidasPanel cards={vencidasCards} onClose={() => setShowVencidas(false)} />
         )}
