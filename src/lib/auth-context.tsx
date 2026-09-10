@@ -34,7 +34,13 @@ export function AuthProvider({ children }: Readonly<{ children: React.ReactNode 
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const token = await refreshSession();
+      let token: string | null = null;
+      try {
+        token = await refreshSession();
+      } catch {
+        if (!cancelled) setStatus('unauthenticated');
+        return;
+      }
       if (cancelled) return;
       if (!token) {
         setStatus('unauthenticated');
