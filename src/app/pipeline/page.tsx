@@ -133,7 +133,7 @@ function KanbanCard({ card, onDragStart }: { card: PipelineCard; onDragStart: (c
 
   return (
     <Link
-      className="relative block cursor-grab overflow-hidden rounded-xl p-3 transition hover:-translate-y-0.5 active:cursor-grabbing"
+      className="relative block cursor-grab overflow-hidden rounded-xl p-4 transition hover:-translate-y-0.5 active:cursor-grabbing"
       style={{ background: 'rgb(30,41,59)', border: '1px solid rgba(255,255,255,0.05)' }}
       draggable
       href={`/quotes/${card.id}`}
@@ -144,33 +144,33 @@ function KanbanCard({ card, onDragStart }: { card: PipelineCard; onDragStart: (c
 
       {/* Quote number + date */}
       <div className="flex items-center justify-between gap-1 pl-2">
-        <p className="text-[9px] font-bold" style={{ color: sc.text }}>{card.number}</p>
+        <p className="text-[11px] font-bold" style={{ color: sc.text }}>{card.number}</p>
         {(card as unknown as { startDate?: string }).startDate && (
-          <span className="rounded px-1 text-[9px] font-medium" style={{ background: 'rgb(51,65,85)', color: 'rgb(100,116,139)' }}>
+          <span className="rounded px-1.5 text-[10px] font-medium" style={{ background: 'rgb(51,65,85)', color: 'rgb(100,116,139)' }}>
             {new Date((card as unknown as { startDate: string }).startDate).toLocaleDateString('es-CO', { day: 'numeric', month: 'numeric', year: 'numeric' })}
           </span>
         )}
       </div>
 
       {/* Client row */}
-      <div className="mt-1.5 flex items-center gap-1.5 pl-2">
+      <div className="mt-2 flex items-center gap-2 pl-2">
         <div
-          className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[9px] font-bold"
+          className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[10px] font-bold"
           style={{ background: color + '33', color }}
         >
           {clientInitials(clientName).charAt(0)}
         </div>
         <div className="min-w-0">
-          <p className="truncate text-xs font-bold leading-tight" style={{ color: 'rgb(255,255,255)' }}>{clientName}</p>
-          {agentName && <p className="truncate text-[9px] font-medium leading-tight" style={{ color: 'rgb(148,163,184)' }}>{agentName}</p>}
+          <p className="truncate text-sm font-bold leading-tight" style={{ color: 'rgb(255,255,255)' }}>{clientName}</p>
+          {agentName && <p className="truncate text-[10px] font-medium leading-tight" style={{ color: 'rgb(148,163,184)' }}>{agentName}</p>}
         </div>
       </div>
 
       {/* Destination */}
-      {card.destination && <p className="mt-1 truncate pl-2 text-[9px]" style={{ color: 'rgb(100,116,139)' }}>{card.destination}</p>}
+      {card.destination && <p className="mt-1 truncate pl-2 text-[10px]" style={{ color: 'rgb(100,116,139)' }}>{card.destination}</p>}
 
       {/* Amount */}
-      <p className="mt-1.5 pl-2 text-[10px] font-medium" style={{ color: 'rgb(203,213,225)' }}>{formatMoney(card.total, card.currency)}</p>
+      <p className="mt-2 pl-2 text-[11px] font-semibold" style={{ color: 'rgb(203,213,225)' }}>{formatMoney(card.total, card.currency)}</p>
     </Link>
   );
 }
@@ -306,7 +306,7 @@ function KanbanBoard() {
 
               {/* Cards area */}
               <div
-                className="flex flex-1 flex-col gap-2 rounded-2xl p-2 min-h-[80px]"
+                className="flex flex-1 flex-col gap-2 rounded-2xl p-2 min-h-[200px]"
                 style={{ background: 'var(--surface)', border: '1px solid var(--border-faint)' }}
                 onDragOver={(e) => e.preventDefault()}
                 onDrop={() => handleDrop(column.status)}
@@ -413,7 +413,7 @@ export default function PipelinePage() {
 
   return (
     <AppShell>
-      <div className="mx-auto w-full max-w-content space-y-6 px-4 pb-28 pt-7 sm:px-6 lg:px-8 lg:pb-10">
+      <div className="w-full space-y-5 px-4 pb-28 pt-7 lg:px-6 lg:pb-10">
         {showVencidas && (
           <VencidasPanel cards={vencidasCards} onClose={() => setShowVencidas(false)} />
         )}
