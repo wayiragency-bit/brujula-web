@@ -67,26 +67,26 @@ export function AppShell({ children }: Readonly<{ children: React.ReactNode }>) 
   return (
     <div className="min-h-screen bg-paper text-ink">
       {/* ── SIDEBAR (desktop) ── */}
-      <aside className="fixed inset-y-0 left-0 z-40 hidden w-[76px] flex-col items-center py-4 lg:flex"
+      <aside className="fixed inset-y-0 left-0 z-40 hidden w-24 flex-col items-center py-2 lg:flex"
              style={{ background: 'var(--sidebar-bg)', borderRight: '1px solid var(--border-faint)' }}>
 
         {/* Logo mark */}
         <Link
           aria-label="Brújula"
-          className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber/15 text-amber transition hover:bg-amber/25"
+          className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber/15 text-amber transition hover:bg-amber/25"
           href="/"
         >
-          <Compass className="h-5 w-5" />
+          <Compass className="h-6 w-6" />
         </Link>
 
         {/* Nav icons */}
-        <nav aria-label="Navegación principal" className="mt-6 flex flex-1 flex-col items-center gap-0.5 w-full px-2">
+        <nav aria-label="Navegación principal" className="mt-4 flex flex-1 flex-col items-center gap-1.5 w-full px-3 overflow-y-auto">
           {navigation.map(({ label, short, href, icon: Icon }) => {
             const active = isActive(pathname, href);
             return (
               <Link
                 aria-label={label}
-                className={`flex w-full flex-col items-center gap-0.5 rounded-xl py-2 transition-all ${
+                className={`flex w-full flex-col items-center justify-center gap-1 rounded-2xl py-2 px-2 transition-all duration-200 ${
                   active
                     ? 'bg-amber text-[var(--sidebar-bg)] shadow-[0_0_16px_rgba(254,178,59,0.25)]'
                     : 'text-white/40 hover:bg-white/8 hover:text-white/80'
@@ -94,30 +94,27 @@ export function AppShell({ children }: Readonly<{ children: React.ReactNode }>) 
                 href={href}
                 key={label}
               >
-                <Icon className="h-[16px] w-[16px]" />
-                <span className="text-[8px] font-medium leading-none tracking-wide">{short}</span>
+                <Icon className="h-[22px] w-[22px]" />
+                <span className="text-[9px] font-medium leading-tight text-center">{short}</span>
               </Link>
             );
           })}
         </nav>
 
-        {/* Avatar / logout */}
+        {/* Logout */}
         <button
           aria-label="Cerrar sesión"
-          className="group relative flex h-10 w-10 items-center justify-center rounded-xl text-red-400 transition hover:bg-red-500/15 hover:text-red-300"
+          className="group relative flex flex-col items-center justify-center gap-1 w-full rounded-2xl py-2 px-2 text-red-400 transition hover:bg-red-500/15 hover:text-red-300"
           onClick={() => logout().then(() => router.replace('/login'))}
           type="button"
         >
-          <LogOut className="h-[18px] w-[18px]" />
-          <span className="pointer-events-none absolute left-[64px] z-50 flex items-center gap-1.5 whitespace-nowrap rounded-md bg-paper-elevated px-2.5 py-1.5 text-xs font-medium text-ink opacity-0 shadow-floating transition-opacity group-hover:opacity-100"
-                style={{ border: '1px solid var(--border)' }}>
-            Cerrar sesión
-          </span>
+          <LogOut className="h-[22px] w-[22px]" />
+          <span className="text-[9px] font-medium leading-tight text-center">Salir</span>
         </button>
       </aside>
 
       {/* ── CONTENT AREA ── */}
-      <div className="lg:pl-[76px]">
+      <div className="lg:pl-24">
 
         {/* Top bar */}
         <header className="sticky top-0 z-30 flex h-14 items-center gap-4 px-4 sm:px-6 lg:px-6"
