@@ -67,8 +67,7 @@ export function AppShell({ children }: Readonly<{ children: React.ReactNode }>) 
   return (
     <div className="min-h-screen bg-paper text-ink">
       {/* ── SIDEBAR (desktop) ── */}
-      <aside className="fixed top-4 bottom-4 left-4 z-40 hidden w-24 flex-col items-center py-2 rounded-2xl lg:flex"
-             style={{ background: 'var(--sidebar-bg)' }}>
+      <aside className="glass-panel fixed top-4 bottom-4 left-4 z-40 hidden w-24 flex-col items-center py-2 rounded-2xl lg:flex">
 
         {/* Logo mark */}
         <Link

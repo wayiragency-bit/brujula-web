@@ -79,11 +79,11 @@ export default function DashboardPage() {
   const pct = totalQuoted > 0 ? Math.min(100, (totalAccepted / totalQuoted) * 100) : 0;
 
   const metrics = [
-    { label: 'Clientes',      value: String(totalClients),    icon: BriefcaseBusiness, spark: SPARKLINES[0] },
-    { label: 'Cotizaciones',  value: String(totalQuoteCount), icon: FileText,           spark: SPARKLINES[1] },
-    { label: 'Inventario',    value: String(totalProducts),   icon: Package,            spark: SPARKLINES[2] },
+    { label: 'Clientes',      value: String(totalClients),    icon: BriefcaseBusiness, spark: SPARKLINES[0], iconBg: '#06b6d4', iconShadow: 'rgba(6,182,212,0.4)' },
+    { label: 'Cotizaciones',  value: String(totalQuoteCount), icon: FileText,           spark: SPARKLINES[1], iconBg: '#10b981', iconShadow: 'rgba(16,185,129,0.4)' },
+    { label: 'Inventario',    value: String(totalProducts),   icon: Package,            spark: SPARKLINES[2], iconBg: '#f59e0b', iconShadow: 'rgba(245,158,11,0.4)' },
     ...(totalMargin !== null
-      ? [{ label: 'Ganancia', value: formatMoney(totalMargin, currency), icon: TrendingUp, spark: SPARKLINES[3], accent: true }]
+      ? [{ label: 'Ganancia', value: formatMoney(totalMargin, currency), icon: TrendingUp, spark: SPARKLINES[3], accent: true, iconBg: '#8b5cf6', iconShadow: 'rgba(139,92,246,0.4)' }]
       : []),
   ];
 
@@ -110,30 +110,26 @@ export default function DashboardPage() {
 
         {/* Metric cards */}
         <section aria-label="Indicadores principales" className="grid grid-cols-2 gap-4 xl:grid-cols-4">
-          {metrics.map((metric, i) => {
+          {metrics.map((metric) => {
             const Icon = metric.icon;
             return (
-              <article className="metric-card" key={metric.label}>
-                <div className="flex items-start justify-between">
+              <article className="glass-card rounded-2xl p-4 transition hover:brightness-110" key={metric.label}>
+                <div className="flex items-center gap-3 mb-3">
                   <div
-                    className="flex h-9 w-9 items-center justify-center rounded-xl"
-                    style={{ background: 'rgba(254,178,59,0.12)' }}
+                    className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl text-white transition-transform duration-300 hover:scale-110"
+                    style={{ background: metric.iconBg, boxShadow: `0 4px 12px ${metric.iconShadow}` }}
                   >
-                    <Icon className="h-4 w-4 text-amber" />
+                    <Icon className="h-6 w-6" />
                   </div>
-                  <Sparkline
-                    color={'accent' in metric && metric.accent ? '#22c55e' : '#feb23b'}
-                    points={metric.spark}
-                  />
+                  <div className="min-w-0">
+                    <p className="label-caps text-ink-soft">{metric.label}</p>
+                    <strong className="font-mono text-2xl font-bold text-ink leading-tight">{metric.value}</strong>
+                  </div>
                 </div>
-                <div className="mt-3">
-                  <strong
-                    className={`font-mono text-3xl font-bold ${'accent' in metric && metric.accent ? 'text-status-accepted' : 'text-ink'}`}
-                  >
-                    {metric.value}
-                  </strong>
-                  <p className="mt-0.5 label-caps text-ink-soft">{metric.label}</p>
-                </div>
+                <Sparkline
+                  color={metric.iconBg}
+                  points={metric.spark}
+                />
               </article>
             );
           })}
