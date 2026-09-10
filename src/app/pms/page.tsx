@@ -25,7 +25,7 @@ export default function PmsPage() {
   const [month, setMonth] = useState(today.getMonth());
   const [view, setView]   = useState<(typeof VIEW_OPTIONS)[number]>(12);
 
-  const { data: productsData, isLoading } = useProducts({});
+  const { data: productsData, isLoading } = useProducts({ page: 1, limit: 20 });
   const products = useMemo(() => (productsData?.data ?? []).slice(0, 20), [productsData]);
 
   const totalDays = getDaysInMonth(year, month);
@@ -63,7 +63,7 @@ export default function PmsPage() {
             <button
               className="flex h-8 w-8 items-center justify-center rounded-lg transition"
               onClick={prevMonth}
-              style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)' }}
+              style={{ background: 'var(--border-faint)', border: '1px solid rgba(255,255,255,0.1)' }}
               type="button"
             >
               <ChevronLeft className="h-4 w-4 text-ink" />
@@ -74,7 +74,7 @@ export default function PmsPage() {
             <button
               className="flex h-8 w-8 items-center justify-center rounded-lg transition"
               onClick={nextMonth}
-              style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)' }}
+              style={{ background: 'var(--border-faint)', border: '1px solid rgba(255,255,255,0.1)' }}
               type="button"
             >
               <ChevronRight className="h-4 w-4 text-ink" />
@@ -101,7 +101,7 @@ export default function PmsPage() {
               style={
                 view === v
                   ? { background: '#feb23b', color: '#0d1117' }
-                  : { background: 'rgba(255,255,255,0.06)', color: 'var(--ink-soft)', border: '1px solid rgba(255,255,255,0.08)' }
+                  : { background: 'var(--border-faint)', color: 'var(--ink-soft)', border: '1px solid var(--border)' }
               }
               type="button"
             >
@@ -113,14 +113,14 @@ export default function PmsPage() {
         {/* Calendar grid */}
         <div
           className="overflow-x-auto rounded-2xl"
-          style={{ background: '#111827', border: '1px solid rgba(255,255,255,0.08)' }}
+          style={{ background: 'var(--paper-card)', border: '1px solid var(--border)' }}
         >
           <table className="w-full min-w-max border-collapse text-sm">
             <thead>
               <tr>
                 <th
                   className="sticky left-0 z-10 px-4 py-3 text-left label-caps text-ink-soft"
-                  style={{ background: '#111827', borderBottom: '1px solid rgba(255,255,255,0.08)', minWidth: '200px' }}
+                  style={{ background: 'var(--paper-card)', borderBottom: '1px solid var(--border)', minWidth: '200px' }}
                 >
                   PRODUCTO / SERVICIO
                 </th>
@@ -129,8 +129,8 @@ export default function PmsPage() {
                     className="px-2 py-3 text-center label-caps"
                     key={d}
                     style={{
-                      borderBottom: '1px solid rgba(255,255,255,0.08)',
-                      borderLeft: '1px solid rgba(255,255,255,0.05)',
+                      borderBottom: '1px solid var(--border)',
+                      borderLeft: '1px solid var(--border-faint)',
                       minWidth: '42px',
                       color: isToday(d) ? '#feb23b' : isWeekend(d) ? '#3d5070' : 'var(--ink-soft)',
                     }}
@@ -159,7 +159,7 @@ export default function PmsPage() {
                 products.map((product) => (
                   <tr
                     key={product.id}
-                    style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}
+                    style={{ borderBottom: '1px solid var(--border-faint)' }}
                     onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.02)'; }}
                     onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = ''; }}
                   >
@@ -182,7 +182,7 @@ export default function PmsPage() {
                       <td
                         key={d}
                         style={{
-                          borderLeft: '1px solid rgba(255,255,255,0.04)',
+                          borderLeft: '1px solid var(--surface)',
                           background: isWeekend(d) ? 'rgba(255,255,255,0.01)' : undefined,
                         }}
                       />
@@ -197,11 +197,11 @@ export default function PmsPage() {
         {/* Reservas web pendientes */}
         <article
           className="rounded-2xl overflow-hidden"
-          style={{ background: '#111827', border: '1px solid rgba(255,255,255,0.08)' }}
+          style={{ background: 'var(--paper-card)', border: '1px solid var(--border)' }}
         >
           <div
             className="flex items-center justify-between px-6 py-4"
-            style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}
+            style={{ borderBottom: '1px solid var(--border-faint)' }}
           >
             <div className="flex items-center gap-2">
               <CalendarDays className="h-4 w-4 text-amber" />
@@ -217,7 +217,7 @@ export default function PmsPage() {
           <div className="overflow-x-auto">
             <table className="w-full min-w-[500px] text-sm">
               <thead>
-                <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+                <tr style={{ borderBottom: '1px solid var(--border-faint)' }}>
                   {['CLIENTE', 'PRODUCTO', 'FECHAS', 'TOTAL', 'ACCIONES'].map((h) => (
                     <th className="label-caps px-6 py-3 text-left text-ink-soft" key={h}>{h}</th>
                   ))}

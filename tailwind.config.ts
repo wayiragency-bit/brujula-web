@@ -9,18 +9,18 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        paper:          '#0d1117',
-        'paper-card':   '#111827',
-        'paper-elevated': '#1a2236',
-        ink:            '#e2e8f0',
-        'ink-soft':     '#8899b8',
-        'ink-muted':    '#3d5070',
-        teal:           '#11433f',
-        'teal-light':   '#0ea5e9',
-        amber:          '#feb23b',
-        line:           'rgba(255,255,255,0.08)',
-        'status-accepted': '#22c55e',
-        'status-expired':  '#f59e0b',
+        paper:            'var(--paper)',
+        'paper-card':     'var(--paper-card)',
+        'paper-elevated': 'var(--paper-elevated)',
+        ink:              'var(--ink)',
+        'ink-soft':       'var(--ink-soft)',
+        'ink-muted':      'var(--ink-muted)',
+        teal:             'var(--teal)',
+        'teal-light':     'var(--teal-light)',
+        amber:            'var(--amber)',
+        line:             'var(--line)',
+        'status-accepted': 'var(--status-accepted)',
+        'status-expired':  'var(--status-expired)',
       },
       fontFamily: {
         display: ['var(--font-display)'],
@@ -28,7 +28,7 @@ const config: Config = {
         mono:    ['var(--font-data)'],
       },
       boxShadow: {
-        card:     '0 1px 3px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.06)',
+        card:     '0 1px 3px rgba(0,0,0,0.2)',
         floating: '0 24px 48px -12px rgba(0,0,0,0.6)',
       },
       maxWidth: {

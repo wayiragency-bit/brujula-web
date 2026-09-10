@@ -36,7 +36,7 @@ export default function MarketingPage() {
               <article
                 className="flex items-center gap-4 rounded-2xl p-5"
                 key={m.label}
-                style={{ background: '#111827', border: '1px solid rgba(255,255,255,0.08)' }}
+                style={{ background: 'var(--paper-card)', border: '1px solid var(--border)' }}
               >
                 <div
                   className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl"
@@ -56,18 +56,18 @@ export default function MarketingPage() {
         {/* Campaign history */}
         <article
           className="overflow-hidden rounded-2xl"
-          style={{ background: '#111827', border: '1px solid rgba(255,255,255,0.08)' }}
+          style={{ background: 'var(--paper-card)', border: '1px solid var(--border)' }}
         >
           <div
             className="px-6 py-4"
-            style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}
+            style={{ borderBottom: '1px solid var(--border-faint)' }}
           >
             <h2 className="font-semibold text-ink">Historial de Campañas</h2>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full min-w-[640px] text-sm">
               <thead>
-                <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+                <tr style={{ borderBottom: '1px solid var(--border-faint)' }}>
                   {['CAMPAÑA', 'AUDIENCIA', 'ENVIADOS', 'APERTURA', 'CLICS', 'ESTADO', 'ACCIONES'].map((h) => (
                     <th className="label-caps px-6 py-3 text-left text-ink-soft" key={h}>{h}</th>
                   ))}
@@ -103,7 +103,7 @@ export default function MarketingPage() {
             <div
               className="flex items-start gap-3 rounded-xl p-4"
               key={tip.title}
-              style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}
+              style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border-faint)' }}
             >
               <span className="text-2xl">{tip.icon}</span>
               <div>

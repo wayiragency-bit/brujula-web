@@ -145,7 +145,7 @@ export default function DashboardPage() {
           {/* Cotizado vs Aceptado */}
           <article
             className="rounded-2xl p-6 sm:p-7"
-            style={{ background: '#111827', border: '1px solid rgba(255,255,255,0.08)' }}
+            style={{ background: 'var(--paper-card)', border: '1px solid var(--border)' }}
           >
             <div className="flex items-start justify-between gap-4">
               <div>
@@ -166,7 +166,7 @@ export default function DashboardPage() {
             <div className="mt-5">
               <div
                 className="h-2.5 w-full overflow-hidden rounded-full"
-                style={{ background: 'rgba(255,255,255,0.06)' }}
+                style={{ background: 'var(--border-faint)' }}
               >
                 <div
                   className="h-full rounded-full transition-all duration-700"
@@ -185,7 +185,7 @@ export default function DashboardPage() {
             {/* Mini stats */}
             <div
               className="mt-5 grid grid-cols-3 gap-3 rounded-xl p-3"
-              style={{ background: 'rgba(255,255,255,0.04)' }}
+              style={{ background: 'var(--surface)' }}
             >
               {[
                 { label: 'Enviadas', value: String(pendingCount), color: '#feb23b' },
@@ -203,7 +203,7 @@ export default function DashboardPage() {
           {/* Pulso comercial */}
           <article
             className="flex flex-col justify-between rounded-2xl p-6 sm:p-7"
-            style={{ background: 'linear-gradient(135deg, #11433f 0%, #0d2e2b 100%)', border: '1px solid rgba(255,255,255,0.08)' }}
+            style={{ background: 'linear-gradient(135deg, #11433f 0%, #0d2e2b 100%)', border: '1px solid var(--border)' }}
           >
             <div>
               <p className="label-caps" style={{ color: 'rgba(160,208,202,0.8)' }}>PULSO COMERCIAL</p>
@@ -230,9 +230,9 @@ export default function DashboardPage() {
           {/* En Curso */}
           <article
             className="rounded-2xl overflow-hidden"
-            style={{ background: '#111827', border: '1px solid rgba(255,255,255,0.08)' }}
+            style={{ background: 'var(--paper-card)', border: '1px solid var(--border)' }}
           >
-            <div className="flex items-center justify-between px-6 py-4" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+            <div className="flex items-center justify-between px-6 py-4" style={{ borderBottom: '1px solid var(--border-faint)' }}>
               <h2 className="font-semibold text-ink">En Curso</h2>
               <Link className="label-caps text-amber" href="/quotes">Ver todas</Link>
             </div>
@@ -245,7 +245,7 @@ export default function DashboardPage() {
                     className="flex items-center justify-between gap-3 px-6 py-3.5 transition"
                     href={`/quotes/${q.id}`}
                     key={q.id}
-                    style={{ borderColor: 'rgba(255,255,255,0.06)' }}
+                    style={{ borderColor: 'var(--border-faint)' }}
                     onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.03)'; }}
                     onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = ''; }}
                   >
@@ -267,9 +267,9 @@ export default function DashboardPage() {
           {/* Top productos */}
           <article
             className="rounded-2xl overflow-hidden"
-            style={{ background: '#111827', border: '1px solid rgba(255,255,255,0.08)' }}
+            style={{ background: 'var(--paper-card)', border: '1px solid var(--border)' }}
           >
-            <div className="flex items-center justify-between px-6 py-4" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+            <div className="flex items-center justify-between px-6 py-4" style={{ borderBottom: '1px solid var(--border-faint)' }}>
               <h2 className="font-semibold text-ink">Más Cotizados</h2>
               <Link className="label-caps text-amber" href="/products">Ver todos</Link>
             </div>
@@ -282,7 +282,7 @@ export default function DashboardPage() {
                     className="flex items-center gap-3 rounded-xl px-3 py-2.5 transition"
                     key={product.id}
                     style={{ cursor: 'default' }}
-                    onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.04)'; }}
+                    onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = 'var(--surface)'; }}
                     onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = ''; }}
                   >
                     <div

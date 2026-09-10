@@ -49,11 +49,11 @@ export default function ChannelManagerPage() {
         {/* Empty state */}
         <article
           className="rounded-2xl p-12 text-center"
-          style={{ background: '#111827', border: '1px solid rgba(255,255,255,0.08)' }}
+          style={{ background: 'var(--paper-card)', border: '1px solid var(--border)' }}
         >
           <div
             className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl"
-            style={{ background: 'rgba(255,255,255,0.05)' }}
+            style={{ background: 'var(--border-faint)' }}
           >
             <Globe className="h-8 w-8 text-ink-soft" />
           </div>
@@ -95,7 +95,7 @@ export default function ChannelManagerPage() {
             <div
               className="rounded-xl p-5"
               key={item.step}
-              style={{ background: '#111827', border: '1px solid rgba(255,255,255,0.08)' }}
+              style={{ background: 'var(--paper-card)', border: '1px solid var(--border)' }}
             >
               <p className="font-mono text-3xl font-bold text-amber/30">{item.step}</p>
               <h3 className="mt-2 font-semibold text-ink">{item.title}</h3>

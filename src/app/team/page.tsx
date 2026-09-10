@@ -74,12 +74,12 @@ export default function TeamPage() {
                 <article
                   className="flex flex-col rounded-2xl overflow-hidden transition"
                   key={member.id}
-                  style={{ background: '#111827', border: '1px solid rgba(255,255,255,0.08)' }}
+                  style={{ background: 'var(--paper-card)', border: '1px solid var(--border)' }}
                 >
                   {/* Card header */}
                   <div
                     className="flex flex-col items-center px-6 pb-5 pt-7"
-                    style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}
+                    style={{ borderBottom: '1px solid var(--border-faint)' }}
                   >
                     {/* Avatar */}
                     <div
@@ -87,8 +87,7 @@ export default function TeamPage() {
                       style={{
                         background: avatarStyle.bg,
                         color: avatarStyle.text,
-                        ringColor: 'rgba(255,255,255,0.06)',
-                        boxShadow: '0 0 0 4px rgba(255,255,255,0.06)',
+                        boxShadow: '0 0 0 4px var(--border-faint)',
                       }}
                     >
                       {initials(member.name)}
@@ -122,8 +121,8 @@ export default function TeamPage() {
                         className="flex flex-col items-center justify-center py-4"
                         key={stat.label}
                         style={{
-                          borderRight: i % 2 === 0 ? '1px solid rgba(255,255,255,0.06)' : undefined,
-                          borderBottom: i < 2 ? '1px solid rgba(255,255,255,0.06)' : undefined,
+                          borderRight: i % 2 === 0 ? '1px solid var(--border-faint)' : undefined,
+                          borderBottom: i < 2 ? '1px solid var(--border-faint)' : undefined,
                         }}
                       >
                         <p
@@ -140,7 +139,7 @@ export default function TeamPage() {
                   {/* Commission earned */}
                   <div
                     className="flex items-center justify-between px-5 py-3"
-                    style={{ borderTop: '1px solid rgba(255,255,255,0.06)', background: 'rgba(34,197,94,0.05)' }}
+                    style={{ borderTop: '1px solid var(--border-faint)', background: 'rgba(34,197,94,0.05)' }}
                   >
                     <div className="flex items-center gap-1.5">
                       <TrendingUp className="h-3.5 w-3.5 text-green-400" />
@@ -150,7 +149,7 @@ export default function TeamPage() {
                   </div>
 
                   {/* Actions */}
-                  <div className="px-4 py-3" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+                  <div className="px-4 py-3" style={{ borderTop: '1px solid var(--border-faint)' }}>
                     <button
                       className="button-secondary w-full inline-flex items-center justify-center gap-2"
                       onClick={() => openEdit(member)}

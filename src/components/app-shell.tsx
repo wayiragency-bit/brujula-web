@@ -68,7 +68,7 @@ export function AppShell({ children }: Readonly<{ children: React.ReactNode }>) 
     <div className="min-h-screen bg-paper text-ink">
       {/* ── SIDEBAR (desktop) ── */}
       <aside className="fixed inset-y-0 left-0 z-40 hidden w-[68px] flex-col items-center bg-[#0a1628] py-4 lg:flex"
-             style={{ borderRight: '1px solid rgba(255,255,255,0.06)' }}>
+             style={{ borderRight: '1px solid var(--border-faint)' }}>
 
         {/* Logo mark */}
         <Link
@@ -126,9 +126,9 @@ export function AppShell({ children }: Readonly<{ children: React.ReactNode }>) 
         {/* Top bar */}
         <header className="sticky top-0 z-30 flex h-14 items-center gap-4 px-4 sm:px-6 lg:px-6"
                 style={{
-                  background: 'rgba(13,17,23,0.85)',
+                  background: 'var(--topbar-bg)',
                   backdropFilter: 'blur(12px)',
-                  borderBottom: '1px solid rgba(255,255,255,0.07)',
+                  borderBottom: '1px solid var(--border-faint)',
                 }}>
 
           {/* Mobile: logo */}
@@ -145,7 +145,7 @@ export function AppShell({ children }: Readonly<{ children: React.ReactNode }>) 
                 className="h-8 w-full rounded-lg pl-8 pr-3 text-sm text-ink placeholder:text-ink-muted focus:outline-none focus:ring-1 focus:ring-amber/30"
                 placeholder="Buscar cotizaciones, clientes…"
                 readOnly
-                style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}
+                style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}
                 type="search"
               />
             </div>
@@ -186,7 +186,7 @@ export function AppShell({ children }: Readonly<{ children: React.ReactNode }>) 
         style={{
           background: 'rgba(10,22,40,0.95)',
           backdropFilter: 'blur(12px)',
-          borderTop: '1px solid rgba(255,255,255,0.08)',
+          borderTop: '1px solid var(--border)',
         }}
       >
         {navigation.slice(0, 5).map(({ label, href, icon: Icon }) => {

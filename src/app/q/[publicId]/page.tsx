@@ -2,9 +2,9 @@
 
 import { use } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Download, MapPin, Calendar, Users, CheckCircle, Clock, XCircle } from 'lucide-react';
+import { Download, MapPin, Calendar, Users, CheckCircle, Clock, XCircle, Compass } from 'lucide-react';
 
-const API = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
+const API = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001/api';
 
 interface PublicItem {
   id: string;
@@ -82,15 +82,23 @@ function pmLabel(pm: string) {
   return map[pm] ?? pm;
 }
 
-const STATUS_CONFIG: Record<string, { label: string; color: string; icon: React.ReactNode }> = {
-  BORRADOR:  { label: 'Borrador',   color: '#888',    icon: <Clock className="h-4 w-4" /> },
-  ENVIADA:   { label: 'Pendiente',  color: '#d97706', icon: <Clock className="h-4 w-4" /> },
-  ACEPTADA:  { label: 'Aceptada',   color: '#059669', icon: <CheckCircle className="h-4 w-4" /> },
-  ABONADA:   { label: 'Con anticipo', color: '#0284c7', icon: <CheckCircle className="h-4 w-4" /> },
-  PAGADA:    { label: 'Pagada',     color: '#059669', icon: <CheckCircle className="h-4 w-4" /> },
-  RECHAZADA: { label: 'Rechazada',  color: '#dc2626', icon: <XCircle className="h-4 w-4" /> },
-  VENCIDA:   { label: 'Vencida',    color: '#dc2626', icon: <XCircle className="h-4 w-4" /> },
+const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; icon: React.ReactNode }> = {
+  BORRADOR:  { label: 'Borrador',     color: '#8899b8', bg: 'rgba(136,153,184,0.12)', icon: <Clock className="h-4 w-4" /> },
+  ENVIADA:   { label: 'Pendiente',    color: '#feb23b', bg: 'rgba(254,178,59,0.12)',  icon: <Clock className="h-4 w-4" /> },
+  ACEPTADA:  { label: 'Aceptada',     color: '#4ade80', bg: 'rgba(74,222,128,0.12)',  icon: <CheckCircle className="h-4 w-4" /> },
+  ABONADA:   { label: 'Con anticipo', color: '#38bdf8', bg: 'rgba(56,189,248,0.12)',  icon: <CheckCircle className="h-4 w-4" /> },
+  PAGADA:    { label: 'Pagada',       color: '#4ade80', bg: 'rgba(74,222,128,0.12)',  icon: <CheckCircle className="h-4 w-4" /> },
+  RECHAZADA: { label: 'Rechazada',    color: '#f87171', bg: 'rgba(248,113,113,0.12)', icon: <XCircle className="h-4 w-4" /> },
+  VENCIDA:   { label: 'Vencida',      color: '#f87171', bg: 'rgba(248,113,113,0.12)', icon: <XCircle className="h-4 w-4" /> },
 };
+
+const card: React.CSSProperties = {
+  background: '#111827',
+  border: '1px solid rgba(255,255,255,0.08)',
+  borderRadius: '16px',
+};
+
+const divider: React.CSSProperties = { borderBottom: '1px solid rgba(255,255,255,0.07)' };
 
 export default function PublicQuotePage({ params }: { params: Promise<{ publicId: string }> }) {
   const { publicId } = use(params);
@@ -107,116 +115,130 @@ export default function PublicQuotePage({ params }: { params: Promise<{ publicId
 
   if (isLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-50">
-        <p className="text-gray-500">Cargando cotización…</p>
+      <div style={{ minHeight: '100vh', background: '#0d1117', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: '12px' }}>
+        <Compass style={{ width: 32, height: 32, color: '#feb23b', animation: 'pulse 2s infinite' }} />
+        <p style={{ color: '#8899b8', fontSize: 14, fontFamily: 'Inter, sans-serif' }}>Cargando cotización…</p>
       </div>
     );
   }
 
   if (isError || !quote) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-gray-50 p-8 text-center">
-        <XCircle className="h-12 w-12 text-red-400" />
-        <h1 className="text-xl font-bold text-gray-800">Cotización no encontrada</h1>
-        <p className="text-gray-500">Este enlace puede haber expirado o no es válido.</p>
+      <div style={{ minHeight: '100vh', background: '#0d1117', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: '16px', padding: '32px', textAlign: 'center' }}>
+        <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'rgba(248,113,113,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <XCircle style={{ width: 28, height: 28, color: '#f87171' }} />
+        </div>
+        <h1 style={{ fontSize: 20, fontWeight: 700, color: '#e2e8f0', fontFamily: 'Inter, sans-serif', margin: 0 }}>Cotización no encontrada</h1>
+        <p style={{ color: '#8899b8', fontSize: 14, fontFamily: 'Inter, sans-serif', margin: 0 }}>Este enlace puede haber expirado o no es válido.</p>
       </div>
     );
   }
 
-  const color = quote.agency.primaryColor || '#0C4A6E';
+  const color = quote.agency.primaryColor || '#feb23b';
   const statusCfg = STATUS_CONFIG[quote.status] ?? STATUS_CONFIG.ENVIADA;
   const hasDiscount = Number(quote.discountTotal) > 0;
   const hasTax = Number(quote.taxTotal) > 0;
   const hasDeposit = Number(quote.depositAmount) > 0;
   const hasBankInfo = quote.agency.bankName || quote.agency.bankAccount;
 
+  const base: React.CSSProperties = { fontFamily: 'Inter, system-ui, sans-serif', color: '#e2e8f0' };
+  const soft: React.CSSProperties = { color: '#8899b8' };
+  const muted: React.CSSProperties = { color: '#3d5070', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em' };
+
   return (
-    <div className="min-h-screen bg-gray-100 py-8 px-4">
-      <div className="mx-auto max-w-3xl space-y-4">
+    <div style={{ minHeight: '100vh', background: '#0d1117', padding: '32px 16px', ...base }}>
+      <div style={{ maxWidth: 720, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 16 }}>
 
         {/* HEADER CARD */}
-        <div className="overflow-hidden rounded-2xl shadow-lg">
-          <div className="flex items-center justify-between px-8 py-7" style={{ background: color }}>
+        <div style={{ ...card, overflow: 'hidden' }}>
+          {/* Brand bar */}
+          <div style={{ background: color, padding: '28px 32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
             <div>
               {quote.agency.logoUrl && (
-                <img alt={quote.agency.name} className="mb-2 h-10 object-contain" src={quote.agency.logoUrl} />
+                <img alt={quote.agency.name} style={{ height: 40, objectFit: 'contain', marginBottom: 8, display: 'block' }} src={quote.agency.logoUrl} />
               )}
-              <h1 className="text-2xl font-extrabold text-white">{quote.agency.name}</h1>
-              {quote.agency.taxId && <p className="mt-0.5 text-sm text-white/70">NIT/RFC: {quote.agency.taxId}</p>}
+              <h1 style={{ fontSize: 22, fontWeight: 800, color: '#fff', margin: 0 }}>{quote.agency.name}</h1>
+              {quote.agency.taxId && <p style={{ marginTop: 4, fontSize: 13, color: 'rgba(255,255,255,0.65)', margin: 0 }}>NIT/RFC: {quote.agency.taxId}</p>}
             </div>
-            <div className="text-right">
-              <p className="text-xs font-semibold uppercase tracking-widest text-white/60">Cotización</p>
-              <p className="text-3xl font-extrabold text-white">{quote.number}</p>
+            <div style={{ textAlign: 'right' }}>
+              <p style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: 'rgba(255,255,255,0.55)', margin: '0 0 4px' }}>Cotización</p>
+              <p style={{ fontSize: 28, fontWeight: 800, color: '#fff', margin: 0 }}>{quote.number}</p>
             </div>
           </div>
 
-          {/* STRIP */}
-          <div className="flex flex-wrap gap-6 border-b border-gray-100 bg-white px-8 py-4">
-            <div className="flex items-center gap-2 text-sm">
-              <MapPin className="h-4 w-4 shrink-0" style={{ color }} />
-              <span className="font-semibold text-gray-800">{quote.destination}</span>
+          {/* Info strip */}
+          <div style={{ padding: '16px 32px', ...divider, display: 'flex', flexWrap: 'wrap', gap: 20, alignItems: 'center' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14 }}>
+              <MapPin style={{ width: 16, height: 16, color }} />
+              <span style={{ fontWeight: 600 }}>{quote.destination}</span>
             </div>
             {quote.startDate && (
-              <div className="flex items-center gap-2 text-sm">
-                <Calendar className="h-4 w-4 shrink-0 text-gray-400" />
-                <span className="text-gray-600">{fmtDate(quote.startDate)} → {fmtDate(quote.endDate)}</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14, ...soft }}>
+                <Calendar style={{ width: 16, height: 16 }} />
+                <span>{fmtDate(quote.startDate)} → {fmtDate(quote.endDate)}</span>
               </div>
             )}
-            <div className="flex items-center gap-2 text-sm">
-              <Users className="h-4 w-4 shrink-0 text-gray-400" />
-              <span className="text-gray-600">
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14, ...soft }}>
+              <Users style={{ width: 16, height: 16 }} />
+              <span>
                 {quote.adults} adulto{quote.adults !== 1 ? 's' : ''}
                 {quote.children > 0 ? ` · ${quote.children} niño${quote.children !== 1 ? 's' : ''}` : ''}
               </span>
             </div>
-            <div className="ml-auto flex items-center gap-1.5 text-sm font-semibold" style={{ color: statusCfg.color }}>
+            <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 600, color: statusCfg.color, background: statusCfg.bg, borderRadius: 999, padding: '4px 12px' }}>
               {statusCfg.icon}
               {statusCfg.label}
             </div>
           </div>
 
-          {/* CLIENT + VALIDITY */}
-          <div className="flex flex-wrap items-center justify-between gap-4 bg-white px-8 py-4">
+          {/* Client + validity */}
+          <div style={{ padding: '16px 32px', display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
             <div>
-              <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">Preparado para</p>
-              <p className="font-semibold text-gray-800">{quote.client.name}</p>
-              <p className="text-sm text-gray-500">{quote.client.phone}{quote.client.email ? ` · ${quote.client.email}` : ''}</p>
+              <p style={{ ...muted, marginBottom: 4 }}>Preparado para</p>
+              <p style={{ fontWeight: 600, margin: '0 0 2px' }}>{quote.client.name}</p>
+              <p style={{ fontSize: 13, ...soft, margin: 0 }}>{quote.client.phone}{quote.client.email ? ` · ${quote.client.email}` : ''}</p>
             </div>
-            <div className="text-right">
-              <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">Asesor</p>
-              <p className="font-semibold text-gray-800">{quote.seller.name}</p>
+            <div style={{ textAlign: 'right' }}>
+              <p style={{ ...muted, marginBottom: 4 }}>Asesor</p>
+              <p style={{ fontWeight: 600, margin: '0 0 2px' }}>{quote.seller.name}</p>
               {quote.validUntil && (
-                <p className="text-xs text-gray-400">Válida hasta {fmtDate(quote.validUntil)}</p>
+                <p style={{ fontSize: 12, ...soft, margin: 0 }}>Válida hasta {fmtDate(quote.validUntil)}</p>
               )}
             </div>
           </div>
         </div>
 
         {/* ITEMS */}
-        <div className="rounded-2xl bg-white shadow-sm">
-          <div className="border-b border-gray-100 px-6 py-4">
-            <h2 className="font-bold text-gray-800">Servicios Incluidos</h2>
+        <div style={{ ...card, overflow: 'hidden' }}>
+          <div style={{ padding: '16px 24px', ...divider }}>
+            <h2 style={{ fontWeight: 700, fontSize: 15, margin: 0 }}>Servicios Incluidos</h2>
           </div>
-          <div className="divide-y divide-gray-50">
-            {quote.items.map((item) => (
-              <div className="flex items-start gap-4 px-6 py-4" key={item.id}>
+          <div>
+            {quote.items.map((item, i) => (
+              <div
+                key={item.id}
+                style={{
+                  display: 'flex', alignItems: 'flex-start', gap: 16, padding: '16px 24px',
+                  borderBottom: i < quote.items.length - 1 ? '1px solid rgba(255,255,255,0.05)' : undefined,
+                }}
+              >
                 {item.imageUrl && (
-                  <img alt={item.name} className="h-16 w-24 shrink-0 rounded-lg object-cover" src={item.imageUrl} />
+                  <img alt={item.name} style={{ width: 80, height: 56, borderRadius: 10, objectFit: 'cover', flexShrink: 0 }} src={item.imageUrl} />
                 )}
-                <div className="min-w-0 flex-1">
-                  <p className="font-semibold text-gray-800">{item.name}</p>
-                  {item.description && <p className="mt-0.5 text-sm text-gray-500">{item.description}</p>}
-                  <p className="mt-1 text-xs text-gray-400">
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <p style={{ fontWeight: 600, margin: '0 0 4px' }}>{item.name}</p>
+                  {item.description && <p style={{ fontSize: 13, ...soft, margin: '0 0 4px' }}>{item.description}</p>}
+                  <p style={{ fontSize: 12, color: '#3d5070', margin: 0 }}>
                     {Number(item.quantity)} {unitLabel(item.unit)}
                     {item.nights > 1 ? ` · ${item.nights} noches` : ''}
                     {item.adults > 0 ? ` · ${item.adults} adultos` : ''}
                     {item.children > 0 ? ` · ${item.children} niños` : ''}
                   </p>
                 </div>
-                <div className="shrink-0 text-right">
-                  <p className="font-bold text-gray-800">{fmt(item.sellPrice, item.currency)}</p>
+                <div style={{ flexShrink: 0, textAlign: 'right' }}>
+                  <p style={{ fontWeight: 700, margin: '0 0 2px' }}>{fmt(item.sellPrice, item.currency)}</p>
                   {Number(item.tax) > 0 && (
-                    <p className="text-xs text-gray-400">{fmt(item.preTax, item.currency)} + {fmt(item.tax, item.currency)} imp.</p>
+                    <p style={{ fontSize: 12, color: '#3d5070', margin: 0 }}>{fmt(item.preTax, item.currency)} + {fmt(item.tax, item.currency)} imp.</p>
                   )}
                 </div>
               </div>
@@ -225,31 +247,31 @@ export default function PublicQuotePage({ params }: { params: Promise<{ publicId
         </div>
 
         {/* TOTALS */}
-        <div className="rounded-2xl bg-white px-6 py-5 shadow-sm">
-          <div className="ml-auto max-w-xs space-y-2">
-            <div className="flex justify-between text-sm text-gray-600">
+        <div style={{ ...card, padding: '20px 24px' }}>
+          <div style={{ marginLeft: 'auto', maxWidth: 280, display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14, ...soft }}>
               <span>Subtotal</span><span>{fmt(quote.subtotal, quote.currency)}</span>
             </div>
             {hasDiscount && (
-              <div className="flex justify-between text-sm text-gray-600">
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14, color: '#4ade80' }}>
                 <span>Descuentos</span><span>- {fmt(quote.discountTotal, quote.currency)}</span>
               </div>
             )}
             {hasTax && (
-              <div className="flex justify-between text-sm text-gray-600">
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14, ...soft }}>
                 <span>{quote.agency.taxName ?? 'Impuestos'} ({quote.agency.taxPct}%)</span>
                 <span>{fmt(quote.taxTotal, quote.currency)}</span>
               </div>
             )}
-            <div className="flex justify-between border-t-2 pt-3 text-lg font-extrabold" style={{ borderColor: color, color }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 18, fontWeight: 800, color, borderTop: `2px solid ${color}40`, paddingTop: 12, marginTop: 2 }}>
               <span>TOTAL</span><span>{fmt(quote.total, quote.currency)}</span>
             </div>
             {hasDeposit && (
               <>
-                <div className="flex justify-between text-sm text-gray-500">
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, ...soft }}>
                   <span>Anticipo requerido</span><span>{fmt(quote.depositAmount, quote.currency)}</span>
                 </div>
-                <div className="flex justify-between font-semibold text-gray-800">
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14, fontWeight: 600 }}>
                   <span>Saldo pendiente</span><span>{fmt(quote.balanceDue, quote.currency)}</span>
                 </div>
               </>
@@ -259,27 +281,34 @@ export default function PublicQuotePage({ params }: { params: Promise<{ publicId
 
         {/* NOTES */}
         {quote.notes && (
-          <div className="rounded-2xl bg-amber-50 px-6 py-4 shadow-sm" style={{ borderLeft: `3px solid ${color}` }}>
-            <p className="mb-1 text-xs font-bold uppercase tracking-wide text-gray-400">Notas</p>
-            <p className="text-sm text-gray-700 whitespace-pre-line">{quote.notes}</p>
+          <div style={{ ...card, padding: '16px 24px', borderLeft: `3px solid ${color}` }}>
+            <p style={{ ...muted, marginBottom: 8 }}>Notas</p>
+            <p style={{ fontSize: 14, ...soft, whiteSpace: 'pre-line', margin: 0 }}>{quote.notes}</p>
           </div>
         )}
 
         {/* BANK INFO */}
         {hasBankInfo && (
-          <div className="rounded-2xl bg-white px-6 py-5 shadow-sm">
-            <p className="mb-3 text-xs font-bold uppercase tracking-wide text-gray-400">
-              Datos de Pago · {pmLabel(quote.agency.paymentMethod)}
-            </p>
-            <div className="grid grid-cols-2 gap-3 text-sm">
+          <div style={{ ...card, padding: '20px 24px' }}>
+            <p style={{ ...muted, marginBottom: 12 }}>Datos de Pago · {pmLabel(quote.agency.paymentMethod)}</p>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
               {quote.agency.bankName && (
-                <div><p className="text-xs text-gray-400">Banco</p><p className="font-semibold text-gray-800">{quote.agency.bankName}</p></div>
+                <div>
+                  <p style={{ ...muted, marginBottom: 2 }}>Banco</p>
+                  <p style={{ fontWeight: 600, margin: 0, fontSize: 14 }}>{quote.agency.bankName}</p>
+                </div>
               )}
               {quote.agency.bankAccount && (
-                <div><p className="text-xs text-gray-400">Cuenta</p><p className="font-semibold text-gray-800">{quote.agency.bankAccount}</p></div>
+                <div>
+                  <p style={{ ...muted, marginBottom: 2 }}>Cuenta</p>
+                  <p style={{ fontWeight: 600, margin: 0, fontSize: 14 }}>{quote.agency.bankAccount}</p>
+                </div>
               )}
               {quote.agency.bankAccountHolder && (
-                <div><p className="text-xs text-gray-400">Titular</p><p className="font-semibold text-gray-800">{quote.agency.bankAccountHolder}</p></div>
+                <div>
+                  <p style={{ ...muted, marginBottom: 2 }}>Titular</p>
+                  <p style={{ fontWeight: 600, margin: 0, fontSize: 14 }}>{quote.agency.bankAccountHolder}</p>
+                </div>
               )}
             </div>
           </div>
@@ -287,16 +316,16 @@ export default function PublicQuotePage({ params }: { params: Promise<{ publicId
 
         {/* CONTACT */}
         {(quote.agency.contactEmail || quote.agency.contactPhone) && (
-          <div className="rounded-2xl bg-white px-6 py-5 shadow-sm">
-            <p className="mb-2 text-xs font-bold uppercase tracking-wide text-gray-400">Contacto</p>
-            <div className="flex flex-wrap gap-4 text-sm">
+          <div style={{ ...card, padding: '20px 24px' }}>
+            <p style={{ ...muted, marginBottom: 10 }}>Contacto</p>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16 }}>
               {quote.agency.contactEmail && (
-                <a className="font-medium hover:underline" href={`mailto:${quote.agency.contactEmail}`} style={{ color }}>
+                <a href={`mailto:${quote.agency.contactEmail}`} style={{ fontSize: 14, fontWeight: 500, color, textDecoration: 'none' }}>
                   {quote.agency.contactEmail}
                 </a>
               )}
               {quote.agency.contactPhone && (
-                <a className="font-medium text-gray-700 hover:underline" href={`tel:${quote.agency.contactPhone}`}>
+                <a href={`tel:${quote.agency.contactPhone}`} style={{ fontSize: 14, fontWeight: 500, color: '#e2e8f0', textDecoration: 'none' }}>
                   {quote.agency.contactPhone}
                 </a>
               )}
@@ -306,27 +335,31 @@ export default function PublicQuotePage({ params }: { params: Promise<{ publicId
 
         {/* TERMS */}
         {quote.agency.termsText && (
-          <div className="rounded-2xl bg-white px-6 py-5 shadow-sm">
-            <p className="mb-2 text-xs font-bold uppercase tracking-wide text-gray-400">Términos y Condiciones</p>
-            <p className="text-xs leading-relaxed text-gray-400 whitespace-pre-line">{quote.agency.termsText}</p>
+          <div style={{ ...card, padding: '20px 24px' }}>
+            <p style={{ ...muted, marginBottom: 8 }}>Términos y Condiciones</p>
+            <p style={{ fontSize: 12, lineHeight: 1.6, color: '#3d5070', whiteSpace: 'pre-line', margin: 0 }}>{quote.agency.termsText}</p>
           </div>
         )}
 
         {/* DOWNLOAD PDF */}
-        <div className="flex justify-center pb-4">
+        <div style={{ display: 'flex', justifyContent: 'center', paddingTop: 4 }}>
           <a
-            className="inline-flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-bold text-white shadow-lg transition hover:opacity-90"
             href={`${API}/public/quotes/${publicId}/pdf`}
             rel="noreferrer"
-            style={{ background: color }}
             target="_blank"
+            style={{
+              display: 'inline-flex', alignItems: 'center', gap: 8,
+              padding: '12px 28px', borderRadius: 12, fontSize: 14, fontWeight: 700,
+              color: '#fff', background: color, textDecoration: 'none',
+              boxShadow: `0 0 24px ${color}40`,
+            }}
           >
-            <Download className="h-4 w-4" />
+            <Download style={{ width: 16, height: 16 }} />
             Descargar PDF
           </a>
         </div>
 
-        <p className="pb-8 text-center text-xs text-gray-400">
+        <p style={{ textAlign: 'center', fontSize: 12, color: '#3d5070', paddingBottom: 24, margin: 0 }}>
           {quote.agency.name} · Powered by Brújula
         </p>
       </div>
