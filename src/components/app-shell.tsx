@@ -93,7 +93,7 @@ export function AppShell({ children }: Readonly<{ children: React.ReactNode }>) 
                 href={href}
                 key={label}
               >
-                <Icon className="h-[25px] w-[25px]" />
+                <Icon className="h-[22px] w-[22px]" />
                 <span className="text-[10px] font-medium leading-tight text-center break-words w-full">{label}</span>
               </Link>
             );
