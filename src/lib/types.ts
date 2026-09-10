@@ -49,6 +49,76 @@ export interface TeamRole {
   slug: string;
 }
 
+export type ProductType = 'HOTEL' | 'TOUR' | 'TRANSPORT' | 'FLIGHT' | 'INSURANCE' | 'EXPERIENCE' | 'OTHER';
+export type ProductUnit = 'PER_PERSON' | 'PER_NIGHT' | 'PER_SERVICE';
+export type MarkupType = 'PERCENT' | 'FIXED';
+
+export interface Supplier {
+  id: string;
+  agencyId: string;
+  name: string;
+  type: ProductType | null;
+  contact: string | null;
+  email: string | null;
+  phone: string | null;
+  commissionPct: number;
+  notes: string | null;
+  active: boolean;
+  createdAt: string;
+  productsCount: number;
+}
+
+export interface SupplierFormValues {
+  name: string;
+  type?: ProductType;
+  contact?: string;
+  email?: string;
+  phone?: string;
+  commissionPct?: number;
+  notes?: string;
+}
+
+export interface Product {
+  id: string;
+  agencyId: string;
+  supplierId: string | null;
+  supplier: Supplier | null;
+  name: string;
+  description: string | null;
+  imageUrl: string | null;
+  type: ProductType;
+  category: string | null;
+  tags: string[];
+  netCost: number;
+  currency: string;
+  unit: ProductUnit;
+  markupType: MarkupType;
+  markupValue: number;
+  taxPct: number;
+  active: boolean;
+  timesQuoted: number;
+  sellPrice: number;
+  marginAmount: number;
+  marginPct: number;
+  createdAt: string;
+}
+
+export interface ProductFormValues {
+  name: string;
+  description?: string;
+  imageUrl?: string;
+  type: ProductType;
+  category?: string;
+  tags: string[];
+  netCost: number;
+  currency: string;
+  unit: ProductUnit;
+  markupType: MarkupType;
+  markupValue: number;
+  taxPct: number;
+  supplierId?: string;
+}
+
 export interface TeamMember {
   id: string;
   name: string;
