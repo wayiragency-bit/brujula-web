@@ -239,7 +239,7 @@ export default function QuotesPage() {
                 className={`flex flex-col items-center gap-1 rounded-xl px-4 py-3 transition-all ${
                   active ? 'ring-1' : 'glass-card hover:brightness-110'
                 }`}
-                style={active ? { background: col.bg, ringColor: col.dot } : {}}
+                style={active ? { background: col.bg, outline: `1px solid ${col.dot}` } : {}}
               >
                 <Icon className="h-4 w-4" style={{ color: col.dot }} />
                 <span className="font-bold leading-none" style={{ fontSize: '18px', color: active ? col.text : 'var(--ink)' }}>
