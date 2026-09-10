@@ -43,23 +43,28 @@ export function SalesGoalEditor({ goal, currency, canEdit }: SalesGoalEditorProp
   if (!canEdit) {
     return (
       <span
-        className="inline-flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold"
+        className="absolute right-4 top-4 z-10 block max-w-[9.5rem] shrink-0 rounded-xl px-3 py-2 text-right leading-tight sm:right-5 sm:top-5"
         style={{ background: 'rgba(139,92,246,0.12)', color: '#a855f7' }}
       >
-        META: {formatMoneyFull(goal, currency)}
+        <span className="label-caps block text-[10px] opacity-80">Meta</span>
+        <span className="block break-words font-mono text-xs font-bold">{formatMoneyFull(goal, currency)}</span>
       </span>
     );
   }
 
   return (
-    <div className="relative" ref={containerRef}>
+    <div className="absolute right-4 top-4 z-10 sm:right-5 sm:top-5" ref={containerRef}>
       <button
-        className="inline-flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition hover:brightness-110"
+        className="flex max-w-[9.5rem] shrink-0 items-start gap-1 rounded-xl px-3 py-2 text-right leading-tight transition hover:brightness-110"
         onClick={toggle}
         style={{ background: 'rgba(139,92,246,0.12)', color: '#a855f7' }}
         type="button"
       >
-        META: {formatMoneyFull(goal, currency)} <Plus className="h-3.5 w-3.5" />
+        <span className="min-w-0 flex-1">
+          <span className="label-caps block text-[10px] opacity-80">Meta</span>
+          <span className="block break-words font-mono text-xs font-bold">{formatMoneyFull(goal, currency)}</span>
+        </span>
+        <Plus className="mt-0.5 h-3.5 w-3.5 shrink-0" />
       </button>
 
       {open && (

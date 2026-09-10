@@ -1,7 +1,7 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { ArrowUpRight, FileText, Package, Plus, TrendingUp, UserPlus, Users } from 'lucide-react';
+import { FileText, Package, Plus, TrendingUp, UserPlus, Users } from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
 import { AppShell } from '@/components/app-shell';
@@ -178,28 +178,18 @@ export default function DashboardPage() {
 
             {/* Ventas del mes */}
             <article
-              className="rounded-2xl p-6 sm:p-7"
+              className="relative rounded-2xl p-6 sm:p-7"
               style={{ background: 'var(--paper-card)', border: '1px solid var(--border)' }}
             >
-              <div className="flex flex-wrap items-start justify-between gap-4">
-                <div>
-                  <p className="label-caps text-ink-soft">
-                    VENTAS DE {new Date().toLocaleDateString('es-CO', { month: 'long' }).toUpperCase()}
-                  </p>
-                  <p className="mt-2 font-mono text-3xl font-extrabold text-ink">{formatMoneyFull(totalAccepted, currency)}</p>
-                  <p className="mt-1 text-sm text-ink-soft">de {formatMoneyFull(totalQuoted, currency)} cotizados</p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <SalesGoalEditor canEdit={hasPermission('settings.edit_agency')} currency={currency} goal={goal} />
-                  <Link
-                    className="inline-flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold text-amber transition"
-                    href="/pipeline"
-                    style={{ background: 'rgba(254,178,59,0.10)' }}
-                  >
-                    Pipeline <ArrowUpRight className="h-3.5 w-3.5" />
-                  </Link>
-                </div>
+              <div className="pr-32 sm:pr-36">
+                <p className="label-caps text-ink-soft">
+                  VENTAS DE {new Date().toLocaleDateString('es-CO', { month: 'long' }).toUpperCase()}
+                </p>
+                <p className="mt-2 font-mono text-3xl font-extrabold text-ink">{formatMoneyFull(totalAccepted, currency)}</p>
+                <p className="mt-1 text-sm text-ink-soft">de {formatMoneyFull(totalQuoted, currency)} cotizados</p>
               </div>
+
+              <SalesGoalEditor canEdit={hasPermission('settings.edit_agency')} currency={currency} goal={goal} />
 
               {/* Progress bar */}
               <div className="mt-5">
@@ -211,22 +201,8 @@ export default function DashboardPage() {
                 </div>
                 <div className="mt-2 flex justify-between">
                   <span className="font-mono text-xs font-bold" style={{ color: '#a855f7' }}>{pct.toFixed(1)}% de la meta</span>
-                  <span className="label-caps text-ink-muted">meta {formatMoneyFull(goal, currency)}</span>
+                  <span className="label-caps text-ink-muted">{acceptedCount} aceptadas · {pendingCount} enviadas</span>
                 </div>
-              </div>
-
-              {/* Mini stats */}
-              <div className="mt-5 grid grid-cols-3 gap-3 rounded-xl p-3" style={{ background: 'var(--surface)' }}>
-                {[
-                  { label: 'Enviadas', value: String(pendingCount), color: '#feb23b' },
-                  { label: 'Aceptadas', value: String(acceptedCount), color: '#22c55e' },
-                  { label: 'Total', value: String(totalQuoteCount), color: 'var(--ink)' },
-                ].map((stat) => (
-                  <div className="text-center" key={stat.label}>
-                    <p className="font-mono text-xl font-bold" style={{ color: stat.color }}>{stat.value}</p>
-                    <p className="label-caps text-ink-muted">{stat.label}</p>
-                  </div>
-                ))}
               </div>
             </article>
 
