@@ -107,7 +107,7 @@ export function AppShell({ children }: Readonly<{ children: React.ReactNode }>) 
           onClick={() => logout().then(() => router.replace('/login'))}
           type="button"
         >
-          <LogOut className="h-[22px] w-[22px]" />
+          <LogOut className="h-[25px] w-[25px]" />
           <span className="text-[11px] font-medium leading-tight text-center">Salir</span>
         </button>
       </aside>
