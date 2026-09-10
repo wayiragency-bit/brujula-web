@@ -305,13 +305,13 @@ function KanbanBoard() {
 
       {error ? <p className="mb-3 rounded-lg px-4 py-2 text-sm text-red-400" style={{ background: 'rgba(248,113,113,0.10)' }} onClick={() => setError(null)}>{error} ✕</p> : null}
 
-      <div className="flex gap-4 overflow-x-auto pb-4">
+      <div className="grid grid-cols-5 gap-4">
         {mainColumns.map((column) => {
           const total    = column.cards.reduce((sum, c) => sum + Number(c.total), 0);
           const currency = column.cards[0]?.currency ?? 'COP';
           const sc       = STATUS_COLORS[column.status];
           return (
-            <div className="flex w-64 shrink-0 flex-col gap-2" key={column.status}>
+            <div className="flex min-w-0 flex-col gap-2" key={column.status}>
 
               {/* Column header — outside/above the card area */}
               <div className="flex items-center justify-between px-1">
