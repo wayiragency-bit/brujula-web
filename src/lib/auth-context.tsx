@@ -8,11 +8,22 @@ export interface AuthUser {
   agencyId: string;
   email: string;
   name: string;
+  lastName: string | null;
   avatarUrl: string | null;
   phone: string | null;
   agency: { id: string; name: string; slug: string } | null;
   roles: { id: string; name: string; slug: string }[];
   permissions: string[];
+}
+
+export interface UpdateProfileValues {
+  name?: string;
+  lastName?: string;
+  email?: string;
+  phone?: string;
+  avatarUrl?: string;
+  currentPassword?: string;
+  newPassword?: string;
 }
 
 type AuthStatus = 'loading' | 'authenticated' | 'unauthenticated';
@@ -23,6 +34,7 @@ interface AuthContextValue {
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   hasPermission: (code: string) => boolean;
+  updateProfile: (values: UpdateProfileValues) => Promise<AuthUser>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -83,7 +95,16 @@ export function AuthProvider({ children }: Readonly<{ children: React.ReactNode 
 
   const hasPermission = useCallback((code: string) => user?.permissions.includes(code) ?? false, [user]);
 
-  const value = useMemo(() => ({ user, status, login, logout, hasPermission }), [user, status, login, logout, hasPermission]);
+  const updateProfile = useCallback(async (values: UpdateProfileValues) => {
+    const updated = await api.patch<AuthUser>('/auth/me', values);
+    setUser(updated);
+    return updated;
+  }, []);
+
+  const value = useMemo(
+    () => ({ user, status, login, logout, hasPermission, updateProfile }),
+    [user, status, login, logout, hasPermission, updateProfile],
+  );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

@@ -11,7 +11,7 @@ import type { Theme } from '@/lib/theme-context';
 import { AppShell } from '@/components/app-shell';
 import { useAgency, useUpdateAgency } from '@/hooks/use-agency';
 import { useAuth } from '@/lib/auth-context';
-import type { Agency, AgencyFormValues, PaymentMethod } from '@/lib/types';
+import type { Agency, AgencyFormValues, AgencyType, PaymentMethod } from '@/lib/types';
 import { inputClass, labelClass, selectClass } from '@/components/ui/form';
 
 /* ─── Tabs ─────────────────────────────────────────────────── */
@@ -31,9 +31,17 @@ const PAYMENT_LABELS: Record<PaymentMethod, string> = {
   CASH: 'Efectivo',
 };
 
+const AGENCY_TYPE_LABELS: Record<AgencyType, string> = {
+  AGENCIA_VIAJES: 'Agencia de Viajes',
+  OPERADOR_TURISTICO: 'Operador Turístico',
+  HOTEL: 'Hotel',
+  COMERCIALIZADOR_TURISTICO: 'Comercializador Turístico',
+  OTRO: 'Otro',
+};
+
 function valuesFrom(agency: Agency): AgencyFormValues {
   return {
-    name: agency.name, logoUrl: agency.logoUrl ?? '', primaryColor: agency.primaryColor, baseCurrency: agency.baseCurrency,
+    name: agency.name, type: agency.type, logoUrl: agency.logoUrl ?? '', primaryColor: agency.primaryColor, baseCurrency: agency.baseCurrency,
     taxId: agency.taxId ?? '', contactEmail: agency.contactEmail ?? '', contactPhone: agency.contactPhone ?? '', address: agency.address ?? '',
     taxName: agency.taxName ?? '', taxPct: Number(agency.taxPct),
     paymentMethod: agency.paymentMethod, bankName: agency.bankName ?? '', bankAccount: agency.bankAccount ?? '', bankAccountHolder: agency.bankAccountHolder ?? '',
@@ -80,7 +88,11 @@ function ToggleRow({ label, desc, checked, onChange }: { label: string; desc?: s
 /* ─── Page ───────────────────────────────────────────────────── */
 export default function SettingsPage() {
   const { data: agency, isLoading } = useAgency();
-  const [tab, setTab] = useState<Tab>('empresa');
+  const { hasPermission } = useAuth();
+  const canEditAgency = hasPermission('settings.edit_agency');
+  // Supervisor/Agente only manage their own profile and appearance; company config and billing stay with Administrador/Propietario.
+  const visibleTabs = TABS.filter((t) => canEditAgency || t.id === 'perfil' || t.id === 'apariencia');
+  const [tab, setTab] = useState<Tab>(canEditAgency ? 'empresa' : 'perfil');
 
   return (
     <AppShell>
@@ -98,7 +110,7 @@ export default function SettingsPage() {
           className="mb-6 flex gap-1 overflow-x-auto rounded-xl p-1"
           style={{ background: 'var(--surface)', border: '1px solid var(--border-faint)' }}
         >
-          {TABS.map(({ id, label, icon: Icon }) => (
+          {visibleTabs.map(({ id, label, icon: Icon }) => (
             <button
               className="flex shrink-0 items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition-all"
               key={id}
@@ -118,15 +130,15 @@ export default function SettingsPage() {
 
         {/* Tab content */}
         <div className="space-y-4">
-          {tab === 'empresa' && (
+          {tab === 'empresa' && canEditAgency && (
             isLoading || !agency
               ? <p className="text-ink-soft">Cargando configuración…</p>
               : <AgencySettingsForm agency={agency} key={agency.id} />
           )}
           {tab === 'perfil'     && <ProfileTab />}
           {tab === 'apariencia' && <AparienciaTab />}
-          {tab === 'correo'     && <CorreoTab />}
-          {tab === 'pagos'      && <PagosTab />}
+          {tab === 'correo'     && canEditAgency && <CorreoTab />}
+          {tab === 'pagos'      && canEditAgency && <PagosTab />}
         </div>
       </div>
     </AppShell>
@@ -188,6 +200,12 @@ function AgencySettingsForm({ agency }: { agency: Agency }) {
           <div>
             <label className={labelClass} htmlFor="name">Nombre de la Empresa</label>
             <input className={inputClass} disabled={!canEdit} id="name" onChange={(e) => set('name', e.target.value)} value={values.name} />
+          </div>
+          <div>
+            <label className={labelClass} htmlFor="agencyType">Tipo de Empresa</label>
+            <select className={selectClass} disabled={!canEdit} id="agencyType" onChange={(e) => set('type', e.target.value as AgencyType)} value={values.type}>
+              {Object.entries(AGENCY_TYPE_LABELS).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+            </select>
           </div>
           <div>
             <label className={labelClass} htmlFor="taxId">Identificación Fiscal (RFC/NIT)</label>
@@ -281,17 +299,51 @@ function AgencySettingsForm({ agency }: { agency: Agency }) {
    TAB: PERFIL
 ══════════════════════════════════════════════════════════════ */
 function ProfileTab() {
-  const { user } = useAuth();
-  const [name, setName]       = useState(user?.name ?? '');
-  const [email]               = useState(user?.email ?? '');
+  const { user, updateProfile } = useAuth();
+  const [name, setName]         = useState(user?.name ?? '');
+  const [lastName, setLastName] = useState(user?.lastName ?? '');
+  const [email, setEmail]       = useState(user?.email ?? '');
+  const [phone, setPhone]       = useState(user?.phone ?? '');
+  const [saved, setSaved]       = useState(false);
+  const [error, setError]       = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+
   const [currentPw, setCurrentPw] = useState('');
-  const [newPw, setNewPw]     = useState('');
+  const [newPw, setNewPw]         = useState('');
   const [confirmPw, setConfirmPw] = useState('');
-  const [saved, setSaved]     = useState(false);
+  const [pwSaved, setPwSaved]     = useState(false);
+  const [pwError, setPwError]     = useState<string | null>(null);
+  const [pwSubmitting, setPwSubmitting] = useState(false);
 
   function initials(n: string) {
     const p = n.trim().split(/\s+/);
     return ((p[0]?.[0] ?? '') + (p[1]?.[0] ?? '')).toUpperCase() || '??';
+  }
+
+  async function handleSaveProfile() {
+    setError(null);
+    setSubmitting(true);
+    try {
+      await updateProfile({ name, lastName, email, phone: phone || undefined });
+      setSaved(true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'No se pudo guardar el perfil.');
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  async function handleChangePassword() {
+    setPwError(null);
+    setPwSubmitting(true);
+    try {
+      await updateProfile({ currentPassword: currentPw, newPassword: newPw });
+      setCurrentPw(''); setNewPw(''); setConfirmPw(''); setPwSaved(true);
+    } catch (err) {
+      setPwError(err instanceof Error ? err.message : 'No se pudo actualizar la contraseña.');
+    } finally {
+      setPwSubmitting(false);
+    }
   }
 
   return (
@@ -303,23 +355,30 @@ function ProfileTab() {
             className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full font-mono text-xl font-bold"
             style={{ background: 'rgba(17,67,63,0.9)', color: '#feb23b', boxShadow: '0 0 0 3px rgba(254,178,59,0.25)' }}
           >
-            {initials(name)}
+            {initials(`${name} ${lastName}`.trim())}
           </div>
           <div>
-            <p className="font-semibold text-ink">{name || '—'}</p>
+            <p className="font-semibold text-ink">{[name, lastName].filter(Boolean).join(' ') || '—'}</p>
             <p className="text-sm text-ink-soft">{user?.roles[0]?.name ?? 'Miembro'}</p>
           </div>
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
-            <label className={labelClass} htmlFor="pf-name">Nombre completo</label>
+            <label className={labelClass} htmlFor="pf-name">Nombre</label>
             <input className={inputClass} id="pf-name" onChange={(e) => { setName(e.target.value); setSaved(false); }} value={name} />
           </div>
           <div>
+            <label className={labelClass} htmlFor="pf-lastname">Apellido</label>
+            <input className={inputClass} id="pf-lastname" onChange={(e) => { setLastName(e.target.value); setSaved(false); }} value={lastName} />
+          </div>
+          <div>
             <label className={labelClass} htmlFor="pf-email">Correo electrónico</label>
-            <input className={inputClass} disabled id="pf-email" readOnly value={email} />
-            <p className="mt-1 text-xs text-ink-muted">El correo no se puede cambiar desde aquí.</p>
+            <input className={inputClass} id="pf-email" onChange={(e) => { setEmail(e.target.value); setSaved(false); }} type="email" value={email} />
+          </div>
+          <div>
+            <label className={labelClass} htmlFor="pf-phone">Número de teléfono</label>
+            <input className={inputClass} id="pf-phone" onChange={(e) => { setPhone(e.target.value); setSaved(false); }} placeholder="+573001234567" value={phone ?? ''} />
           </div>
           <div>
             <label className={labelClass}>Rol</label>
@@ -341,44 +400,49 @@ function ProfileTab() {
           </div>
         </div>
 
+        {error && <p className="rounded-lg px-4 py-3 text-sm text-red-400" style={{ background: 'rgba(248,113,113,0.10)' }}>{error}</p>}
         {saved && <p className="rounded-lg px-4 py-3 text-sm text-green-400" style={{ background: 'rgba(74,222,128,0.10)' }}>Perfil actualizado.</p>}
 
         <div className="flex justify-end">
           <button
             className="button-primary"
-            onClick={() => setSaved(true)}
+            disabled={submitting}
+            onClick={handleSaveProfile}
             type="button"
           >
-            Guardar Perfil
+            {submitting ? 'Guardando…' : 'Guardar Perfil'}
           </button>
         </div>
       </Card>
 
-      <Card title="Cambiar Contraseña" subtitle="Usa una contraseña fuerte de al menos 8 caracteres.">
+      <Card title="Cambiar Contraseña" subtitle="Usa una contraseña fuerte de al menos 10 caracteres.">
         <div className="grid gap-4 sm:grid-cols-3">
           <div>
             <label className={labelClass} htmlFor="pw-current">Contraseña actual</label>
-            <input className={inputClass} id="pw-current" onChange={(e) => setCurrentPw(e.target.value)} placeholder="••••••••" type="password" value={currentPw} />
+            <input className={inputClass} id="pw-current" onChange={(e) => { setCurrentPw(e.target.value); setPwSaved(false); }} placeholder="••••••••" type="password" value={currentPw} />
           </div>
           <div>
             <label className={labelClass} htmlFor="pw-new">Nueva contraseña</label>
-            <input className={inputClass} id="pw-new" onChange={(e) => setNewPw(e.target.value)} placeholder="••••••••" type="password" value={newPw} />
+            <input className={inputClass} id="pw-new" onChange={(e) => { setNewPw(e.target.value); setPwSaved(false); }} placeholder="••••••••" type="password" value={newPw} />
           </div>
           <div>
             <label className={labelClass} htmlFor="pw-confirm">Confirmar nueva</label>
-            <input className={inputClass} id="pw-confirm" onChange={(e) => setConfirmPw(e.target.value)} placeholder="••••••••" type="password" value={confirmPw} />
+            <input className={inputClass} id="pw-confirm" onChange={(e) => { setConfirmPw(e.target.value); setPwSaved(false); }} placeholder="••••••••" type="password" value={confirmPw} />
           </div>
         </div>
         {newPw && confirmPw && newPw !== confirmPw && (
           <p className="rounded-lg px-4 py-3 text-sm text-red-400" style={{ background: 'rgba(248,113,113,0.10)' }}>Las contraseñas no coinciden.</p>
         )}
+        {pwError && <p className="rounded-lg px-4 py-3 text-sm text-red-400" style={{ background: 'rgba(248,113,113,0.10)' }}>{pwError}</p>}
+        {pwSaved && <p className="rounded-lg px-4 py-3 text-sm text-green-400" style={{ background: 'rgba(74,222,128,0.10)' }}>Contraseña actualizada.</p>}
         <div className="flex justify-end">
           <button
             className="button-secondary"
-            disabled={!currentPw || !newPw || newPw !== confirmPw}
+            disabled={!currentPw || !newPw || newPw !== confirmPw || pwSubmitting}
+            onClick={handleChangePassword}
             type="button"
           >
-            <Shield className="h-3.5 w-3.5" /> Actualizar Contraseña
+            <Shield className="h-3.5 w-3.5" /> {pwSubmitting ? 'Actualizando…' : 'Actualizar Contraseña'}
           </button>
         </div>
       </Card>

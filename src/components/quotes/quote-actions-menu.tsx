@@ -1,22 +1,27 @@
 'use client';
 
-import { Download, Link2, Mail, MoreVertical, Trash2 } from 'lucide-react';
+import { Download, Link2, Mail, MoreVertical, Share2, Trash2 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { API_BASE } from '@/lib/api';
 import { useResendQuoteEmail } from '@/hooks/use-quotes';
+import { useAuth } from '@/lib/auth-context';
 import type { Quote } from '@/lib/types';
 
 interface QuoteActionsMenuProps {
   quote: Quote;
   onDelete: () => void;
+  onShare?: () => void;
 }
 
-export function QuoteActionsMenu({ quote, onDelete }: QuoteActionsMenuProps) {
+export function QuoteActionsMenu({ quote, onDelete, onShare }: QuoteActionsMenuProps) {
   const buttonRef = useRef<HTMLButtonElement>(null);
   const [position, setPosition] = useState<{ top: number; left: number } | null>(null);
   const [copied, setCopied] = useState(false);
   const resendEmail = useResendQuoteEmail();
+  const { user, hasPermission } = useAuth();
+  const canDelete = hasPermission('quotes.delete');
+  const canManageAccess = quote.sellerId === user?.id || hasPermission('quotes.manage_access');
 
   function open() {
     const rect = buttonRef.current?.getBoundingClientRect();
@@ -98,14 +103,26 @@ export function QuoteActionsMenu({ quote, onDelete }: QuoteActionsMenuProps) {
                   >
                     <Link2 className="h-4 w-4" />
                   </button>
-                  <button
-                    aria-label="Eliminar"
-                    className="rounded-lg p-1.5 text-ink-soft transition hover:bg-red-50 hover:text-red-600"
-                    onClick={() => { close(); onDelete(); }}
-                    type="button"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
+                  {canManageAccess && onShare ? (
+                    <button
+                      aria-label="Compartir"
+                      className="rounded-lg p-1.5 text-ink-soft transition hover:bg-ink/5 hover:text-teal"
+                      onClick={() => { close(); onShare(); }}
+                      type="button"
+                    >
+                      <Share2 className="h-4 w-4" />
+                    </button>
+                  ) : null}
+                  {canDelete ? (
+                    <button
+                      aria-label="Eliminar"
+                      className="rounded-lg p-1.5 text-ink-soft transition hover:bg-red-50 hover:text-red-600"
+                      onClick={() => { close(); onDelete(); }}
+                      type="button"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  ) : null}
                 </div>
               </div>
             </>,

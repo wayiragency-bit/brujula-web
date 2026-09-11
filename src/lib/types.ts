@@ -314,11 +314,13 @@ export interface PipelineColumn {
 }
 
 export type PaymentMethod = 'BANK_TRANSFER' | 'CARD' | 'CASH';
+export type AgencyType = 'AGENCIA_VIAJES' | 'OPERADOR_TURISTICO' | 'HOTEL' | 'COMERCIALIZADOR_TURISTICO' | 'OTRO';
 
 export interface Agency {
   id: string;
   name: string;
   slug: string;
+  type: AgencyType;
   logoUrl: string | null;
   primaryColor: string;
   baseCurrency: string;
@@ -338,6 +340,7 @@ export interface Agency {
 
 export interface AgencyFormValues {
   name?: string;
+  type?: AgencyType;
   logoUrl?: string;
   primaryColor?: string;
   baseCurrency?: string;
@@ -383,4 +386,12 @@ export interface QuoteAnalytics {
   granularity: AnalyticsGranularity;
   window: number;
   buckets: QuoteAnalyticsBucket[];
+}
+
+export interface QuoteAccessRow {
+  userId: string;
+  name: string | null;
+  accessType: string;
+  grantedBy: string;
+  createdAt: string;
 }

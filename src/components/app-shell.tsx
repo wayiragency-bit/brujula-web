@@ -22,17 +22,17 @@ import { useEffect } from 'react';
 import { useAuth } from '@/lib/auth-context';
 
 const navigation = [
-  { label: 'Dashboard',       href: '/',                icon: LayoutDashboard },
-  { label: 'Estatus',         href: '/pipeline',        icon: BarChart3 },
-  { label: 'Cotizaciones',    href: '/quotes',          icon: FileText },
-  { label: 'Clientes',        href: '/clients',         icon: UsersRound },
-  { label: 'Productos',       href: '/products',        icon: Package },
-  { label: 'Calendario PMS',  href: '/pms',             icon: CalendarDays },
-  { label: 'Channel Manager', href: '/channel-manager', icon: Globe },
-  { label: 'Proveedores',     href: '/suppliers',       icon: Truck },
-  { label: 'Marketing',       href: '/marketing',       icon: Megaphone },
-  { label: 'Equipo',          href: '/team',            icon: UsersRound },
-  { label: 'Configuración',   href: '/settings',        icon: Settings },
+  { label: 'Dashboard',       href: '/',                icon: LayoutDashboard, permission: undefined },
+  { label: 'Estatus',         href: '/pipeline',        icon: BarChart3,       permission: undefined },
+  { label: 'Cotizaciones',    href: '/quotes',          icon: FileText,        permission: undefined },
+  { label: 'Clientes',        href: '/clients',         icon: UsersRound,      permission: undefined },
+  { label: 'Productos',       href: '/products',        icon: Package,        permission: 'products.view' },
+  { label: 'Calendario PMS',  href: '/pms',             icon: CalendarDays,    permission: 'pms.view' },
+  { label: 'Channel Manager', href: '/channel-manager', icon: Globe,           permission: 'channels.view' },
+  { label: 'Proveedores',     href: '/suppliers',       icon: Truck,           permission: 'products.view' },
+  { label: 'Marketing',       href: '/marketing',       icon: Megaphone,       permission: 'marketing.view' },
+  { label: 'Equipo',          href: '/team',            icon: UsersRound,      permission: 'team.view' },
+  { label: 'Configuración',   href: '/settings',        icon: Settings,        permission: undefined },
 ];
 
 function isActive(pathname: string, href: string): boolean {
@@ -47,11 +47,21 @@ function initials(name: string): string {
 export function AppShell({ children }: Readonly<{ children: React.ReactNode }>) {
   const pathname = usePathname();
   const router   = useRouter();
-  const { user, status, logout } = useAuth();
+  const { user, status, logout, hasPermission } = useAuth();
+
+  const visibleNav = navigation.filter((item) => !item.permission || hasPermission(item.permission));
 
   useEffect(() => {
     if (status === 'unauthenticated') router.replace('/login');
   }, [status, router]);
+
+  // Hiding the nav item is not real security (the API already enforces it) — this redirect just
+  // keeps a user from landing on a blank/erroring page for a module their role can't see.
+  useEffect(() => {
+    if (status !== 'authenticated') return;
+    const restricted = navigation.find((item) => item.permission && isActive(pathname, item.href));
+    if (restricted && !hasPermission(restricted.permission!)) router.replace('/');
+  }, [status, pathname, hasPermission, router]);
 
   if (status !== 'authenticated' || !user) {
     return (
@@ -80,7 +90,7 @@ export function AppShell({ children }: Readonly<{ children: React.ReactNode }>) 
 
         {/* Nav icons */}
         <nav aria-label="Navegación principal" className="mt-[clamp(8px,3.5vh,32px)] flex flex-1 min-h-0 flex-col items-center justify-start gap-[clamp(4px,1.3vh,12px)] w-full px-2 overflow-hidden">
-          {navigation.map(({ label, href, icon: Icon }) => {
+          {visibleNav.map(({ label, href, icon: Icon }) => {
             const active = isActive(pathname, href);
             return (
               <Link
@@ -185,7 +195,7 @@ export function AppShell({ children }: Readonly<{ children: React.ReactNode }>) 
           borderTop: '1px solid var(--border)',
         }}
       >
-        {navigation.slice(0, 5).map(({ label, href, icon: Icon }) => {
+        {visibleNav.slice(0, 5).map(({ label, href, icon: Icon }) => {
           const active = isActive(pathname, href);
           return (
             <Link

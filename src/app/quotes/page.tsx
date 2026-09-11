@@ -9,6 +9,7 @@ import { useMemo, useState } from 'react';
 import { AppShell } from '@/components/app-shell';
 import { Sparkline } from '@/components/dashboard/sparkline';
 import { QuoteActionsMenu } from '@/components/quotes/quote-actions-menu';
+import { QuoteShareModal } from '@/components/quotes/quote-share-modal';
 import { useDeleteQuote, useQuoteSellers, useQuotes } from '@/hooks/use-quotes';
 import type { Quote, QuoteStatus } from '@/lib/types';
 
@@ -145,6 +146,7 @@ export default function QuotesPage() {
     from: checkinFrom || undefined, to: checkinTo || undefined,
   });
   const [confirmDelete, setConfirmDelete] = useState<Quote | null>(null);
+  const [shareQuote, setShareQuote] = useState<Quote | null>(null);
   const deleteQuote = useDeleteQuote();
 
   function clearEmisionFilter() {
@@ -521,7 +523,7 @@ export default function QuotesPage() {
                         </span>
                       </td>
                       <td className="px-4 py-3 text-center">
-                        <QuoteActionsMenu onDelete={() => setConfirmDelete(quote)} quote={quote} />
+                        <QuoteActionsMenu onDelete={() => setConfirmDelete(quote)} onShare={() => setShareQuote(quote)} quote={quote} />
                       </td>
                     </tr>
                   );
@@ -584,6 +586,8 @@ export default function QuotesPage() {
           </div>
         </div>
       )}
+
+      {shareQuote && <QuoteShareModal onClose={() => setShareQuote(null)} quote={shareQuote} />}
     </AppShell>
   );
 }

@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
-import type { CatalogProduct, Paginated, Quote, QuoteHeaderDraft, QuoteItemDraft, QuoteListSummaryRow, QuoteRef, QuoteStatus } from '@/lib/types';
+import type { CatalogProduct, Paginated, Quote, QuoteAccessRow, QuoteHeaderDraft, QuoteItemDraft, QuoteListSummaryRow, QuoteRef, QuoteStatus } from '@/lib/types';
 
 export interface QuotesFilters {
   q?: string;
@@ -109,6 +109,30 @@ export function useDeleteQuote() {
   return useMutation({
     mutationFn: ({ id, version }: { id: string; version: number }) => api.delete<void>(`/quotes/${id}?version=${version}`),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['quotes'] }),
+  });
+}
+
+export function useQuoteAccess(id: string | undefined) {
+  return useQuery({
+    queryKey: ['quotes', id, 'access'],
+    queryFn: () => api.get<QuoteAccessRow[]>(`/quotes/${id}/access`),
+    enabled: Boolean(id),
+  });
+}
+
+export function useGrantQuoteAccess(id: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (userId: string) => api.post<QuoteAccessRow[]>(`/quotes/${id}/access`, { userId }),
+    onSuccess: (rows) => queryClient.setQueryData(['quotes', id, 'access'], rows),
+  });
+}
+
+export function useRevokeQuoteAccess(id: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (userId: string) => api.delete<QuoteAccessRow[]>(`/quotes/${id}/access/${userId}`),
+    onSuccess: (rows) => queryClient.setQueryData(['quotes', id, 'access'], rows),
   });
 }
 
