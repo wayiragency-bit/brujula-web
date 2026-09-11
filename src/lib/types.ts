@@ -313,6 +313,14 @@ export interface PipelineColumn {
 export type PaymentMethod = 'BANK_TRANSFER' | 'CARD' | 'CASH';
 export type AgencyType = 'AGENCIA_VIAJES' | 'OPERADOR_TURISTICO' | 'HOTEL' | 'COMERCIALIZADOR_TURISTICO' | 'OTRO';
 
+export const AGENCY_TYPE_LABELS: Record<AgencyType, string> = {
+  AGENCIA_VIAJES: 'Agencia de Viajes',
+  OPERADOR_TURISTICO: 'Operador Turístico',
+  HOTEL: 'Hotel',
+  COMERCIALIZADOR_TURISTICO: 'Comercializador Turístico',
+  OTRO: 'Otro',
+};
+
 export interface Agency {
   id: string;
   name: string;

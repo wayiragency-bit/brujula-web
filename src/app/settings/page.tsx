@@ -11,6 +11,7 @@ import type { Theme } from '@/lib/theme-context';
 import { AppShell } from '@/components/app-shell';
 import { useAgency, useUpdateAgency } from '@/hooks/use-agency';
 import { useAuth } from '@/lib/auth-context';
+import { AGENCY_TYPE_LABELS } from '@/lib/types';
 import type { Agency, AgencyFormValues, AgencyType, PaymentMethod } from '@/lib/types';
 import { inputClass, labelClass, selectClass } from '@/components/ui/form';
 
@@ -29,14 +30,6 @@ const PAYMENT_LABELS: Record<PaymentMethod, string> = {
   BANK_TRANSFER: 'Transferencia Bancaria',
   CARD: 'Tarjeta de Crédito/Débito',
   CASH: 'Efectivo',
-};
-
-const AGENCY_TYPE_LABELS: Record<AgencyType, string> = {
-  AGENCIA_VIAJES: 'Agencia de Viajes',
-  OPERADOR_TURISTICO: 'Operador Turístico',
-  HOTEL: 'Hotel',
-  COMERCIALIZADOR_TURISTICO: 'Comercializador Turístico',
-  OTRO: 'Otro',
 };
 
 function valuesFrom(agency: Agency): AgencyFormValues {

@@ -2,6 +2,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { api, refreshOnce, setAccessToken } from '@/lib/api';
+import type { AgencyType } from '@/lib/types';
 
 export interface AuthUser {
   id: string;
@@ -14,6 +15,14 @@ export interface AuthUser {
   agency: { id: string; name: string; slug: string } | null;
   roles: { id: string; name: string; slug: string }[];
   permissions: string[];
+}
+
+export interface RegisterValues {
+  agencyName: string;
+  type: AgencyType;
+  name: string;
+  email: string;
+  password: string;
 }
 
 export interface UpdateProfileValues {
@@ -32,6 +41,7 @@ interface AuthContextValue {
   user: AuthUser | null;
   status: AuthStatus;
   login: (email: string, password: string) => Promise<void>;
+  register: (values: RegisterValues) => Promise<void>;
   logout: () => Promise<void>;
   hasPermission: (code: string) => boolean;
   updateProfile: (values: UpdateProfileValues) => Promise<AuthUser>;
@@ -82,6 +92,13 @@ export function AuthProvider({ children }: Readonly<{ children: React.ReactNode 
     setStatus('authenticated');
   }, []);
 
+  const register = useCallback(async (values: RegisterValues) => {
+    const data = await api.post<{ accessToken: string; user: AuthUser }>('/auth/register', values);
+    setAccessToken(data.accessToken);
+    setUser(data.user);
+    setStatus('authenticated');
+  }, []);
+
   const logout = useCallback(async () => {
     try {
       await api.post('/auth/logout');
@@ -102,8 +119,8 @@ export function AuthProvider({ children }: Readonly<{ children: React.ReactNode 
   }, []);
 
   const value = useMemo(
-    () => ({ user, status, login, logout, hasPermission, updateProfile }),
-    [user, status, login, logout, hasPermission, updateProfile],
+    () => ({ user, status, login, register, logout, hasPermission, updateProfile }),
+    [user, status, login, register, logout, hasPermission, updateProfile],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

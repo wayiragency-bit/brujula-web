@@ -1,6 +1,7 @@
 'use client';
 
 import { Compass } from 'lucide-react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState, type FormEvent } from 'react';
 import { ApiError } from '@/lib/api';
@@ -120,7 +121,7 @@ export default function LoginPage() {
         </form>
 
         <p className="mt-6 text-center text-xs text-ink-muted">
-          Brújula · Sistema de cotizaciones
+          ¿No tienes cuenta? <Link className="font-semibold text-amber hover:underline" href="/register">Crea la tuya gratis</Link>
         </p>
       </div>
     </div>
