@@ -29,12 +29,12 @@ const STATUS_LABELS: Record<QuoteStatus, string> = {
 
 const STATUS_COLORS: Record<QuoteStatus, { dot: string; bg: string; text: string }> = {
   BORRADOR:  { dot: '#94a3b8', bg: 'rgba(148,163,184,0.15)', text: '#94a3b8' },
-  ENVIADA:   { dot: '#feb23b', bg: 'rgba(254,178,59,0.15)',  text: '#feb23b' },
-  ACEPTADA:  { dot: '#22c55e', bg: 'rgba(34,197,94,0.15)',   text: '#22c55e' },
+  ENVIADA:   { dot: '#3b82f6', bg: 'rgba(59,130,246,0.15)',  text: '#3b82f6' },
+  ACEPTADA:  { dot: '#10b981', bg: 'rgba(16,185,129,0.15)',  text: '#10b981' },
   ABONADA:   { dot: '#0ea5e9', bg: 'rgba(14,165,233,0.15)',  text: '#0ea5e9' },
   PAGADA:    { dot: '#06b6d4', bg: 'rgba(6,182,212,0.15)',   text: '#06b6d4' },
   RECHAZADA: { dot: '#ef4444', bg: 'rgba(239,68,68,0.15)',   text: '#ef4444' },
-  VENCIDA:   { dot: '#f97316', bg: 'rgba(249,115,22,0.15)',  text: '#f97316' },
+  VENCIDA:   { dot: '#f59e0b', bg: 'rgba(245,158,11,0.15)',  text: '#f59e0b' },
 };
 
 const STATUS_ICONS: Record<QuoteStatus, React.ElementType> = {
@@ -68,8 +68,8 @@ const METRIC_DEFS = [
     footnote: 'Ganancias',
     trend: 'up' as const,
     icon: CheckCircle2,
-    iconBg: '#22c55e',
-    iconShadow: 'rgba(34,197,94,0.35)',
+    iconBg: '#10b981',
+    iconShadow: 'rgba(16,185,129,0.35)',
     statuses: ['ACEPTADA', 'ABONADA', 'PAGADA'] as QuoteStatus[],
     field: 'total' as const,
     spark: SPARKLINES[1],
@@ -92,8 +92,8 @@ const METRIC_DEFS = [
     footnote: 'Expiradas',
     trend: 'down' as const,
     icon: AlertCircle,
-    iconBg: '#f97316',
-    iconShadow: 'rgba(249,115,22,0.35)',
+    iconBg: '#f59e0b',
+    iconShadow: 'rgba(245,158,11,0.35)',
     statuses: ['VENCIDA'] as QuoteStatus[],
     field: 'total' as const,
     spark: SPARKLINES[3],

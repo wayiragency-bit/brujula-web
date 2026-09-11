@@ -130,12 +130,12 @@ input, textarea, select { color-scheme: dark; }
 
 /* Status chips */
 .chip-borrador  { @apply rounded-full px-2.5 py-0.5 text-xs font-semibold; background: rgba(255,255,255,0.08); color: var(--ink-soft); }
-.chip-enviada   { @apply rounded-full px-2.5 py-0.5 text-xs font-semibold; background: rgba(254,178,59,0.15); color: #feb23b; }
-.chip-aceptada  { @apply rounded-full px-2.5 py-0.5 text-xs font-semibold; background: rgba(34,197,94,0.15); color: #4ade80; }
+.chip-enviada   { @apply rounded-full px-2.5 py-0.5 text-xs font-semibold; background: rgba(59,130,246,0.15); color: #60a5fa; }
+.chip-aceptada  { @apply rounded-full px-2.5 py-0.5 text-xs font-semibold; background: rgba(16,185,129,0.15); color: #34d399; }
 .chip-abonada   { @apply rounded-full px-2.5 py-0.5 text-xs font-semibold; background: rgba(14,165,233,0.15); color: #38bdf8; }
 .chip-pagada    { @apply rounded-full px-2.5 py-0.5 text-xs font-semibold; background: rgba(34,197,94,0.20); color: #86efac; }
 .chip-rechazada { @apply rounded-full px-2.5 py-0.5 text-xs font-semibold; background: rgba(239,68,68,0.15); color: #f87171; }
-.chip-vencida   { @apply rounded-full px-2.5 py-0.5 text-xs font-semibold; background: rgba(249,115,22,0.15); color: #fb923c; }
+.chip-vencida   { @apply rounded-full px-2.5 py-0.5 text-xs font-semibold; background: rgba(245,158,11,0.15); color: #fbbf24; }
 
 /* Glass utilities — matching Rativia's glass-panel / glass-card */
 .glass-panel {
@@ -162,11 +162,11 @@ input, textarea, select { color-scheme: dark; }
 /* Light mode chip overrides — pastel backgrounds + dark text for readability on white */
 [data-theme="light"] .chip-borrador  { background: rgba(0,0,0,0.06);    color: #475569; }
 [data-theme="light"] .chip-enviada   { background: #EFF6FF;              color: #1d4ed8; }
-[data-theme="light"] .chip-aceptada  { background: #ECFDF5;              color: #15803d; }
+[data-theme="light"] .chip-aceptada  { background: #ECFDF5;              color: #047857; }
 [data-theme="light"] .chip-abonada   { background: #F0F9FF;              color: #0369a1; }
 [data-theme="light"] .chip-pagada    { background: #ECFEFF;              color: #0e7490; }
 [data-theme="light"] .chip-rechazada { background: #FEF2F2;              color: #dc2626; }
-[data-theme="light"] .chip-vencida   { background: #FFF7ED;              color: #c2410c; }
+[data-theme="light"] .chip-vencida   { background: #FFFBEB;              color: #b45309; }
 
 @media (max-width: 640px) {
   .button-primary,

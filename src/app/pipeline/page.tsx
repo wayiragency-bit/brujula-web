@@ -16,12 +16,12 @@ const STATUS_LABELS: Record<QuoteStatus, string> = {
 
 const STATUS_COLORS: Record<QuoteStatus, { dot: string; badge: string; text: string }> = {
   BORRADOR:  { dot: '#94a3b8', badge: 'rgba(148,163,184,0.15)', text: '#94a3b8' },
-  ENVIADA:   { dot: '#feb23b', badge: 'rgba(254,178,59,0.15)',  text: '#feb23b' },
-  ACEPTADA:  { dot: '#22c55e', badge: 'rgba(34,197,94,0.15)',   text: '#22c55e' },
+  ENVIADA:   { dot: '#3b82f6', badge: 'rgba(59,130,246,0.15)',  text: '#3b82f6' },
+  ACEPTADA:  { dot: '#10b981', badge: 'rgba(16,185,129,0.15)',  text: '#10b981' },
   ABONADA:   { dot: '#0ea5e9', badge: 'rgba(14,165,233,0.15)',  text: '#0ea5e9' },
   PAGADA:    { dot: '#06b6d4', badge: 'rgba(6,182,212,0.15)',   text: '#06b6d4' },
   RECHAZADA: { dot: '#ef4444', badge: 'rgba(239,68,68,0.15)',   text: '#ef4444' },
-  VENCIDA:   { dot: '#f97316', badge: 'rgba(249,115,22,0.15)',  text: '#f97316' },
+  VENCIDA:   { dot: '#f59e0b', badge: 'rgba(245,158,11,0.15)',  text: '#f59e0b' },
 };
 
 function clientInitials(name?: string): string {
