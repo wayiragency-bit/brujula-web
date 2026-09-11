@@ -223,33 +223,25 @@ export default function QuotesPage() {
         </div>
 
         {/* Status tabs */}
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-3">
           {/* Todos tab */}
           <button
-            type="button"
-            onClick={() => { setStatus(undefined); setPage(1); }}
-            className={`flex flex-col items-center gap-1 rounded-xl px-4 py-3 transition-all ${
-              !status
-                ? 'bg-teal/15 ring-1 ring-teal/40'
-                : 'glass-card hover:brightness-110'
+            className={`flex min-w-[150px] flex-1 items-center justify-between gap-3 rounded-2xl p-4 transition-all ${
+              !status ? 'ring-1 ring-teal/40' : 'glass-card hover:brightness-110'
             }`}
+            onClick={() => { setStatus(undefined); setPage(1); }}
+            style={!status ? { background: 'rgba(13,148,136,0.10)' } : {}}
+            type="button"
           >
-            <BarChart3
-              className="h-4 w-4"
-              style={{ color: !status ? '#0d9488' : 'var(--ink-soft)' }}
-            />
-            <span
-              className="font-bold leading-none"
-              style={{ fontSize: '18px', color: !status ? '#0d9488' : 'var(--ink)' }}
-            >
-              {totalCount}
-            </span>
-            <span
-              className="uppercase font-medium leading-none text-ink-soft"
-              style={{ fontSize: '9px', letterSpacing: '0.5px' }}
-            >
-              Total
-            </span>
+            <div className="min-w-0 text-left">
+              <p className="label-caps text-ink-soft" style={{ fontSize: '10px', letterSpacing: '1.5px' }}>Total Cot</p>
+              <p className="mt-1 font-black leading-none" style={{ fontSize: '22px', color: !status ? '#0d9488' : 'var(--ink)' }}>
+                {totalCount}
+              </p>
+            </div>
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full" style={{ background: 'rgba(13,148,136,0.15)' }}>
+              <BarChart3 className="h-4 w-4" style={{ color: '#0d9488' }} />
+            </div>
           </button>
 
           {ALL_STATUSES.map((s) => {
@@ -258,24 +250,23 @@ export default function QuotesPage() {
             const Icon   = STATUS_ICONS[s];
             return (
               <button
-                key={s}
-                type="button"
-                onClick={() => { setStatus(s); setPage(1); }}
-                className={`flex flex-col items-center gap-1 rounded-xl px-4 py-3 transition-all ${
+                className={`flex min-w-[150px] flex-1 items-center justify-between gap-3 rounded-2xl p-4 transition-all ${
                   active ? 'ring-1' : 'glass-card hover:brightness-110'
                 }`}
-                style={active ? { background: col.bg, outline: `1px solid ${col.dot}` } : {}}
+                key={s}
+                onClick={() => { setStatus(s); setPage(1); }}
+                style={active ? { background: col.bg, boxShadow: `0 0 0 1px ${col.dot}` } : {}}
+                type="button"
               >
-                <Icon className="h-4 w-4" style={{ color: col.dot }} />
-                <span className="font-bold leading-none" style={{ fontSize: '18px', color: active ? col.text : 'var(--ink)' }}>
-                  {counts.get(s) ?? 0}
-                </span>
-                <span
-                  className="uppercase font-medium leading-none text-ink-soft"
-                  style={{ fontSize: '9px', letterSpacing: '0.5px' }}
-                >
-                  {STATUS_LABELS[s]}
-                </span>
+                <div className="min-w-0 text-left">
+                  <p className="label-caps text-ink-soft" style={{ fontSize: '10px', letterSpacing: '1.5px' }}>{STATUS_LABELS[s]}</p>
+                  <p className="mt-1 font-black leading-none" style={{ fontSize: '22px', color: active ? col.text : 'var(--ink)' }}>
+                    {counts.get(s) ?? 0}
+                  </p>
+                </div>
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full" style={{ background: col.bg }}>
+                  <Icon className="h-4 w-4" style={{ color: col.dot }} />
+                </div>
               </button>
             );
           })}
