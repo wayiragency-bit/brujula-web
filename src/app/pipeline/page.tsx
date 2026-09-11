@@ -60,14 +60,6 @@ function clientInitials(name?: string): string {
   return ((parts[0]?.[0] ?? '') + (parts[1]?.[0] ?? '')).toUpperCase() || '?';
 }
 
-const AVATAR_COLORS = ['#06b6d4','#10b981','#f59e0b','#8b5cf6','#ec4899','#0ea5e9','#22c55e'];
-function avatarColor(name?: string): string {
-  if (!name) return '#94a3b8';
-  let hash = 0;
-  for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
-  return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
-}
-
 const MONTH_NAMES = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
 
 function formatMoney(value: string, currency: string): string {
@@ -158,7 +150,6 @@ function PaymentModal({
 function KanbanCard({ card, onDragStart }: { card: PipelineCard; onDragStart: (card: PipelineCard) => void }) {
   const clientName = card.client?.name ?? 'Sin cliente';
   const agentName  = (card as unknown as { agent?: { name: string } }).agent?.name;
-  const color      = avatarColor(clientName);
   const sc         = STATUS_COLORS[card.status];
 
   return (
@@ -186,7 +177,7 @@ function KanbanCard({ card, onDragStart }: { card: PipelineCard; onDragStart: (c
       <div className="mt-2 flex items-center gap-2 pl-2">
         <div
           className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[10px] font-bold"
-          style={{ background: color + '33', color }}
+          style={{ background: 'var(--paper-elevated)', color: 'var(--ink-soft)' }}
         >
           {clientInitials(clientName).charAt(0)}
         </div>
