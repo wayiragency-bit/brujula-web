@@ -184,6 +184,10 @@ export interface QuoteItemDraft {
   serviceEndDate?: string | null;
   priceTier?: PriceTier;
   extras?: QuoteItemExtra[];
+  reservationMode?: ReservationMode | null;
+  durationHours?: string | null;
+  startTime?: string | null;
+  endTime?: string | null;
 }
 
 export interface QuoteItemView extends QuoteItemDraft {
@@ -271,6 +275,10 @@ export interface CatalogProduct {
   imageUrl: string | null;
   unit: ProductUnit;
   currency: string;
+  reservationMode: ReservationMode;
+  durationHours: string | null;
+  startTime: string | null;
+  endTime: string | null;
   netCost?: string;
   markupType?: MarkupType;
   markupValue?: string;

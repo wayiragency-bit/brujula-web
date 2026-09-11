@@ -14,7 +14,7 @@ import {
   useRecordPayment,
   useUpdateQuote,
 } from '@/hooks/use-quotes';
-import type { MarkupType, ProductUnit, Quote, QuoteHeaderDraft, QuoteItemDraft, QuoteStatus } from '@/lib/types';
+import type { CatalogProduct, MarkupType, ProductUnit, Quote, QuoteHeaderDraft, QuoteItemDraft, QuoteStatus } from '@/lib/types';
 import { inputClass, labelClass, selectClass } from '@/components/ui/form';
 import { QuoteItemCard } from '@/components/quotes/quote-item-card';
 import { QuoteItinerary } from '@/components/quotes/quote-itinerary';
@@ -162,19 +162,25 @@ export function QuoteBuilder({ initial }: { initial?: Quote }) {
     setHeader((prev) => ({ ...prev, [key]: value }));
   }
 
-  function addProductItem(product: { id: string; name: string; unit: ProductUnit; currency: string; imageUrl: string | null }) {
+  function addProductItem(product: CatalogProduct) {
     setItems((prev) => [
       ...prev,
       {
         key: newKey(),
         productId: product.id,
         name: product.name,
+        description: product.description ?? undefined,
+        imageUrl: product.imageUrl,
         unit: product.unit,
         quantity: '1',
         adults: header.adults ?? 1,
         children: header.children ?? 0,
         priceTier: 'IDEAL',
         extras: [],
+        reservationMode: product.reservationMode,
+        durationHours: product.durationHours,
+        startTime: product.startTime,
+        endTime: product.endTime,
       },
     ]);
     setShowCatalog(false);
