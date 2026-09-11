@@ -134,12 +134,14 @@ export default function QuotesPage() {
   const [status, setStatus]   = useState<QuoteStatus | undefined>(undefined);
   const [page, setPage]       = useState(1);
   const [pageSize, setPageSize] = useState(PAGE_SIZE);
-  const [dateFilterOpen, setDateFilterOpen] = useState(false);
+  const [emisionOpen, setEmisionOpen] = useState(false);
+  const [checkinOpen, setCheckinOpen] = useState(false);
   const [createdFrom, setCreatedFrom] = useState('');
   const [createdTo, setCreatedTo] = useState('');
   const [checkinFrom, setCheckinFrom] = useState('');
   const [checkinTo, setCheckinTo] = useState('');
-  const hasDateFilter = Boolean(createdFrom || createdTo || checkinFrom || checkinTo);
+  const hasEmisionFilter = Boolean(createdFrom || createdTo);
+  const hasCheckinFilter = Boolean(checkinFrom || checkinTo);
 
   const { data, isLoading } = useQuotes({
     q: search || undefined, status, page, limit: pageSize,
@@ -149,9 +151,12 @@ export default function QuotesPage() {
   const [confirmDelete, setConfirmDelete] = useState<Quote | null>(null);
   const deleteQuote = useDeleteQuote();
 
-  function clearDateFilters() {
-    setCreatedFrom(''); setCreatedTo(''); setCheckinFrom(''); setCheckinTo('');
-    setPage(1);
+  function clearEmisionFilter() {
+    setCreatedFrom(''); setCreatedTo(''); setPage(1);
+  }
+
+  function clearCheckinFilter() {
+    setCheckinFrom(''); setCheckinTo(''); setPage(1);
   }
 
   const { counts, totals } = useMemo(() => {
@@ -307,22 +312,22 @@ export default function QuotesPage() {
           <div className="relative">
             <button
               className="inline-flex items-center gap-2 rounded-xl px-3.5 py-2.5 text-sm font-semibold transition"
-              onClick={() => setDateFilterOpen((o) => !o)}
+              onClick={() => setEmisionOpen((o) => !o)}
               style={{
-                border: `1px solid ${hasDateFilter ? '#8b5cf6' : 'var(--border)'}`,
-                color: hasDateFilter ? '#8b5cf6' : 'var(--ink)',
-                background: hasDateFilter ? 'rgba(139,92,246,0.08)' : 'var(--surface)',
+                border: `1px solid ${hasEmisionFilter ? '#8b5cf6' : 'var(--border)'}`,
+                color: hasEmisionFilter ? '#8b5cf6' : 'var(--ink)',
+                background: hasEmisionFilter ? 'rgba(139,92,246,0.08)' : 'var(--surface)',
               }}
               type="button"
             >
-              <Calendar className="h-4 w-4" /> Filtro de Fechas
+              <Calendar className="h-4 w-4" /> Fecha de Emisión
             </button>
 
-            {dateFilterOpen ? (
+            {emisionOpen ? (
               <>
-                <div className="fixed inset-0 z-40" onClick={() => setDateFilterOpen(false)} />
+                <div className="fixed inset-0 z-40" onClick={() => setEmisionOpen(false)} />
                 <div
-                  className="absolute left-0 top-full z-50 mt-2 w-72 space-y-4 rounded-2xl p-4 shadow-floating"
+                  className="absolute left-0 top-full z-50 mt-2 w-64 space-y-3 rounded-2xl p-4 shadow-floating"
                   onClick={(e) => e.stopPropagation()}
                   style={{ background: 'var(--paper-card)', border: '1px solid var(--border)' }}
                 >
@@ -345,6 +350,38 @@ export default function QuotesPage() {
                       />
                     </div>
                   </div>
+                  {hasEmisionFilter ? (
+                    <button className="text-xs font-semibold text-ink-soft hover:text-ink" onClick={clearEmisionFilter} type="button">
+                      Limpiar
+                    </button>
+                  ) : null}
+                </div>
+              </>
+            ) : null}
+          </div>
+
+          <div className="relative">
+            <button
+              className="inline-flex items-center gap-2 rounded-xl px-3.5 py-2.5 text-sm font-semibold transition"
+              onClick={() => setCheckinOpen((o) => !o)}
+              style={{
+                border: `1px solid ${hasCheckinFilter ? '#8b5cf6' : 'var(--border)'}`,
+                color: hasCheckinFilter ? '#8b5cf6' : 'var(--ink)',
+                background: hasCheckinFilter ? 'rgba(139,92,246,0.08)' : 'var(--surface)',
+              }}
+              type="button"
+            >
+              <Calendar className="h-4 w-4" /> Fecha de Check-in
+            </button>
+
+            {checkinOpen ? (
+              <>
+                <div className="fixed inset-0 z-40" onClick={() => setCheckinOpen(false)} />
+                <div
+                  className="absolute left-0 top-full z-50 mt-2 w-64 space-y-3 rounded-2xl p-4 shadow-floating"
+                  onClick={(e) => e.stopPropagation()}
+                  style={{ background: 'var(--paper-card)', border: '1px solid var(--border)' }}
+                >
                   <div>
                     <p className="label-caps mb-2 text-ink-soft" style={{ fontSize: '10px', letterSpacing: '1.5px' }}>Fecha de Check-in</p>
                     <div className="grid grid-cols-2 gap-2">
@@ -364,9 +401,9 @@ export default function QuotesPage() {
                       />
                     </div>
                   </div>
-                  {hasDateFilter ? (
-                    <button className="text-xs font-semibold text-ink-soft hover:text-ink" onClick={clearDateFilters} type="button">
-                      Limpiar filtros de fecha
+                  {hasCheckinFilter ? (
+                    <button className="text-xs font-semibold text-ink-soft hover:text-ink" onClick={clearCheckinFilter} type="button">
+                      Limpiar
                     </button>
                   ) : null}
                 </div>
