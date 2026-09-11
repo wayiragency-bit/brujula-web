@@ -356,12 +356,8 @@ export function QuoteBuilder({ initial }: { initial?: Quote }) {
                 </select>
               </div>
               <div>
-                <label className={labelClass} htmlFor="adults">Adultos</label>
-                <input className={inputClass} disabled={!editable} id="adults" min={0} onChange={(e) => setHeaderField('adults', Number(e.target.value))} type="number" value={header.adults ?? 1} />
-              </div>
-              <div>
-                <label className={labelClass} htmlFor="children">Niños</label>
-                <input className={inputClass} disabled={!editable} id="children" min={0} onChange={(e) => setHeaderField('children', Number(e.target.value))} type="number" value={header.children ?? 0} />
+                <label className={labelClass} htmlFor="pax">Número de Pax</label>
+                <input className={inputClass} disabled={!editable} id="pax" min={0} onChange={(e) => setHeaderField('adults', Number(e.target.value))} type="number" value={header.adults ?? 1} />
               </div>
               <div>
                 <label className={labelClass} htmlFor="validityDays">Válido por (días)</label>

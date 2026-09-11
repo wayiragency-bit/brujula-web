@@ -1,6 +1,6 @@
 'use client';
 
-import { Check, Minus, Plus, Search } from 'lucide-react';
+import { Minus, Plus, Search } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { Modal } from '@/components/ui/modal';
 import { inputClass } from '@/components/ui/form';
@@ -122,16 +122,6 @@ export function QuoteCatalogModal({ open, onClose, onConfirm }: QuoteCatalogModa
                     <span className="absolute left-2 top-2 rounded-md bg-ink/70 px-2 py-0.5 text-[10px] font-bold uppercase text-white">
                       {product.type}
                     </span>
-                    <button
-                      aria-label={isSelected ? 'Quitar' : 'Seleccionar'}
-                      className={`absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full text-white transition ${
-                        isSelected ? 'bg-teal' : 'bg-ink/30 hover:bg-ink/50'
-                      }`}
-                      onClick={() => toggle(product)}
-                      type="button"
-                    >
-                      <Check className="h-4 w-4" />
-                    </button>
                   </div>
                   <div className="space-y-2 p-3">
                     <p className="text-sm font-semibold text-ink">{product.name}</p>
@@ -158,7 +148,16 @@ export function QuoteCatalogModal({ open, onClose, onConfirm }: QuoteCatalogModa
                             <Plus className="h-3.5 w-3.5" />
                           </button>
                         </div>
-                      ) : null}
+                      ) : (
+                        <button
+                          aria-label="Agregar"
+                          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-teal text-white shadow-sm transition hover:bg-teal/90"
+                          onClick={() => toggle(product)}
+                          type="button"
+                        >
+                          <Plus className="h-4 w-4" strokeWidth={2.5} />
+                        </button>
+                      )}
                     </div>
                   </div>
                 </div>
