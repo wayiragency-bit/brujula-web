@@ -147,7 +147,7 @@ export function QuoteBuilder({ initial }: { initial?: Quote }) {
 
   useEffect(() => {
     if (!editable) return;
-    if (!header.clientId || !header.destination.trim()) return;
+    if (items.length === 0) return;
     const timer = setTimeout(() => {
       previewQuote.mutate(
         { ...header, quoteId: initial?.id, items: items.map(toPayloadItem) },
