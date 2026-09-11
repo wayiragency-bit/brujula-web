@@ -1,6 +1,6 @@
 'use client';
 
-import { Clock, Plus, Trash2 } from 'lucide-react';
+import { Clock, Plus, Trash2, Users } from 'lucide-react';
 import { inputClass, labelClass } from '@/components/ui/form';
 import type { PriceTier, QuoteItemDraft, QuoteItemExtra, QuoteItemView } from '@/lib/types';
 
@@ -10,6 +10,8 @@ const TIER_LABELS: Record<PriceTier, string> = {
   IDEAL: 'Ideal',
   CUSTOM: 'Personalizado',
 };
+
+const PAX_OPTIONS = Array.from({ length: 51 }, (_, n) => n);
 
 function formatMoney(value: string | number | undefined, currency: string): string {
   const n = Number(value ?? 0);
@@ -89,29 +91,33 @@ export function QuoteItemCard({ item, line, currency, editable, canEditPricing, 
               />
             )}
             {item.description ? <p className="mt-0.5 text-xs text-ink-soft">{item.description}</p> : null}
-            <div className="mt-2 flex flex-wrap gap-2">
-              <label className="inline-flex items-center gap-1.5 rounded-lg border border-ink/10 px-2 py-1 text-xs text-ink-soft">
-                Adultos
-                <input
-                  className="w-8 border-0 bg-transparent p-0 text-xs font-semibold text-ink focus:outline-none"
-                  disabled={!editable}
-                  min={0}
-                  onChange={(e) => onChange({ adults: Number(e.target.value) })}
-                  type="number"
-                  value={item.adults ?? 1}
-                />
-              </label>
-              <label className="inline-flex items-center gap-1.5 rounded-lg border border-ink/10 px-2 py-1 text-xs text-ink-soft">
-                Niños
-                <input
-                  className="w-8 border-0 bg-transparent p-0 text-xs font-semibold text-ink focus:outline-none"
-                  disabled={!editable}
-                  min={0}
-                  onChange={(e) => onChange({ children: Number(e.target.value) })}
-                  type="number"
-                  value={item.children ?? 0}
-                />
-              </label>
+            <div className="mt-2 flex flex-wrap items-center gap-2">
+              <div className="inline-flex items-center gap-2 rounded-lg border border-ink/10 px-2.5 py-1.5 text-xs text-ink-soft">
+                <Users className="h-3.5 w-3.5 text-teal" />
+                <span className="flex items-center gap-1">
+                  Adultos
+                  <select
+                    className="border-0 bg-transparent p-0 text-xs font-semibold text-ink focus:outline-none"
+                    disabled={!editable}
+                    onChange={(e) => onChange({ adults: Number(e.target.value) })}
+                    value={item.adults ?? 1}
+                  >
+                    {PAX_OPTIONS.map((n) => <option key={n} value={n}>{n}</option>)}
+                  </select>
+                </span>
+                <span className="h-3 w-px bg-ink/10" />
+                <span className="flex items-center gap-1">
+                  Niños
+                  <select
+                    className="border-0 bg-transparent p-0 text-xs font-semibold text-ink focus:outline-none"
+                    disabled={!editable}
+                    onChange={(e) => onChange({ children: Number(e.target.value) })}
+                    value={item.children ?? 0}
+                  >
+                    {PAX_OPTIONS.map((n) => <option key={n} value={n}>{n}</option>)}
+                  </select>
+                </span>
+              </div>
               {showsNights ? (
                 <label className="inline-flex items-center gap-1.5 rounded-lg border border-ink/10 px-2 py-1 text-xs text-ink-soft">
                   Noches

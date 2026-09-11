@@ -8,16 +8,16 @@ import {
   useChangeQuoteStatus,
   useCreateQuote,
   usePreviewQuote,
-  useQuoteCatalog,
   useQuoteClientOptions,
   useQuoteSellers,
   useRecordPayment,
   useUpdateQuote,
 } from '@/hooks/use-quotes';
-import type { CatalogProduct, MarkupType, ProductUnit, Quote, QuoteHeaderDraft, QuoteItemDraft, QuoteStatus } from '@/lib/types';
+import type { CatalogProduct, MarkupType, Quote, QuoteHeaderDraft, QuoteItemDraft, QuoteStatus } from '@/lib/types';
 import { inputClass, labelClass, selectClass } from '@/components/ui/form';
 import { QuoteItemCard } from '@/components/quotes/quote-item-card';
 import { QuoteItinerary } from '@/components/quotes/quote-itinerary';
+import { QuoteCatalogModal } from '@/components/quotes/quote-catalog-modal';
 
 interface DraftItem extends QuoteItemDraft {
   key: string;
@@ -41,12 +41,6 @@ const STATUS_COLORS: Record<QuoteStatus, string> = {
   PAGADA: 'bg-status-accepted/15 text-status-accepted',
   RECHAZADA: 'bg-red-100 text-red-600',
   VENCIDA: 'bg-status-expired/15 text-status-expired',
-};
-
-const UNIT_LABELS: Record<ProductUnit, string> = {
-  PER_SERVICE: 'Servicio',
-  PER_NIGHT: 'Noche',
-  PER_PERSON: 'Persona',
 };
 
 function formatMoney(value: string | number | undefined, currency: string): string {
@@ -124,8 +118,7 @@ export function QuoteBuilder({ initial }: { initial?: Quote }) {
   const [header, setHeader] = useState<QuoteHeaderDraft>(() => draftFromQuote(initial).header);
   const [items, setItems] = useState<DraftItem[]>(() => draftFromQuote(initial).items);
   const [preview, setPreview] = useState<Quote | null>(initial ?? null);
-  const [catalogSearch, setCatalogSearch] = useState('');
-  const [showCatalog, setShowCatalog] = useState(false);
+  const [showCatalogModal, setShowCatalogModal] = useState(false);
   const [showManualForm, setShowManualForm] = useState(false);
   const [manual, setManual] = useState({ name: '', netCost: '0', markupType: 'PERCENT' as MarkupType, markupValue: '0', taxPct: '0' });
   const [clientSearch, setClientSearch] = useState(initial?.client?.name ?? '');
@@ -138,7 +131,6 @@ export function QuoteBuilder({ initial }: { initial?: Quote }) {
 
   const { data: sellers } = useQuoteSellers();
   const { data: clientOptions } = useQuoteClientOptions(clientSearch);
-  const { data: catalog } = useQuoteCatalog(catalogSearch);
   const previewQuote = usePreviewQuote();
   const createQuote = useCreateQuote();
   const updateQuote = useUpdateQuote(initial?.id ?? 'none');
@@ -162,29 +154,28 @@ export function QuoteBuilder({ initial }: { initial?: Quote }) {
     setHeader((prev) => ({ ...prev, [key]: value }));
   }
 
-  function addProductItem(product: CatalogProduct) {
+  function addProductItems(selections: { product: CatalogProduct; quantity: number }[]) {
     setItems((prev) => [
       ...prev,
-      {
+      ...selections.map(({ product, quantity }) => ({
         key: newKey(),
         productId: product.id,
         name: product.name,
         description: product.description ?? undefined,
         imageUrl: product.imageUrl,
         unit: product.unit,
-        quantity: '1',
+        quantity: String(quantity),
         adults: header.adults ?? 1,
         children: header.children ?? 0,
-        priceTier: 'IDEAL',
+        priceTier: 'IDEAL' as const,
         extras: [],
         reservationMode: product.reservationMode,
         durationHours: product.durationHours,
         startTime: product.startTime,
         endTime: product.endTime,
-      },
+      })),
     ]);
-    setShowCatalog(false);
-    setCatalogSearch('');
+    setShowCatalogModal(false);
   }
 
   function addManualItem() {
@@ -418,38 +409,15 @@ export function QuoteBuilder({ initial }: { initial?: Quote }) {
               <h2 className="label-caps text-ink-soft">Itinerario de Servicios</h2>
               {editable ? (
                 <div className="flex gap-2">
-                  <button className="button-secondary inline-flex items-center gap-1.5 text-xs" onClick={() => setShowCatalog((v) => !v)} type="button">
-                    <Search className="h-3.5 w-3.5" /> Catálogo
+                  <button className="button-secondary inline-flex items-center gap-1.5 text-xs" onClick={() => setShowManualForm((v) => !v)} type="button">
+                    <Plus className="h-3.5 w-3.5" /> Ítem Manual
                   </button>
-                  <button className="button-primary inline-flex items-center gap-1.5 text-xs" onClick={() => setShowManualForm((v) => !v)} type="button">
-                    <Plus className="h-3.5 w-3.5" /> Agregar Servicio
+                  <button className="button-primary inline-flex items-center gap-1.5 text-xs" onClick={() => setShowCatalogModal(true)} type="button">
+                    <Search className="h-3.5 w-3.5" /> Agregar Servicio
                   </button>
                 </div>
               ) : null}
             </div>
-
-            {showCatalog ? (
-              <div className="rounded-xl border border-ink/10 p-3">
-                <input
-                  autoFocus
-                  className={inputClass}
-                  onChange={(e) => setCatalogSearch(e.target.value)}
-                  placeholder="Buscar producto…"
-                  value={catalogSearch}
-                />
-                <ul className="mt-2 max-h-48 space-y-1 overflow-y-auto">
-                  {catalog?.map((product) => (
-                    <li key={product.id}>
-                      <button className="flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-sm hover:bg-ink/5" onClick={() => addProductItem(product)} type="button">
-                        <span>{product.name}</span>
-                        <span className="text-xs text-ink-soft">{UNIT_LABELS[product.unit]}</span>
-                      </button>
-                    </li>
-                  ))}
-                  {catalog?.length === 0 ? <li className="px-3 py-2 text-sm text-ink-soft">Sin resultados.</li> : null}
-                </ul>
-              </div>
-            ) : null}
 
             {showManualForm ? (
               <div className="grid gap-3 rounded-xl border border-ink/10 p-3 sm:grid-cols-5">
@@ -464,7 +432,7 @@ export function QuoteBuilder({ initial }: { initial?: Quote }) {
               <div className="py-6 text-center text-sm text-ink-soft">
                 <p>No hay servicios agregados.</p>
                 {editable ? (
-                  <button className="mt-1 font-semibold text-teal hover:underline" onClick={() => setShowCatalog(true)} type="button">
+                  <button className="mt-1 font-semibold text-teal hover:underline" onClick={() => setShowCatalogModal(true)} type="button">
                     Agregar el primero
                   </button>
                 ) : null}
@@ -544,6 +512,8 @@ export function QuoteBuilder({ initial }: { initial?: Quote }) {
           <QuoteItinerary destination={header.destination} items={items} />
         </div>
       </div>
+
+      <QuoteCatalogModal onClose={() => setShowCatalogModal(false)} onConfirm={addProductItems} open={showCatalogModal} />
     </div>
   );
 }

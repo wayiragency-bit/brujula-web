@@ -275,6 +275,9 @@ export interface CatalogProduct {
   imageUrl: string | null;
   unit: ProductUnit;
   currency: string;
+  type: ProductType;
+  category: string | null;
+  sellPrice: string;
   reservationMode: ReservationMode;
   durationHours: string | null;
   startTime: string | null;
