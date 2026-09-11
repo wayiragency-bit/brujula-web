@@ -62,6 +62,13 @@ function clientInitials(name?: string): string {
 
 const MONTH_NAMES = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
 
+function formatShortDate(iso: string): string {
+  const d = new Date(iso);
+  const day = String(d.getUTCDate()).padStart(2, '0');
+  const month = String(d.getUTCMonth() + 1).padStart(2, '0');
+  return `${day}.${month}.${d.getUTCFullYear()}`;
+}
+
 function formatMoney(value: string, currency: string): string {
   return new Intl.NumberFormat('es-CO', { style: 'currency', currency, maximumFractionDigits: 0 }).format(Number(value));
 }
@@ -163,15 +170,23 @@ function KanbanCard({ card, onDragStart }: { card: PipelineCard; onDragStart: (c
       {/* Colored left stripe */}
       <span className="absolute left-0 top-0 bottom-0 w-[3px]" style={{ background: sc.dot }} />
 
-      {/* Quote number + date */}
+      {/* Quote number + issue date */}
       <div className="flex items-center justify-between gap-1 pl-2">
         <p className="text-[11px] font-bold" style={{ color: sc.text }}>{card.number}</p>
-        {(card as unknown as { startDate?: string }).startDate && (
-          <span className="rounded px-1.5 text-[10px] font-medium" style={{ background: 'var(--surface)', color: 'var(--ink-muted)' }}>
-            {new Date((card as unknown as { startDate: string }).startDate).toLocaleDateString('es-CO', { day: 'numeric', month: 'numeric', year: 'numeric' })}
-          </span>
-        )}
+        <span className="text-[10px] font-medium" style={{ color: 'var(--ink-muted)' }}>
+          Emisión {formatShortDate(card.createdAt)}
+        </span>
       </div>
+
+      {/* Reservation date — the one advisors need to track */}
+      {card.startDate && (
+        <div className="mt-1 flex items-center gap-1 pl-2">
+          <CalendarDays className="h-3 w-3 shrink-0" style={{ color: 'var(--ink-soft)' }} />
+          <span className="text-[11px] font-bold" style={{ color: 'var(--ink)' }}>
+            Reserva {formatShortDate(card.startDate)}
+          </span>
+        </div>
+      )}
 
       {/* Client row */}
       <div className="mt-2 flex items-center gap-2 pl-2">

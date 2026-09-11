@@ -274,6 +274,7 @@ export interface PipelineCard {
   destination: string;
   total: string;
   currency: string;
+  createdAt: string;
   startDate: string | null;
   validUntil: string | null;
   depositAmount: string;
