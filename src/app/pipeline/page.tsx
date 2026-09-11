@@ -3,11 +3,12 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   AlertTriangle, BadgeCheck, BarChart3, CalendarDays, CheckCircle2, ChevronLeft, ChevronRight,
-  FileEdit, Send, Wallet, X, XCircle,
+  FileEdit, History, Send, Wallet, X, XCircle,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useMemo, useState } from 'react';
 import { AppShell } from '@/components/app-shell';
+import { PipelineHistoryView } from '@/components/pipeline/history-view';
 import { usePipelineCalendar, usePipelineKanban } from '@/hooks/use-pipeline';
 import { api } from '@/lib/api';
 import type { PipelineCard, QuoteStatus } from '@/lib/types';
@@ -433,7 +434,7 @@ function CalendarView() {
 }
 
 export default function PipelinePage() {
-  const [view, setView]                 = useState<'kanban' | 'calendar'>('kanban');
+  const [view, setView]                 = useState<'kanban' | 'calendar' | 'history'>('kanban');
   const [showVencidas, setShowVencidas] = useState(false);
   const [showBorrador, setShowBorrador] = useState(false);
   const { data: pipelineData }          = usePipelineKanban();
@@ -492,42 +493,55 @@ export default function PipelinePage() {
               <CalendarDays size={18} />
               Calendario
             </button>
+            <button
+              className="inline-flex h-9 items-center gap-2 rounded-lg px-4 text-sm font-medium transition"
+              style={view === 'history'
+                ? { background: 'var(--teal)', color: '#ffffff' }
+                : { background: 'transparent', color: '#94a3b8' }}
+              onClick={() => setView('history')}
+              type="button"
+            >
+              <History size={18} />
+              Histórico
+            </button>
           </div>
         </header>
 
         {/* Secondary toolbar — hidden statuses */}
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={() => setShowBorrador(true)}
-            className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium transition hover:brightness-110"
-            style={{ background: scB.badge, color: scB.text, border: `1px solid ${scB.dot}40` }}
-          >
-            <STATUS_ICONS.BORRADOR className="h-3.5 w-3.5" />
-            Borrador
-            {borradorCards.length > 0 && (
-              <span className="ml-1 rounded-full px-1.5 py-0.5 text-[10px] font-bold" style={{ background: scB.dot + '33', color: scB.text }}>
-                {borradorCards.length}
-              </span>
-            )}
-          </button>
-          <button
-            type="button"
-            onClick={() => setShowVencidas(true)}
-            className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium transition hover:brightness-110"
-            style={{ background: scV.badge, color: scV.text, border: `1px solid ${scV.dot}40` }}
-          >
-            <STATUS_ICONS.VENCIDA className="h-3.5 w-3.5" />
-            Vencidas
-            {vencidasCards.length > 0 && (
-              <span className="ml-1 rounded-full px-1.5 py-0.5 text-[10px] font-bold" style={{ background: scV.dot + '33', color: scV.text }}>
-                {vencidasCards.length}
-              </span>
-            )}
-          </button>
-        </div>
+        {view !== 'history' && (
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setShowBorrador(true)}
+              className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium transition hover:brightness-110"
+              style={{ background: scB.badge, color: scB.text, border: `1px solid ${scB.dot}40` }}
+            >
+              <STATUS_ICONS.BORRADOR className="h-3.5 w-3.5" />
+              Borrador
+              {borradorCards.length > 0 && (
+                <span className="ml-1 rounded-full px-1.5 py-0.5 text-[10px] font-bold" style={{ background: scB.dot + '33', color: scB.text }}>
+                  {borradorCards.length}
+                </span>
+              )}
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowVencidas(true)}
+              className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium transition hover:brightness-110"
+              style={{ background: scV.badge, color: scV.text, border: `1px solid ${scV.dot}40` }}
+            >
+              <STATUS_ICONS.VENCIDA className="h-3.5 w-3.5" />
+              Vencidas
+              {vencidasCards.length > 0 && (
+                <span className="ml-1 rounded-full px-1.5 py-0.5 text-[10px] font-bold" style={{ background: scV.dot + '33', color: scV.text }}>
+                  {vencidasCards.length}
+                </span>
+              )}
+            </button>
+          </div>
+        )}
 
-        {view === 'kanban' ? <KanbanBoard /> : <CalendarView />}
+        {view === 'kanban' ? <KanbanBoard /> : view === 'calendar' ? <CalendarView /> : <PipelineHistoryView />}
       </div>
     </AppShell>
   );
