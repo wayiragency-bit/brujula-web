@@ -14,7 +14,7 @@ import { useTeam } from '@/hooks/use-team';
 import { useQuotes } from '@/hooks/use-quotes';
 import { useAuth } from '@/lib/auth-context';
 import { api } from '@/lib/api';
-import { formatMoney, formatMoneyFull } from '@/lib/format';
+import { formatMoneyFull } from '@/lib/format';
 import type { Paginated, Product, ProductType, Quote, QuoteListSummaryRow, QuoteStatus } from '@/lib/types';
 
 const ACCEPTED_LIKE = new Set<QuoteStatus>(['ACEPTADA', 'ABONADA', 'PAGADA']);
@@ -108,7 +108,7 @@ export default function DashboardPage() {
     { label: 'Total Clientes', value: String(totalClients), icon: Users,   spark: SPARKLINES[1], iconBg: '#10b981', iconShadow: 'rgba(16,185,129,0.4)', sub: 'Cartera activa' },
     { label: 'Cotizaciones',  value: String(totalQuoteCount), icon: FileText, spark: SPARKLINES[2], iconBg: '#f59e0b', iconShadow: 'rgba(245,158,11,0.4)', sub: `${pendingCount} enviadas` },
     ...(totalMargin !== null
-      ? [{ label: 'Ganancia', value: formatMoney(totalMargin, currency), icon: TrendingUp, spark: SPARKLINES[4], iconBg: '#ec4899', iconShadow: 'rgba(236,72,153,0.4)', sub: 'Cotizaciones aceptadas' }]
+      ? [{ label: 'Ganancia', value: formatMoneyFull(totalMargin, currency), icon: TrendingUp, spark: SPARKLINES[4], iconBg: '#ec4899', iconShadow: 'rgba(236,72,153,0.4)', sub: 'Cotizaciones aceptadas' }]
       : []),
   ];
 
@@ -279,7 +279,7 @@ export default function DashboardPage() {
                       <p className="mt-3 truncate text-sm font-medium text-ink">{product.name}</p>
                       <div className="mt-1 flex items-center justify-between">
                         <span className="text-xs text-ink-soft">{product.timesQuoted} Ventas</span>
-                        <span className="font-mono text-sm font-bold text-ink">{formatMoney(product.sellPrice, product.currency)}</span>
+                        <span className="font-mono text-sm font-bold text-ink">{formatMoneyFull(product.sellPrice, product.currency)}</span>
                       </div>
                     </div>
                   ))
@@ -348,7 +348,7 @@ export default function DashboardPage() {
                           <p className="text-xs text-ink-soft">Agente</p>
                         </div>
                         <div className="shrink-0 text-right">
-                          <p className="font-mono text-sm font-bold" style={{ color: '#22c55e' }}>{formatMoney(agent.sold, currency)}</p>
+                          <p className="font-mono text-sm font-bold" style={{ color: '#22c55e' }}>{formatMoneyFull(agent.sold, currency)}</p>
                           <p className="label-caps text-ink-muted">Generado</p>
                         </div>
                       </div>

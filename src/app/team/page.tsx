@@ -9,7 +9,7 @@ import type { InviteMemberValues, UpdateMemberValues } from '@/hooks/use-team';
 import type { TeamMember } from '@/lib/types';
 
 function formatMoney(value: number): string {
-  return new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', notation: 'compact', maximumFractionDigits: 1 }).format(value);
+  return new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(value);
 }
 
 function initials(name: string): string {

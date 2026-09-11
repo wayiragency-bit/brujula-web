@@ -112,13 +112,7 @@ const METRIC_DEFS = [
   },
 ];
 
-function formatCompact(value: number, currency: string): string {
-  return new Intl.NumberFormat('es-CO', {
-    style: 'currency', currency, notation: 'compact', maximumFractionDigits: 0,
-  }).format(value);
-}
-
-function formatFull(value: string, currency: string): string {
+function formatFull(value: string | number, currency: string): string {
   return new Intl.NumberFormat('es-CO', {
     style: 'currency', currency, maximumFractionDigits: 0,
   }).format(Number(value));
@@ -232,7 +226,7 @@ export default function QuotesPage() {
                   className="font-black text-ink leading-none"
                   style={{ fontSize: '27px', letterSpacing: '-1.2px' }}
                 >
-                  {val > 0 ? formatCompact(val, baseCurrency) : '—'}
+                  {val > 0 ? formatFull(val, baseCurrency) : '—'}
                 </p>
                 <div className="mt-3 flex items-center justify-between gap-2">
                   <span

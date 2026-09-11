@@ -71,7 +71,7 @@ function avatarColor(name?: string): string {
 const MONTH_NAMES = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
 
 function formatMoney(value: string, currency: string): string {
-  return new Intl.NumberFormat('es-CO', { style: 'currency', currency, notation: 'compact', maximumFractionDigits: 1 }).format(Number(value));
+  return new Intl.NumberFormat('es-CO', { style: 'currency', currency, maximumFractionDigits: 0 }).format(Number(value));
 }
 
 function useChangeStatusMutation() {
@@ -164,7 +164,7 @@ function KanbanCard({ card, onDragStart }: { card: PipelineCard; onDragStart: (c
   return (
     <Link
       className="relative block cursor-grab overflow-hidden rounded-xl p-4 transition hover:-translate-y-0.5 active:cursor-grabbing"
-      style={{ background: 'rgb(30,41,59)', border: '1px solid rgba(255,255,255,0.05)' }}
+      style={{ background: 'var(--paper-card)', border: '1px solid var(--border-faint)' }}
       draggable
       href={`/quotes/${card.id}`}
       onDragStart={(e) => { e.dataTransfer.setData('text/plain', card.id); onDragStart(card); }}
@@ -176,7 +176,7 @@ function KanbanCard({ card, onDragStart }: { card: PipelineCard; onDragStart: (c
       <div className="flex items-center justify-between gap-1 pl-2">
         <p className="text-[11px] font-bold" style={{ color: sc.text }}>{card.number}</p>
         {(card as unknown as { startDate?: string }).startDate && (
-          <span className="rounded px-1.5 text-[10px] font-medium" style={{ background: 'rgb(51,65,85)', color: 'rgb(100,116,139)' }}>
+          <span className="rounded px-1.5 text-[10px] font-medium" style={{ background: 'var(--surface)', color: 'var(--ink-muted)' }}>
             {new Date((card as unknown as { startDate: string }).startDate).toLocaleDateString('es-CO', { day: 'numeric', month: 'numeric', year: 'numeric' })}
           </span>
         )}
@@ -191,16 +191,16 @@ function KanbanCard({ card, onDragStart }: { card: PipelineCard; onDragStart: (c
           {clientInitials(clientName).charAt(0)}
         </div>
         <div className="min-w-0">
-          <p className="truncate text-sm font-bold leading-tight" style={{ color: 'rgb(255,255,255)' }}>{clientName}</p>
-          {agentName && <p className="truncate text-[10px] font-medium leading-tight" style={{ color: 'rgb(148,163,184)' }}>{agentName}</p>}
+          <p className="truncate text-sm font-bold leading-tight" style={{ color: 'var(--ink)' }}>{clientName}</p>
+          {agentName && <p className="truncate text-[10px] font-medium leading-tight" style={{ color: 'var(--ink-soft)' }}>{agentName}</p>}
         </div>
       </div>
 
       {/* Destination */}
-      {card.destination && <p className="mt-1 truncate pl-2 text-[10px]" style={{ color: 'rgb(100,116,139)' }}>{card.destination}</p>}
+      {card.destination && <p className="mt-1 truncate pl-2 text-[10px]" style={{ color: 'var(--ink-muted)' }}>{card.destination}</p>}
 
       {/* Amount */}
-      <p className="mt-2 pl-2 text-[11px] font-semibold" style={{ color: 'rgb(203,213,225)' }}>{formatMoney(card.total, card.currency)}</p>
+      <p className="mt-2 pl-2 text-[11px] font-semibold" style={{ color: 'var(--ink-soft)' }}>{formatMoney(card.total, card.currency)}</p>
     </Link>
   );
 }
