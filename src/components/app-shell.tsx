@@ -79,7 +79,7 @@ export function AppShell({ children }: Readonly<{ children: React.ReactNode }>) 
         </Link>
 
         {/* Nav icons */}
-        <nav aria-label="Navegación principal" className="mt-2 flex flex-1 min-h-0 flex-col items-center justify-evenly w-full px-2 overflow-hidden">
+        <nav aria-label="Navegación principal" className="mt-2 flex flex-1 min-h-0 flex-col items-center justify-start gap-1.5 w-full px-2 overflow-y-auto">
           {navigation.map(({ label, href, icon: Icon }) => {
             const active = isActive(pathname, href);
             return (
