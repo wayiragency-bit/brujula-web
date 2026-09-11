@@ -321,32 +321,30 @@ function KanbanBoard() {
           const total    = column.cards.reduce((sum, c) => sum + Number(c.total), 0);
           const currency = column.cards[0]?.currency ?? 'COP';
           return (
-            <div
-              className="flex min-w-0 flex-col overflow-hidden rounded-2xl"
-              key={column.status}
-              style={{ border: '1px solid var(--border-faint)' }}
-            >
-              <ColumnHeader count={column.cards.length} status={column.status} />
-
-              {/* Cards area */}
+            <div className="flex min-w-0 flex-col" key={column.status}>
               <div
-                className="flex flex-1 flex-col gap-2 p-2 min-h-[200px]"
-                style={{ background: 'var(--paper)' }}
-                onDragOver={(e) => e.preventDefault()}
-                onDrop={() => handleDrop(column.status)}
+                className="flex flex-1 flex-col overflow-hidden rounded-2xl"
+                style={{ border: '1px solid var(--border-faint)' }}
               >
-                {column.cards.length === 0 ? (
-                  <p className="rounded-lg border border-dashed py-6 text-center text-xs text-ink-muted" style={{ borderColor: 'var(--border)' }}>Arrastra aquí</p>
-                ) : (
-                  column.cards.map((card) => <KanbanCard card={card} key={card.id} onDragStart={setDragging} />)
-                )}
+                <ColumnHeader count={column.cards.length} status={column.status} />
+
+                {/* Cards area */}
+                <div
+                  className="flex flex-1 flex-col gap-2 p-2 min-h-[200px]"
+                  style={{ background: 'var(--paper)' }}
+                  onDragOver={(e) => e.preventDefault()}
+                  onDrop={() => handleDrop(column.status)}
+                >
+                  {column.cards.length === 0 ? (
+                    <p className="rounded-lg border border-dashed py-6 text-center text-xs text-ink-muted" style={{ borderColor: 'var(--border)' }}>Arrastra aquí</p>
+                  ) : (
+                    column.cards.map((card) => <KanbanCard card={card} key={card.id} onDragStart={setDragging} />)
+                  )}
+                </div>
               </div>
 
-              {/* Column total */}
-              <div className="px-3 py-2.5" style={{ background: 'var(--paper-card)', borderTop: '1px solid var(--border-faint)' }}>
-                <p className="label-caps text-ink-muted">Total etapa</p>
-                <p className="font-mono text-sm font-bold text-ink">{formatMoney(String(total), currency)}</p>
-              </div>
+              {/* Column total — floats below the card, no box */}
+              <p className="mt-2.5 px-1 font-mono text-sm font-bold text-ink">{formatMoney(String(total), currency)}</p>
             </div>
           );
         })}
