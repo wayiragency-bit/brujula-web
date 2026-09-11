@@ -344,7 +344,7 @@ function KanbanBoard() {
               </div>
 
               {/* Column total — floats below the card, no box */}
-              <p className="mt-2.5 px-1 font-mono text-sm font-bold text-ink">{formatMoney(String(total), currency)}</p>
+              <p className="mt-2.5 px-1 font-mono text-base font-bold text-ink">{formatMoney(String(total), currency)}</p>
             </div>
           );
         })}
