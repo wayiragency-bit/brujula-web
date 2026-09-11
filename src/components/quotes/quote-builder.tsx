@@ -1,6 +1,6 @@
 'use client';
 
-import { ExternalLink, Plus, Search } from 'lucide-react';
+import { ArrowLeft, ExternalLink, Plus, Search } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '@/lib/auth-context';
@@ -134,6 +134,7 @@ export function QuoteBuilder({ initial }: { initial?: Quote }) {
   const [paymentAmount, setPaymentAmount] = useState('');
   const [paymentDate, setPaymentDate] = useState(() => new Date().toISOString().slice(0, 10));
   const [paymentReference, setPaymentReference] = useState('');
+  const [showPaymentForm, setShowPaymentForm] = useState(false);
 
   const { data: sellers } = useQuoteSellers();
   const { data: clientOptions } = useQuoteClientOptions(clientSearch);
@@ -256,6 +257,7 @@ export function QuoteBuilder({ initial }: { initial?: Quote }) {
       setPaymentAmount('');
       setPaymentReference('');
       setPaymentDate(new Date().toISOString().slice(0, 10));
+      setShowPaymentForm(false);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'No se pudo registrar el abono.');
     }
@@ -267,7 +269,11 @@ export function QuoteBuilder({ initial }: { initial?: Quote }) {
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <h1 className="font-display text-2xl font-extrabold text-ink">{initial ? initial.number : 'Nueva Cotización'}</h1>
+          <button className="inline-flex items-center gap-1 text-sm font-medium text-ink-soft transition hover:text-ink" onClick={() => router.push('/quotes')} type="button">
+            <ArrowLeft className="h-4 w-4" /> Volver
+          </button>
+          <span className="text-ink/15">|</span>
+          <h1 className="font-display text-2xl font-extrabold uppercase text-ink">{initial ? initial.number : 'Nueva Cotización'}</h1>
           {initial ? <span className={`rounded-full px-3 py-1 font-mono text-[11px] font-bold uppercase ${STATUS_COLORS[initial.status]}`}>{STATUS_LABELS[initial.status]}</span> : null}
         </div>
         <div className="flex flex-wrap gap-2">
@@ -304,7 +310,7 @@ export function QuoteBuilder({ initial }: { initial?: Quote }) {
       {error ? <p className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-600" role="alert">{error}</p> : null}
 
       <div className="grid gap-6 lg:grid-cols-3">
-        <div className="space-y-6 lg:col-span-2">
+        <div className="space-y-6 lg:col-span-1">
           <section className="space-y-4 rounded-2xl border border-ink/10 bg-paper-card p-6 shadow-card">
             <h2 className="label-caps text-ink-soft">Información del Cliente</h2>
             {editable ? (
@@ -385,6 +391,22 @@ export function QuoteBuilder({ initial }: { initial?: Quote }) {
             ) : null}
           </section>
 
+          {canViewFinancial && editable ? (
+            <section className="space-y-4 rounded-2xl border border-ink/10 bg-paper-card p-6 shadow-card">
+              <h2 className="label-caps text-ink-soft">Comisión</h2>
+              <div className="grid grid-cols-2 gap-3">
+                <select className={selectClass} disabled={!canEditPricing} onChange={(e) => setHeaderField('commissionBase', e.target.value as 'MARGIN' | 'TOTAL')} value={header.commissionBase ?? 'MARGIN'}>
+                  <option value="MARGIN">Sobre margen</option>
+                  <option value="TOTAL">Sobre total</option>
+                </select>
+                <input className={inputClass} disabled={!canEditPricing} min={0} onChange={(e) => setHeaderField('commissionPct', e.target.value)} placeholder="%" type="number" value={header.commissionPct ?? '0'} />
+              </div>
+              {preview?.commissionAmount ? <p className="text-xs text-ink-soft">Comisión estimada: {formatMoney(preview.commissionAmount, currency)}</p> : null}
+            </section>
+          ) : null}
+        </div>
+
+        <div className="space-y-6 lg:col-span-2">
           <section className="space-y-4 rounded-2xl border border-ink/10 bg-paper-card p-6 shadow-card">
             <div className="flex items-center justify-between">
               <h2 className="label-caps text-ink-soft">Itinerario de Servicios</h2>
@@ -394,7 +416,7 @@ export function QuoteBuilder({ initial }: { initial?: Quote }) {
                     <Search className="h-3.5 w-3.5" /> Catálogo
                   </button>
                   <button className="button-primary inline-flex items-center gap-1.5 text-xs" onClick={() => setShowManualForm((v) => !v)} type="button">
-                    <Plus className="h-3.5 w-3.5" /> Ítem Manual
+                    <Plus className="h-3.5 w-3.5" /> Agregar Servicio
                   </button>
                 </div>
               ) : null}
@@ -433,7 +455,14 @@ export function QuoteBuilder({ initial }: { initial?: Quote }) {
             ) : null}
 
             {items.length === 0 ? (
-              <p className="py-6 text-center text-sm text-ink-soft">No hay servicios agregados.</p>
+              <div className="py-6 text-center text-sm text-ink-soft">
+                <p>No hay servicios agregados.</p>
+                {editable ? (
+                  <button className="mt-1 font-semibold text-teal hover:underline" onClick={() => setShowCatalog(true)} type="button">
+                    Agregar el primero
+                  </button>
+                ) : null}
+              </div>
             ) : (
               <div className="space-y-3">
                 {items.map((item) => (
@@ -451,15 +480,46 @@ export function QuoteBuilder({ initial }: { initial?: Quote }) {
                 ))}
               </div>
             )}
-          </section>
 
-          <QuoteItinerary destination={header.destination} items={items} />
-        </div>
+            <div className="border-t border-ink/10 pt-4">
+              <div className="flex items-center justify-between">
+                <h3 className="label-caps text-ink-soft">Abonos / Depósitos</h3>
+                {initial && (initial.status === 'ACEPTADA' || initial.status === 'ABONADA') && hasPermission('quotes.record_payment') ? (
+                  <button className="button-secondary inline-flex items-center gap-1.5 text-xs" onClick={() => setShowPaymentForm((v) => !v)} type="button">
+                    <Plus className="h-3.5 w-3.5" /> Añadir Abono
+                  </button>
+                ) : null}
+              </div>
 
-        <aside className="space-y-4">
-          <div className="space-y-3 rounded-2xl border border-ink/10 bg-paper-card p-6 shadow-card">
-            <h2 className="label-caps text-ink-soft">Resumen</h2>
-            <dl className="space-y-2 text-sm">
+              {showPaymentForm && initial ? (
+                <div className="mt-3 grid gap-3 rounded-xl border border-ink/10 p-3 sm:grid-cols-2">
+                  <div className="sm:col-span-2">
+                    <label className={labelClass}>Monto</label>
+                    <div className="flex gap-2">
+                      <input className={inputClass} onChange={(e) => setPaymentAmount(e.target.value)} placeholder="Monto" type="number" value={paymentAmount} />
+                      <button
+                        className="button-secondary shrink-0 whitespace-nowrap text-xs"
+                        onClick={() => setPaymentAmount(initial.balanceDue)}
+                        type="button"
+                      >
+                        Saldo completo
+                      </button>
+                    </div>
+                  </div>
+                  <div>
+                    <label className={labelClass}>Fecha</label>
+                    <input className={inputClass} onChange={(e) => setPaymentDate(e.target.value)} type="date" value={paymentDate} />
+                  </div>
+                  <div>
+                    <label className={labelClass}>Referencia</label>
+                    <input className={inputClass} onChange={(e) => setPaymentReference(e.target.value)} placeholder="N.º comprobante" value={paymentReference} />
+                  </div>
+                  <button className="button-primary sm:col-span-2" disabled={!paymentAmount} onClick={handlePayment} type="button">Registrar Pago</button>
+                </div>
+              ) : null}
+            </div>
+
+            <dl className="space-y-2 border-t border-ink/10 pt-4 text-sm">
               <div className="flex justify-between"><dt className="text-ink-soft">Subtotal</dt><dd className="font-mono text-ink">{formatMoney(preview?.subtotal, currency)}</dd></div>
               <div className="flex justify-between"><dt className="text-ink-soft">Impuestos</dt><dd className="font-mono text-ink">{formatMoney(preview?.taxTotal, currency)}</dd></div>
               <div className="flex justify-between border-t border-ink/10 pt-2 text-base font-bold"><dt className="text-ink">Total</dt><dd className="font-mono text-ink">{formatMoney(preview?.total, currency)}</dd></div>
@@ -473,52 +533,10 @@ export function QuoteBuilder({ initial }: { initial?: Quote }) {
                 </>
               ) : null}
             </dl>
-          </div>
+          </section>
 
-          {canViewFinancial && editable ? (
-            <div className="space-y-3 rounded-2xl border border-ink/10 bg-paper-card p-6 shadow-card">
-              <h2 className="label-caps text-ink-soft">Comisión</h2>
-              <div className="grid grid-cols-2 gap-3">
-                <select className={selectClass} disabled={!canEditPricing} onChange={(e) => setHeaderField('commissionBase', e.target.value as 'MARGIN' | 'TOTAL')} value={header.commissionBase ?? 'MARGIN'}>
-                  <option value="MARGIN">Sobre margen</option>
-                  <option value="TOTAL">Sobre total</option>
-                </select>
-                <input className={inputClass} disabled={!canEditPricing} min={0} onChange={(e) => setHeaderField('commissionPct', e.target.value)} placeholder="%" type="number" value={header.commissionPct ?? '0'} />
-              </div>
-              {preview?.commissionAmount ? <p className="text-xs text-ink-soft">Comisión estimada: {formatMoney(preview.commissionAmount, currency)}</p> : null}
-            </div>
-          ) : null}
-
-          {initial && (initial.status === 'ACEPTADA' || initial.status === 'ABONADA') && hasPermission('quotes.record_payment') ? (
-            <div className="space-y-3 rounded-2xl border border-ink/10 bg-paper-card p-6 shadow-card">
-              <h2 className="label-caps text-ink-soft">Registrar Abono</h2>
-              <div>
-                <label className={labelClass}>Monto</label>
-                <div className="flex gap-2">
-                  <input className={inputClass} onChange={(e) => setPaymentAmount(e.target.value)} placeholder="Monto" type="number" value={paymentAmount} />
-                  <button
-                    className="button-secondary shrink-0 whitespace-nowrap text-xs"
-                    onClick={() => setPaymentAmount(initial.balanceDue)}
-                    type="button"
-                  >
-                    Saldo completo
-                  </button>
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className={labelClass}>Fecha</label>
-                  <input className={inputClass} onChange={(e) => setPaymentDate(e.target.value)} type="date" value={paymentDate} />
-                </div>
-                <div>
-                  <label className={labelClass}>Referencia</label>
-                  <input className={inputClass} onChange={(e) => setPaymentReference(e.target.value)} placeholder="N.º comprobante" value={paymentReference} />
-                </div>
-              </div>
-              <button className="button-primary w-full" disabled={!paymentAmount} onClick={handlePayment} type="button">Registrar Pago</button>
-            </div>
-          ) : null}
-        </aside>
+          <QuoteItinerary destination={header.destination} items={items} />
+        </div>
       </div>
     </div>
   );
