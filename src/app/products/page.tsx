@@ -16,13 +16,14 @@ function formatMoney(value: number, currency: string): string {
 export default function ProductsPage() {
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
-  const { data, isLoading } = useProducts({ q: search || undefined, page, limit: PAGE_SIZE });
+  const { data, isLoading } = useProducts({ q: search || undefined, page, limit: PAGE_SIZE, active: true });
 
   const createProduct = useCreateProduct();
   const deactivateProduct = useDeactivateProduct();
   const [modalOpen, setModalOpen] = useState(false);
   const [modalKey, setModalKey] = useState(0);
   const [editing, setEditing] = useState<Product | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState<Product | null>(null);
   const updateProduct = useUpdateProduct(editing?.id ?? 'none');
 
   function openCreate() {
@@ -85,9 +86,7 @@ export default function ProductsPage() {
                     <button
                       aria-label="Desactivar"
                       className="rounded-lg p-1.5 text-ink-soft transition hover:bg-red-50 hover:text-red-600"
-                      onClick={() => {
-                        if (window.confirm(`¿Desactivar ${product.name}?`)) deactivateProduct.mutate(product.id);
-                      }}
+                      onClick={() => setConfirmDelete(product)}
                       type="button"
                     >
                       <Trash2 className="h-4 w-4" />
@@ -138,6 +137,33 @@ export default function ProductsPage() {
       </div>
 
       <ProductFormModal key={modalKey} initial={editing ?? undefined} onClose={() => setModalOpen(false)} onSubmit={handleSubmit} open={modalOpen} />
+
+      {confirmDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)' }} onClick={() => setConfirmDelete(null)}>
+          <div className="w-full max-w-sm rounded-2xl p-6 space-y-4" style={{ background: 'var(--paper-card)', border: '1px solid var(--border)' }} onClick={(e) => e.stopPropagation()}>
+            <div>
+              <p className="label-caps text-red-400">Desactivar producto</p>
+              <h3 className="font-display text-lg font-extrabold text-ink mt-1">{confirmDelete.name}</h3>
+              <p className="text-sm text-ink-soft mt-1">El producto dejará de aparecer en tu catálogo y no podrá agregarse a nuevas cotizaciones. Las cotizaciones existentes no se ven afectadas.</p>
+            </div>
+            <div className="flex gap-2 justify-end">
+              <button className="button-secondary" onClick={() => setConfirmDelete(null)} type="button">Cancelar</button>
+              <button
+                className="inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-bold text-white bg-red-500 hover:bg-red-600 transition disabled:opacity-50"
+                disabled={deactivateProduct.isPending}
+                onClick={() => {
+                  const id = confirmDelete.id;
+                  setConfirmDelete(null);
+                  deactivateProduct.mutate(id);
+                }}
+                type="button"
+              >
+                <Trash2 className="h-3.5 w-3.5" /> {deactivateProduct.isPending ? 'Eliminando…' : 'Eliminar'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </AppShell>
   );
 }

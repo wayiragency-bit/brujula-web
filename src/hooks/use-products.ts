@@ -6,6 +6,7 @@ export interface ProductsFilters {
   q?: string;
   type?: ProductType;
   category?: string;
+  active?: boolean;
   page: number;
   limit: number;
 }
@@ -15,6 +16,7 @@ function buildQuery(filters: ProductsFilters): string {
   if (filters.q) params.set('q', filters.q);
   if (filters.type) params.set('type', filters.type);
   if (filters.category) params.set('category', filters.category);
+  if (filters.active !== undefined) params.set('active', String(filters.active));
   params.set('page', String(filters.page));
   params.set('limit', String(filters.limit));
   return params.toString();
