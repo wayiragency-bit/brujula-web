@@ -126,7 +126,7 @@ export function QuoteCatalogModal({ open, onClose, onConfirm }: QuoteCatalogModa
                   <div className="space-y-2 p-3">
                     <p className="text-sm font-semibold text-ink">{product.name}</p>
                     {product.description ? <p className="line-clamp-2 text-xs text-ink-soft">{product.description}</p> : null}
-                    <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center justify-between gap-2 border-t border-ink/10 pt-2">
                       <p className="font-mono text-sm font-bold text-teal">{formatMoney(product.sellPrice, product.currency)}</p>
                       {isSelected ? (
                         <div className="flex items-center gap-2 rounded-lg border border-ink/10 px-1.5 py-0.5">
