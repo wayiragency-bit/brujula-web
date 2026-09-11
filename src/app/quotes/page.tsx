@@ -185,25 +185,25 @@ export default function QuotesPage() {
             const val  = getMetricValue(def);
             return (
               <div
+                className="glass-card relative overflow-hidden rounded-2xl p-4"
                 key={def.key}
-                className="glass-card rounded-2xl p-4"
               >
-                <div className="mb-3 flex items-center justify-between gap-2">
-                  <div className="flex min-w-0 items-center gap-3">
-                    <div
-                      className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-white"
-                      style={{ background: def.iconBg, boxShadow: `0 4px 10px ${def.iconShadow}` }}
-                    >
-                      <Icon className="h-5 w-5" />
-                    </div>
-                    <p
-                      className="truncate font-black uppercase text-ink-soft"
-                      style={{ fontSize: '10px', letterSpacing: '2px' }}
-                    >
-                      {def.label}
-                    </p>
-                  </div>
+                <div className="absolute right-3 top-3 opacity-90">
                   <Sparkline color={def.iconBg} points={def.spark} />
+                </div>
+                <div className="mb-3 flex items-center gap-3 pr-20">
+                  <div
+                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-white"
+                    style={{ background: def.iconBg, boxShadow: `0 4px 10px ${def.iconShadow}` }}
+                  >
+                    <Icon className="h-5 w-5" />
+                  </div>
+                  <p
+                    className="font-black uppercase leading-tight text-ink-soft"
+                    style={{ fontSize: '10px', letterSpacing: '1.5px' }}
+                  >
+                    {def.label}
+                  </p>
                 </div>
                 <p
                   className="font-black text-ink leading-none"
