@@ -67,25 +67,25 @@ export function AppShell({ children }: Readonly<{ children: React.ReactNode }>) 
   return (
     <div className="min-h-screen bg-paper text-ink">
       {/* ── SIDEBAR (desktop) ── */}
-      <aside className="glass-panel fixed top-4 bottom-4 left-4 z-40 hidden w-[92px] flex-col items-center py-[clamp(8px,2vh,16px)] rounded-2xl overflow-hidden lg:flex">
+      <aside className="glass-panel fixed top-4 bottom-4 left-4 z-40 hidden w-[92px] flex-col items-center py-[clamp(8px,1.8vh,16px)] rounded-2xl overflow-hidden lg:flex">
 
         {/* Logo mark */}
         <Link
           aria-label="Brújula"
-          className="flex h-[clamp(40px,6vh,64px)] w-[clamp(40px,6vh,64px)] shrink-0 items-center justify-center rounded-2xl bg-amber/15 text-amber transition hover:bg-amber/25"
+          className="flex h-[clamp(44px,7vh,64px)] w-[clamp(44px,7vh,64px)] shrink-0 items-center justify-center rounded-2xl bg-amber/15 text-amber transition hover:bg-amber/25"
           href="/"
         >
-          <Compass className="h-[clamp(20px,3vh,32px)] w-[clamp(20px,3vh,32px)]" />
+          <Compass className="h-[clamp(22px,3.5vh,32px)] w-[clamp(22px,3.5vh,32px)]" />
         </Link>
 
         {/* Nav icons */}
-        <nav aria-label="Navegación principal" className="mt-[clamp(6px,3vh,32px)] flex flex-1 min-h-0 flex-col items-center justify-start gap-[clamp(2px,0.9vh,12px)] w-full px-2 overflow-hidden">
+        <nav aria-label="Navegación principal" className="mt-[clamp(8px,3.5vh,32px)] flex flex-1 min-h-0 flex-col items-center justify-start gap-[clamp(4px,1.3vh,12px)] w-full px-2 overflow-hidden">
           {navigation.map(({ label, href, icon: Icon }) => {
             const active = isActive(pathname, href);
             return (
               <Link
                 aria-label={label}
-                className={`flex w-full flex-col items-center justify-center gap-0.5 rounded-xl py-[clamp(0px,0.3vh,4px)] px-1 transition-all duration-200 ${
+                className={`flex w-full flex-col items-center justify-center gap-0.5 rounded-xl py-[clamp(0px,0.45vh,4px)] px-1 transition-all duration-200 ${
                   active
                     ? 'bg-amber text-[var(--sidebar-bg)] shadow-[0_0_16px_rgba(254,178,59,0.25)]'
                     : 'text-[var(--sidebar-nav-text)] hover:bg-[var(--sidebar-nav-hover-bg)] hover:text-[var(--sidebar-nav-text-active)]'
@@ -93,8 +93,8 @@ export function AppShell({ children }: Readonly<{ children: React.ReactNode }>) 
                 href={href}
                 key={label}
               >
-                <Icon className="h-[clamp(14px,2vh,22px)] w-[clamp(14px,2vh,22px)]" />
-                <span className="text-[clamp(7px,0.9vh,10px)] font-medium leading-tight text-center w-full">
+                <Icon className="h-[clamp(16px,2.4vh,22px)] w-[clamp(16px,2.4vh,22px)]" />
+                <span className="text-[clamp(8px,1.1vh,10px)] font-medium leading-tight text-center w-full">
                   {label.split(' ').map((word) => (
                     <span className="block" key={word}>{word}</span>
                   ))}
@@ -107,12 +107,12 @@ export function AppShell({ children }: Readonly<{ children: React.ReactNode }>) 
         {/* Logout */}
         <button
           aria-label="Cerrar sesión"
-          className="group mt-[clamp(2px,1vh,8px)] flex shrink-0 flex-col items-center justify-center gap-1 rounded-xl py-[clamp(0px,0.4vh,8px)] px-4 transition-all duration-200 text-red-400 hover:bg-red-500 hover:text-white hover:shadow-[0_0_16px_rgba(239,68,68,0.3)]"
+          className="group mt-[clamp(2px,0.9vh,8px)] flex shrink-0 flex-col items-center justify-center gap-1 rounded-xl py-[clamp(0px,0.9vh,8px)] px-4 transition-all duration-200 text-red-400 hover:bg-red-500 hover:text-white hover:shadow-[0_0_16px_rgba(239,68,68,0.3)]"
           onClick={() => logout().then(() => router.replace('/login'))}
           type="button"
         >
-          <LogOut className="h-[clamp(16px,2.2vh,25px)] w-[clamp(16px,2.2vh,25px)]" />
-          <span className="text-[clamp(7px,0.9vh,11px)] font-medium leading-tight text-center">Salir</span>
+          <LogOut className="h-[clamp(18px,2.8vh,25px)] w-[clamp(18px,2.8vh,25px)]" />
+          <span className="text-[clamp(8px,1.2vh,11px)] font-medium leading-tight text-center">Salir</span>
         </button>
       </aside>
 
