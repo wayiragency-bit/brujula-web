@@ -6,6 +6,7 @@ export interface QuotesFilters {
   q?: string;
   status?: QuoteStatus;
   statuses?: QuoteStatus[];
+  sellerId?: string;
   from?: string;
   to?: string;
   createdFrom?: string;

@@ -2,14 +2,14 @@
 
 import {
   AlertCircle, BarChart3, Calendar, CheckCircle2, ChevronLeft, ChevronRight,
-  Circle, Clock, DollarSign, FileText, Filter, Plus, Search, Send, Trash2, TrendingUp, XCircle,
+  Circle, Clock, DollarSign, FileText, Filter, Plus, Search, Send, Trash2, TrendingUp, UserRound, XCircle,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useMemo, useState } from 'react';
 import { AppShell } from '@/components/app-shell';
 import { Sparkline } from '@/components/dashboard/sparkline';
 import { QuoteActionsMenu } from '@/components/quotes/quote-actions-menu';
-import { useDeleteQuote, useQuotes } from '@/hooks/use-quotes';
+import { useDeleteQuote, useQuoteSellers, useQuotes } from '@/hooks/use-quotes';
 import type { Quote, QuoteStatus } from '@/lib/types';
 
 const SPARKLINES = [
@@ -134,6 +134,8 @@ export default function QuotesPage() {
   const [status, setStatus]   = useState<QuoteStatus | undefined>(undefined);
   const [page, setPage]       = useState(1);
   const [pageSize, setPageSize] = useState(PAGE_SIZE);
+  const [sellerId, setSellerId] = useState('');
+  const { data: sellers } = useQuoteSellers();
   const [emisionOpen, setEmisionOpen] = useState(false);
   const [checkinOpen, setCheckinOpen] = useState(false);
   const [createdFrom, setCreatedFrom] = useState('');
@@ -144,7 +146,7 @@ export default function QuotesPage() {
   const hasCheckinFilter = Boolean(checkinFrom || checkinTo);
 
   const { data, isLoading } = useQuotes({
-    q: search || undefined, status, page, limit: pageSize,
+    q: search || undefined, status, page, limit: pageSize, sellerId: sellerId || undefined,
     createdFrom: createdFrom || undefined, createdTo: createdTo || undefined,
     from: checkinFrom || undefined, to: checkinTo || undefined,
   });
@@ -431,6 +433,18 @@ export default function QuotesPage() {
             >
               <option value="">Todos Los Estados</option>
               {ALL_STATUSES.map((s) => <option key={s} value={s}>{STATUS_LABELS[s]}</option>)}
+            </select>
+          </label>
+
+          <label className="inline-flex items-center gap-2 rounded-xl px-3.5 py-2.5 text-sm" style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
+            <UserRound className="h-4 w-4 text-ink-soft" />
+            <select
+              className="bg-transparent font-semibold text-ink outline-none"
+              onChange={(e) => { setSellerId(e.target.value); setPage(1); }}
+              value={sellerId}
+            >
+              <option value="">Todos Los Agentes</option>
+              {sellers?.map((seller) => <option key={seller.id} value={seller.id}>{seller.name}</option>)}
             </select>
           </label>
         </div>
