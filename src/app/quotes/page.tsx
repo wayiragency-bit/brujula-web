@@ -2,14 +2,15 @@
 
 import {
   AlertCircle, BarChart3, CheckCircle2, ChevronLeft, ChevronRight,
-  Circle, Clock, DollarSign, FileText, Plus, Search, Send, TrendingUp, XCircle,
+  Circle, Clock, DollarSign, FileText, Plus, Search, Send, Trash2, TrendingUp, XCircle,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useMemo, useState } from 'react';
 import { AppShell } from '@/components/app-shell';
 import { Sparkline } from '@/components/dashboard/sparkline';
-import { useQuotes } from '@/hooks/use-quotes';
-import type { QuoteStatus } from '@/lib/types';
+import { QuoteActionsMenu } from '@/components/quotes/quote-actions-menu';
+import { useDeleteQuote, useQuotes } from '@/hooks/use-quotes';
+import type { Quote, QuoteStatus } from '@/lib/types';
 
 const SPARKLINES = [
   [10, 18, 14, 24, 20, 30],
@@ -134,6 +135,8 @@ export default function QuotesPage() {
   const [page, setPage]       = useState(1);
 
   const { data, isLoading } = useQuotes({ q: search || undefined, status, page, limit: PAGE_SIZE });
+  const [confirmDelete, setConfirmDelete] = useState<Quote | null>(null);
+  const deleteQuote = useDeleteQuote();
 
   const { counts, totals } = useMemo(() => {
     const c = new Map<QuoteStatus, number>();
@@ -289,11 +292,11 @@ export default function QuotesPage() {
           <table className="w-full min-w-[900px]">
             <thead>
               <tr style={{ borderBottom: '1px solid var(--border)' }}>
-                {['ID', 'Cliente', 'Agente', 'Emisión', 'Válido Hasta', 'Destino', 'Total', 'Depósito', 'Estado'].map((col, i) => (
+                {['ID', 'Cliente', 'Agente', 'Emisión', 'Válido Hasta', 'Destino', 'Total', 'Depósito', 'Estado', 'Acciones'].map((col, i) => (
                   <th
                     key={col}
                     className="px-4 py-3 text-left text-ink"
-                    style={{ fontSize: '14px', fontWeight: 700, textAlign: i >= 6 && i <= 7 ? 'right' : 'left' }}
+                    style={{ fontSize: '14px', fontWeight: 700, textAlign: i >= 6 && i <= 7 ? 'right' : col === 'Acciones' ? 'center' : 'left' }}
                   >
                     {col}
                   </th>
@@ -303,13 +306,13 @@ export default function QuotesPage() {
             <tbody>
               {isLoading ? (
                 <tr>
-                  <td className="px-4 py-8 text-center text-sm text-ink-soft" colSpan={9}>
+                  <td className="px-4 py-8 text-center text-sm text-ink-soft" colSpan={10}>
                     Cargando cotizaciones…
                   </td>
                 </tr>
               ) : data?.data.length === 0 ? (
                 <tr>
-                  <td className="px-4 py-8 text-center text-sm text-ink-soft" colSpan={9}>
+                  <td className="px-4 py-8 text-center text-sm text-ink-soft" colSpan={10}>
                     No se encontraron cotizaciones.
                   </td>
                 </tr>
@@ -361,6 +364,9 @@ export default function QuotesPage() {
                           {STATUS_LABELS[quote.status]}
                         </span>
                       </td>
+                      <td className="px-4 py-3 text-center">
+                        <QuoteActionsMenu onDelete={() => setConfirmDelete(quote)} quote={quote} />
+                      </td>
                     </tr>
                   );
                 })
@@ -395,6 +401,33 @@ export default function QuotesPage() {
           </div>
         )}
       </div>
+
+      {confirmDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={() => setConfirmDelete(null)} style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)' }}>
+          <div className="w-full max-w-sm rounded-2xl p-6 space-y-4" onClick={(e) => e.stopPropagation()} style={{ background: 'var(--paper-card)', border: '1px solid var(--border)' }}>
+            <div>
+              <p className="label-caps text-red-400">Eliminar cotización</p>
+              <h3 className="font-display text-lg font-extrabold text-ink mt-1">{confirmDelete.number}</h3>
+              <p className="text-sm text-ink-soft mt-1">Esta acción eliminará la cotización permanentemente. No podrás deshacerla.</p>
+            </div>
+            <div className="flex gap-2 justify-end">
+              <button className="button-secondary" onClick={() => setConfirmDelete(null)} type="button">Cancelar</button>
+              <button
+                className="inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-bold text-white bg-red-500 hover:bg-red-600 transition disabled:opacity-50"
+                disabled={deleteQuote.isPending}
+                onClick={() => {
+                  const target = confirmDelete;
+                  setConfirmDelete(null);
+                  deleteQuote.mutate({ id: target.id, version: target.version });
+                }}
+                type="button"
+              >
+                <Trash2 className="h-3.5 w-3.5" /> {deleteQuote.isPending ? 'Eliminando…' : 'Eliminar'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </AppShell>
   );
 }

@@ -93,6 +93,20 @@ export function useChangeQuoteStatus(id: string) {
   });
 }
 
+export function useResendQuoteEmail() {
+  return useMutation({
+    mutationFn: (id: string) => api.post<{ sent: true }>(`/quotes/${id}/resend-email`),
+  });
+}
+
+export function useDeleteQuote() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, version }: { id: string; version: number }) => api.delete<void>(`/quotes/${id}?version=${version}`),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['quotes'] }),
+  });
+}
+
 export function useRecordPayment(id: string) {
   const queryClient = useQueryClient();
   return useMutation({
