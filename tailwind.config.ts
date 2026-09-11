@@ -32,7 +32,7 @@ const config: Config = {
         floating: '0 24px 48px -12px rgba(0,0,0,0.6)',
       },
       maxWidth: {
-        content: '1400px',
+        content: '1600px',
       },
     },
   },

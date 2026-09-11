@@ -114,7 +114,7 @@ export function QuotesAnalyticsChart() {
   const hasAnyData = (data?.buckets.length ?? 0) > 0;
 
   return (
-    <article className="rounded-2xl p-6 sm:p-7" style={{ background: 'var(--paper-card)', border: '1px solid var(--border)' }}>
+    <article className="rounded-2xl p-7 sm:p-8" style={{ background: 'var(--paper-card)', border: '1px solid var(--border)' }}>
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <h2 className="font-semibold text-ink">Análisis de Cotizaciones</h2>
