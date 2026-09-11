@@ -1,7 +1,10 @@
 'use client';
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { BarChart3, CalendarDays, ChevronLeft, ChevronRight, X } from 'lucide-react';
+import {
+  AlertTriangle, BadgeCheck, BarChart3, CalendarDays, CheckCircle2, ChevronLeft, ChevronRight,
+  FileEdit, Send, Wallet, X, XCircle,
+} from 'lucide-react';
 import Link from 'next/link';
 import { useMemo, useState } from 'react';
 import { AppShell } from '@/components/app-shell';
@@ -23,6 +26,33 @@ const STATUS_COLORS: Record<QuoteStatus, { dot: string; badge: string; text: str
   RECHAZADA: { dot: '#ef4444', badge: 'rgba(239,68,68,0.15)',   text: '#ef4444' },
   VENCIDA:   { dot: '#f59e0b', badge: 'rgba(245,158,11,0.15)',  text: '#f59e0b' },
 };
+
+const STATUS_ICONS: Record<QuoteStatus, React.ElementType> = {
+  BORRADOR: FileEdit, ENVIADA: Send, ACEPTADA: CheckCircle2, ABONADA: Wallet,
+  PAGADA: BadgeCheck, RECHAZADA: XCircle, VENCIDA: AlertTriangle,
+};
+
+function ColumnHeader({ status, count }: { status: QuoteStatus; count: number }) {
+  const sc = STATUS_COLORS[status];
+  const Icon = STATUS_ICONS[status];
+  return (
+    <div
+      className="flex items-center justify-between rounded-t-2xl px-3 py-2.5"
+      style={{ background: sc.badge, borderBottom: `4px solid ${sc.dot}` }}
+    >
+      <div className="flex items-center gap-2">
+        <Icon className="h-4 w-4 shrink-0" style={{ color: sc.dot }} />
+        <h3 className="text-sm font-bold uppercase tracking-wide" style={{ color: 'var(--ink)' }}>{STATUS_LABELS[status]}</h3>
+      </div>
+      <span
+        className="flex h-5 min-w-[22px] shrink-0 items-center justify-center rounded-full px-2 text-xs font-bold"
+        style={{ background: 'var(--paper-card)', color: 'var(--ink-soft)' }}
+      >
+        {count}
+      </span>
+    </div>
+  );
+}
 
 function clientInitials(name?: string): string {
   if (!name) return '?';
@@ -181,6 +211,7 @@ function SidePanel({
   const total    = cards.reduce((sum, c) => sum + Number(c.total), 0);
   const currency = cards[0]?.currency ?? 'COP';
   const sc       = STATUS_COLORS[status];
+  const Icon     = STATUS_ICONS[status];
   return (
     <div className="fixed inset-0 z-50 flex" onClick={onClose}>
       <div className="flex-1" style={{ background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)' }} />
@@ -190,21 +221,22 @@ function SidePanel({
         onClick={(e) => e.stopPropagation()}
       >
         {/* Panel header */}
-        <div className="flex items-center justify-between px-4 py-4" style={{ borderBottom: '1px solid var(--border)' }}>
+        <div className="flex items-center justify-between px-4 py-3" style={{ background: sc.badge, borderBottom: `4px solid ${sc.dot}` }}>
           <div className="flex items-center gap-2">
-            <span className="h-2 w-2 rounded-full" style={{ background: sc.dot }} />
-            <h3 className="text-sm font-bold uppercase tracking-wide text-ink">{label}</h3>
+            <Icon className="h-4 w-4 shrink-0" style={{ color: sc.dot }} />
+            <h3 className="text-sm font-bold uppercase tracking-wide" style={{ color: 'var(--ink)' }}>{label}</h3>
             <span
-              className="flex h-5 min-w-[20px] items-center justify-center rounded-full px-1.5 text-xs font-bold"
-              style={{ background: sc.badge, color: sc.text }}
+              className="flex h-5 min-w-[22px] items-center justify-center rounded-full px-2 text-xs font-bold"
+              style={{ background: 'var(--paper-card)', color: 'var(--ink-soft)' }}
             >
               {cards.length}
             </span>
           </div>
           <button
             aria-label="Cerrar"
-            className="rounded-lg p-1.5 text-ink-soft transition hover:bg-ink/10 hover:text-ink"
+            className="rounded-lg p-1.5 transition hover:bg-black/10"
             onClick={onClose}
+            style={{ color: 'var(--ink-soft)' }}
             type="button"
           >
             <X className="h-4 w-4" />
@@ -288,28 +320,18 @@ function KanbanBoard() {
         {mainColumns.map((column) => {
           const total    = column.cards.reduce((sum, c) => sum + Number(c.total), 0);
           const currency = column.cards[0]?.currency ?? 'COP';
-          const sc       = STATUS_COLORS[column.status];
           return (
-            <div className="flex min-w-0 flex-col gap-2" key={column.status}>
-
-              {/* Column header — outside/above the card area */}
-              <div className="flex items-center justify-between px-1">
-                <div className="flex items-center gap-2">
-                  <span className="h-2 w-2 rounded-full" style={{ background: sc.dot }} />
-                  <h3 className="text-sm font-bold uppercase tracking-wide text-ink">{STATUS_LABELS[column.status]}</h3>
-                </div>
-                <span
-                  className="flex h-5 min-w-[20px] items-center justify-center rounded-full px-1.5 text-xs font-bold"
-                  style={{ background: sc.badge, color: sc.text }}
-                >
-                  {column.cards.length}
-                </span>
-              </div>
+            <div
+              className="flex min-w-0 flex-col overflow-hidden rounded-2xl"
+              key={column.status}
+              style={{ border: '1px solid var(--border-faint)' }}
+            >
+              <ColumnHeader count={column.cards.length} status={column.status} />
 
               {/* Cards area */}
               <div
-                className="flex flex-1 flex-col gap-2 rounded-2xl p-2 min-h-[200px]"
-                style={{ background: 'var(--surface)', border: '1px solid var(--border-faint)' }}
+                className="flex flex-1 flex-col gap-2 p-2 min-h-[200px]"
+                style={{ background: 'var(--surface)' }}
                 onDragOver={(e) => e.preventDefault()}
                 onDrop={() => handleDrop(column.status)}
               >
@@ -320,8 +342,8 @@ function KanbanBoard() {
                 )}
               </div>
 
-              {/* Column total — outside/below the card area */}
-              <div className="px-1">
+              {/* Column total */}
+              <div className="px-3 py-2.5" style={{ background: 'var(--paper-card)', borderTop: '1px solid var(--border-faint)' }}>
                 <p className="label-caps text-ink-muted">Total etapa</p>
                 <p className="font-mono text-sm font-bold text-ink">{formatMoney(String(total), currency)}</p>
               </div>
@@ -477,7 +499,7 @@ export default function PipelinePage() {
             className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium transition hover:brightness-110"
             style={{ background: scB.badge, color: scB.text, border: `1px solid ${scB.dot}40` }}
           >
-            <span className="h-1.5 w-1.5 rounded-full" style={{ background: scB.dot }} />
+            <STATUS_ICONS.BORRADOR className="h-3.5 w-3.5" />
             Borrador
             {borradorCards.length > 0 && (
               <span className="ml-1 rounded-full px-1.5 py-0.5 text-[10px] font-bold" style={{ background: scB.dot + '33', color: scB.text }}>
@@ -491,7 +513,7 @@ export default function PipelinePage() {
             className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium transition hover:brightness-110"
             style={{ background: scV.badge, color: scV.text, border: `1px solid ${scV.dot}40` }}
           >
-            <span className="h-1.5 w-1.5 rounded-full" style={{ background: scV.dot }} />
+            <STATUS_ICONS.VENCIDA className="h-3.5 w-3.5" />
             Vencidas
             {vencidasCards.length > 0 && (
               <span className="ml-1 rounded-full px-1.5 py-0.5 text-[10px] font-bold" style={{ background: scV.dot + '33', color: scV.text }}>
