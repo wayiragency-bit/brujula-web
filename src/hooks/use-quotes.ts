@@ -6,6 +6,10 @@ export interface QuotesFilters {
   q?: string;
   status?: QuoteStatus;
   statuses?: QuoteStatus[];
+  from?: string;
+  to?: string;
+  createdFrom?: string;
+  createdTo?: string;
   sort?: 'createdAt' | 'startDate' | 'total' | 'number' | 'updatedAt';
   order?: 'ASC' | 'DESC';
   page: number;

@@ -1,7 +1,7 @@
 'use client';
 
 import {
-  AlertCircle, BarChart3, CheckCircle2, ChevronLeft, ChevronRight,
+  AlertCircle, BarChart3, Calendar, CheckCircle2, ChevronLeft, ChevronRight,
   Circle, Clock, DollarSign, FileText, Plus, Search, Send, Trash2, TrendingUp, XCircle,
 } from 'lucide-react';
 import Link from 'next/link';
@@ -133,10 +133,25 @@ export default function QuotesPage() {
   const [search, setSearch]   = useState('');
   const [status, setStatus]   = useState<QuoteStatus | undefined>(undefined);
   const [page, setPage]       = useState(1);
+  const [dateFilterOpen, setDateFilterOpen] = useState(false);
+  const [createdFrom, setCreatedFrom] = useState('');
+  const [createdTo, setCreatedTo] = useState('');
+  const [checkinFrom, setCheckinFrom] = useState('');
+  const [checkinTo, setCheckinTo] = useState('');
+  const hasDateFilter = Boolean(createdFrom || createdTo || checkinFrom || checkinTo);
 
-  const { data, isLoading } = useQuotes({ q: search || undefined, status, page, limit: PAGE_SIZE });
+  const { data, isLoading } = useQuotes({
+    q: search || undefined, status, page, limit: PAGE_SIZE,
+    createdFrom: createdFrom || undefined, createdTo: createdTo || undefined,
+    from: checkinFrom || undefined, to: checkinTo || undefined,
+  });
   const [confirmDelete, setConfirmDelete] = useState<Quote | null>(null);
   const deleteQuote = useDeleteQuote();
+
+  function clearDateFilters() {
+    setCreatedFrom(''); setCreatedTo(''); setCheckinFrom(''); setCheckinTo('');
+    setPage(1);
+  }
 
   const { counts, totals } = useMemo(() => {
     const c = new Map<QuoteStatus, number>();
@@ -275,16 +290,88 @@ export default function QuotesPage() {
           })}
         </div>
 
-        {/* Search */}
-        <div className="relative w-full sm:max-w-sm">
-          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-muted" />
-          <input
-            className="w-full rounded-xl py-2.5 pl-9 pr-3 text-sm text-ink placeholder:text-ink-muted focus:outline-none focus:ring-1 focus:ring-teal/40"
-            style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}
-            placeholder="Buscar por número, destino o cliente…"
-            value={search}
-            onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-          />
+        {/* Search + date filter */}
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="relative w-full sm:max-w-sm">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-muted" />
+            <input
+              className="w-full rounded-xl py-2.5 pl-9 pr-3 text-sm text-ink placeholder:text-ink-muted focus:outline-none focus:ring-1 focus:ring-teal/40"
+              style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}
+              placeholder="Buscar por número, destino o cliente…"
+              value={search}
+              onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+            />
+          </div>
+
+          <div className="relative">
+            <button
+              className="inline-flex items-center gap-2 rounded-xl px-3.5 py-2.5 text-sm font-semibold transition"
+              onClick={() => setDateFilterOpen((o) => !o)}
+              style={{
+                border: `1px solid ${hasDateFilter ? '#8b5cf6' : 'var(--border)'}`,
+                color: hasDateFilter ? '#8b5cf6' : 'var(--ink)',
+                background: hasDateFilter ? 'rgba(139,92,246,0.08)' : 'var(--surface)',
+              }}
+              type="button"
+            >
+              <Calendar className="h-4 w-4" /> Filtro de Fechas
+            </button>
+
+            {dateFilterOpen ? (
+              <>
+                <div className="fixed inset-0 z-40" onClick={() => setDateFilterOpen(false)} />
+                <div
+                  className="absolute left-0 top-full z-50 mt-2 w-72 space-y-4 rounded-2xl p-4 shadow-floating"
+                  onClick={(e) => e.stopPropagation()}
+                  style={{ background: 'var(--paper-card)', border: '1px solid var(--border)' }}
+                >
+                  <div>
+                    <p className="label-caps mb-2 text-ink-soft" style={{ fontSize: '10px', letterSpacing: '1.5px' }}>Fecha de Emisión</p>
+                    <div className="grid grid-cols-2 gap-2">
+                      <input
+                        className="w-full rounded-lg px-2 py-1.5 text-sm text-ink outline-none focus:ring-1 focus:ring-teal/40"
+                        onChange={(e) => { setCreatedFrom(e.target.value); setPage(1); }}
+                        style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}
+                        type="date"
+                        value={createdFrom}
+                      />
+                      <input
+                        className="w-full rounded-lg px-2 py-1.5 text-sm text-ink outline-none focus:ring-1 focus:ring-teal/40"
+                        onChange={(e) => { setCreatedTo(e.target.value); setPage(1); }}
+                        style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}
+                        type="date"
+                        value={createdTo}
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <p className="label-caps mb-2 text-ink-soft" style={{ fontSize: '10px', letterSpacing: '1.5px' }}>Fecha de Check-in</p>
+                    <div className="grid grid-cols-2 gap-2">
+                      <input
+                        className="w-full rounded-lg px-2 py-1.5 text-sm text-ink outline-none focus:ring-1 focus:ring-teal/40"
+                        onChange={(e) => { setCheckinFrom(e.target.value); setPage(1); }}
+                        style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}
+                        type="date"
+                        value={checkinFrom}
+                      />
+                      <input
+                        className="w-full rounded-lg px-2 py-1.5 text-sm text-ink outline-none focus:ring-1 focus:ring-teal/40"
+                        onChange={(e) => { setCheckinTo(e.target.value); setPage(1); }}
+                        style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}
+                        type="date"
+                        value={checkinTo}
+                      />
+                    </div>
+                  </div>
+                  {hasDateFilter ? (
+                    <button className="text-xs font-semibold text-ink-soft hover:text-ink" onClick={clearDateFilters} type="button">
+                      Limpiar filtros de fecha
+                    </button>
+                  ) : null}
+                </div>
+              </>
+            ) : null}
+          </div>
         </div>
 
         {/* Table */}
