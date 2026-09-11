@@ -334,7 +334,7 @@ export function QuoteBuilder({ initial }: { initial?: Quote }) {
                     {clientOptionsLoading ? (
                       <p className="px-3 py-2 text-sm text-ink-soft">Buscando…</p>
                     ) : clientOptions && clientOptions.length > 0 ? (
-                      <ul>
+                      <ul className="max-h-[120px] overflow-y-auto">
                         {clientOptions.map((client) => (
                           <li key={client.id}>
                             <button
