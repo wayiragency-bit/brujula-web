@@ -45,6 +45,32 @@ function bucketLabel(iso: string, granularity: AnalyticsGranularity): string {
     : d.toLocaleDateString('es-CO', { month: 'short' }).toUpperCase();
 }
 
+function periodKey(d: Date, granularity: AnalyticsGranularity): string {
+  return granularity === 'day'
+    ? `${d.getUTCFullYear()}-${d.getUTCMonth()}-${d.getUTCDate()}`
+    : `${d.getUTCFullYear()}-${d.getUTCMonth()}`;
+}
+
+/* Every period in the window, even ones with no quotes yet — otherwise a narrow
+   window with sparse data renders as disconnected floating dots instead of a line. */
+function buildExpectedPeriods(granularity: AnalyticsGranularity, window: number): Date[] {
+  const start = new Date();
+  start.setUTCHours(0, 0, 0, 0);
+  start.setUTCDate(1);
+  start.setUTCMonth(start.getUTCMonth() - (window - 1));
+
+  const now = new Date();
+  const step = granularity === 'day' ? 'date' : 'month';
+  const periods: Date[] = [];
+  const cursor = new Date(start);
+  while (cursor <= now) {
+    periods.push(new Date(cursor));
+    if (step === 'date') cursor.setUTCDate(cursor.getUTCDate() + 1);
+    else cursor.setUTCMonth(cursor.getUTCMonth() + 1);
+  }
+  return periods;
+}
+
 function ChartTooltip({ active, payload, label, currency }: { active?: boolean; payload?: { dataKey: string; value: number }[]; label?: string; currency: string }) {
   if (!active || !payload?.length) return null;
   return (
@@ -72,11 +98,20 @@ export function QuotesAnalyticsChart() {
   const [window, setWindow] = useState<2 | 3 | 6 | 12>(2);
   const { data, isLoading } = useQuoteAnalytics({ granularity, window });
 
-  const chartData = useMemo(
-    () => (data?.buckets ?? []).map((bucket) => ({ ...bucket, label: bucketLabel(bucket.date, granularity) })),
-    [data, granularity],
-  );
+  const chartData = useMemo(() => {
+    const byKey = new Map((data?.buckets ?? []).map((bucket) => [periodKey(new Date(bucket.date), granularity), bucket]));
+    return buildExpectedPeriods(granularity, window).map((date) => {
+      const bucket = byKey.get(periodKey(date, granularity));
+      return {
+        label: bucketLabel(date.toISOString(), granularity),
+        cotizado: bucket?.cotizado ?? 0,
+        aceptado: bucket?.aceptado ?? 0,
+        enCurso: bucket?.enCurso ?? 0,
+      };
+    });
+  }, [data, granularity, window]);
   const currency = data?.currency ?? 'COP';
+  const hasAnyData = (data?.buckets.length ?? 0) > 0;
 
   return (
     <article className="rounded-2xl p-6 sm:p-7" style={{ background: 'var(--paper-card)', border: '1px solid var(--border)' }}>
@@ -127,7 +162,7 @@ export function QuotesAnalyticsChart() {
       <div className="mt-4 h-64 w-full">
         {isLoading ? (
           <div className="flex h-full items-center justify-center text-sm text-ink-soft">Cargando…</div>
-        ) : chartData.length === 0 ? (
+        ) : !hasAnyData ? (
           <div className="flex h-full items-center justify-center text-sm text-ink-soft">Aún no hay cotizaciones en este período.</div>
         ) : (
           <ResponsiveContainer height="100%" width="100%">
