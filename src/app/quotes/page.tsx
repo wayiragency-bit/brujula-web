@@ -185,13 +185,10 @@ export default function QuotesPage() {
             const val  = getMetricValue(def);
             return (
               <div
-                className="glass-card relative overflow-hidden rounded-2xl p-4"
+                className="glass-card rounded-2xl p-4"
                 key={def.key}
               >
-                <div className="absolute right-3 top-3 opacity-90">
-                  <Sparkline color={def.iconBg} points={def.spark} />
-                </div>
-                <div className="mb-3 flex items-center gap-3 pr-20">
+                <div className="mb-3 flex items-center gap-3">
                   <div
                     className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-white"
                     style={{ background: def.iconBg, boxShadow: `0 4px 10px ${def.iconShadow}` }}
@@ -199,7 +196,7 @@ export default function QuotesPage() {
                     <Icon className="h-5 w-5" />
                   </div>
                   <p
-                    className="font-black uppercase leading-tight text-ink-soft"
+                    className="min-w-0 flex-1 font-black uppercase leading-tight text-ink-soft"
                     style={{ fontSize: '10px', letterSpacing: '1.5px' }}
                   >
                     {def.label}
@@ -211,12 +208,15 @@ export default function QuotesPage() {
                 >
                   {val > 0 ? formatCompact(val, baseCurrency) : '—'}
                 </p>
-                <span
-                  className="mt-2 inline-block rounded-md px-1.5 py-0.5 text-ink-soft"
-                  style={{ background: 'var(--surface)', fontSize: '11px', fontWeight: 700 }}
-                >
-                  {def.trend === 'down' ? '↘' : '↗'} {def.footnote}
-                </span>
+                <div className="mt-2 flex items-center justify-between gap-2">
+                  <span
+                    className="inline-block shrink-0 rounded-md px-1.5 py-0.5 text-ink-soft"
+                    style={{ background: 'var(--surface)', fontSize: '11px', fontWeight: 700 }}
+                  >
+                    {def.trend === 'down' ? '↘' : '↗'} {def.footnote}
+                  </span>
+                  <Sparkline color={def.iconBg} points={def.spark} />
+                </div>
               </div>
             );
           })}
