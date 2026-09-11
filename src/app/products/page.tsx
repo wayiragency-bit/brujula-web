@@ -24,7 +24,7 @@ async function downloadExport() {
   const url = URL.createObjectURL(blob);
   const anchor = document.createElement('a');
   anchor.href = url;
-  anchor.download = 'productos.csv';
+  anchor.download = `productos_export_${new Date().toISOString().slice(0, 10)}.xlsx`;
   anchor.click();
   URL.revokeObjectURL(url);
 }
