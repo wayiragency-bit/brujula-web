@@ -9,7 +9,7 @@ interface ThemeCtx {
   setTheme: (t: Theme) => void;
 }
 
-const Ctx = createContext<ThemeCtx>({ theme: 'dark', setTheme: () => {} });
+const Ctx = createContext<ThemeCtx>({ theme: 'light', setTheme: () => {} });
 
 function applyTheme(theme: Theme) {
   const root = document.documentElement;
@@ -21,10 +21,10 @@ function applyTheme(theme: Theme) {
 }
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>('dark');
+  const [theme, setThemeState] = useState<Theme>('light');
 
   useEffect(() => {
-    const saved = (localStorage.getItem('brujula-theme') as Theme | null) ?? 'dark';
+    const saved = (localStorage.getItem('brujula-theme') as Theme | null) ?? 'light';
     setThemeState(saved);
     applyTheme(saved);
   }, []);
