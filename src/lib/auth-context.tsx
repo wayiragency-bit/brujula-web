@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { api, refreshSession, setAccessToken } from '@/lib/api';
+import { api, refreshOnce, setAccessToken } from '@/lib/api';
 
 export interface AuthUser {
   id: string;
@@ -36,7 +36,10 @@ export function AuthProvider({ children }: Readonly<{ children: React.ReactNode 
     (async () => {
       let token: string | null = null;
       try {
-        token = await refreshSession();
+        // Share the in-flight refresh with apiFetch's own 401 retry — the refresh token
+        // rotates on every use, so two concurrent /auth/refresh calls race and the loser
+        // revokes the whole session.
+        token = await refreshOnce();
       } catch {
         if (!cancelled) setStatus('unauthenticated');
         return;

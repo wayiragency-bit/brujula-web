@@ -9,15 +9,24 @@ import { useQuote } from '@/hooks/use-quotes';
 
 export default function QuoteDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
-  const { data: quote, isLoading } = useQuote(id);
+  const { data: quote, isLoading, isError, refetch } = useQuote(id);
 
   return (
     <AppShell>
       <div className="mx-auto w-full max-w-content space-y-6 px-4 pb-28 pt-7 sm:px-6 lg:px-8 lg:pb-10">
-        <Link className="inline-flex items-center gap-2 text-sm font-semibold text-teal hover:underline" href="/quotes">
-          <ArrowLeft className="h-4 w-4" /> Volver
-        </Link>
-        {isLoading || !quote ? <p className="text-ink-soft">Cargando cotización…</p> : <QuoteBuilder initial={quote} key={quote.id} />}
+        {isError ? (
+          <div className="space-y-3">
+            <Link className="inline-flex items-center gap-2 text-sm font-semibold text-teal hover:underline" href="/quotes">
+              <ArrowLeft className="h-4 w-4" /> Volver
+            </Link>
+            <p className="text-red-600">No se pudo cargar la cotización.</p>
+            <button className="button-secondary" onClick={() => refetch()} type="button">Reintentar</button>
+          </div>
+        ) : isLoading || !quote ? (
+          <p className="text-ink-soft">Cargando cotización…</p>
+        ) : (
+          <QuoteBuilder initial={quote} key={quote.id} />
+        )}
       </div>
     </AppShell>
   );

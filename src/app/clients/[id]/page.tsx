@@ -11,10 +11,21 @@ import type { ClientFormValues } from '@/lib/types';
 
 export default function ClientDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
-  const { data: client, isLoading } = useClient(id);
+  const { data: client, isLoading, isError, refetch } = useClient(id);
   const updateClient = useUpdateClient(id);
   const [editing, setEditing] = useState(false);
   const [modalKey, setModalKey] = useState(0);
+
+  if (isError) {
+    return (
+      <AppShell>
+        <div className="mx-auto w-full max-w-content space-y-3 px-4 py-10 sm:px-6 lg:px-8">
+          <p className="text-red-600">No se pudo cargar el cliente.</p>
+          <button className="button-secondary" onClick={() => refetch()} type="button">Reintentar</button>
+        </div>
+      </AppShell>
+    );
+  }
 
   if (isLoading || !client) {
     return (

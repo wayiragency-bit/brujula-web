@@ -71,4 +71,4 @@ export const api = {
   delete: <T>(path: string) => apiFetch<T>(path, { method: 'DELETE' }),
 };
 
-export { refreshSession, API_BASE };
+export { refreshOnce, API_BASE };
