@@ -39,7 +39,6 @@ export interface ClientFormValues {
   document?: string;
   country?: string;
   city?: string;
-  sellerId?: string;
   notes?: string;
 }
 

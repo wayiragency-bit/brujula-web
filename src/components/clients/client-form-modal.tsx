@@ -1,7 +1,8 @@
 'use client';
 
+import { Lock } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
-import { useTeam } from '@/hooks/use-team';
+import { useAuth } from '@/lib/auth-context';
 import { COUNTRIES } from '@/lib/countries';
 import type { Client, ClientFormValues } from '@/lib/types';
 import { Modal } from '@/components/ui/modal';
@@ -25,7 +26,6 @@ const EMPTY: ClientFormValues = {
   document: '',
   country: '',
   city: '',
-  sellerId: '',
   notes: '',
 };
 
@@ -40,13 +40,12 @@ function valuesFrom(initial?: Client): ClientFormValues {
     document: initial.document ?? '',
     country: initial.country ?? '',
     city: initial.city ?? '',
-    sellerId: initial.sellerId ?? '',
     notes: initial.notes ?? '',
   };
 }
 
 export function ClientFormModal({ open, onClose, onSubmit, initial, initialName }: ClientFormModalProps) {
-  const { data: team } = useTeam();
+  const { user } = useAuth();
   const [values, setValues] = useState<ClientFormValues>(() => (initial ? valuesFrom(initial) : { ...EMPTY, name: initialName ?? '' }));
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -66,7 +65,6 @@ export function ClientFormModal({ open, onClose, onSubmit, initial, initialName 
         document: values.document || undefined,
         country: values.country || undefined,
         city: values.city || undefined,
-        sellerId: values.sellerId || undefined,
         notes: values.notes || undefined,
       };
       await onSubmit(payload);
@@ -88,18 +86,14 @@ export function ClientFormModal({ open, onClose, onSubmit, initial, initialName 
     >
       <form className="space-y-5" onSubmit={handleSubmit}>
         <div>
-          <label className={labelClass} htmlFor="sellerId">Asignar Vendedor</label>
-          <select
-            className={selectClass}
-            id="sellerId"
-            onChange={(e) => set('sellerId', e.target.value)}
-            value={values.sellerId}
+          <label className={labelClass}>Asesor Propietario</label>
+          <div
+            className="flex h-10 items-center gap-2 rounded-lg px-3 text-sm text-ink-soft"
+            style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}
           >
-            <option value="">Sin asignar (visible para todo el equipo)</option>
-            {team?.map((member) => (
-              <option key={member.id} value={member.id}>{member.name} ({member.email})</option>
-            ))}
-          </select>
+            <span className="flex-1">{initial ? initial.seller?.name ?? '—' : user?.name}</span>
+            <Lock className="h-3.5 w-3.5 shrink-0" />
+          </div>
         </div>
 
         <div className="grid gap-5 sm:grid-cols-2">
