@@ -4,15 +4,16 @@ import { useState } from 'react';
 import {
   Settings, User, Palette, Mail, CreditCard,
   Building2, CheckCircle, Shield, Globe2,
-  Download, Receipt,
+  Receipt,
 } from 'lucide-react';
 import { useTheme } from '@/lib/theme-context';
 import type { Theme } from '@/lib/theme-context';
 import { AppShell } from '@/components/app-shell';
 import { useAgency, useUpdateAgency } from '@/hooks/use-agency';
+import { useSubscription } from '@/hooks/use-billing';
 import { useAuth } from '@/lib/auth-context';
 import { AGENCY_TYPE_LABELS } from '@/lib/types';
-import type { Agency, AgencyFormValues, AgencyType, PaymentMethod } from '@/lib/types';
+import type { Agency, AgencyFormValues, AgencyType, PaymentMethod, SubscriptionStatus } from '@/lib/types';
 import { inputClass, labelClass, selectClass } from '@/components/ui/form';
 
 /* ─── Tabs ─────────────────────────────────────────────────── */
@@ -635,104 +636,89 @@ function CorreoTab() {
 /* ══════════════════════════════════════════════════════════════
    TAB: HISTORIAL DE PAGO
 ══════════════════════════════════════════════════════════════ */
-const MOCK_PLAN = {
-  name: 'Pro',
-  price: '$49 USD/mes',
-  renewsOn: '10 Oct 2026',
-  seats: 5,
-  usedSeats: 2,
+const SUBSCRIPTION_STATUS_LABELS: Record<SubscriptionStatus, string> = {
+  TRIAL: 'Prueba gratis',
+  ACTIVE: 'Activo',
+  EXPIRED: 'Vencido',
+  PAST_DUE: 'Pago pendiente',
+  CANCELLED: 'Cancelado',
 };
 
+function formatDate(value: string): string {
+  return new Date(value).toLocaleDateString('es-CO', { day: '2-digit', month: 'short', year: 'numeric' });
+}
+
 export function PagosTab() {
+  const { data: subscription, isLoading } = useSubscription();
+
+  if (isLoading) return <Card title="Plan Actual"><p className="text-ink-soft">Cargando…</p></Card>;
+
   return (
     <>
       {/* Current plan */}
       <Card title="Plan Actual">
-        <div
-          className="flex flex-wrap items-center justify-between gap-4 rounded-xl p-5"
-          style={{ background: 'rgba(254,178,59,0.06)', border: '1px solid rgba(254,178,59,0.2)' }}
-        >
-          <div className="flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl" style={{ background: 'rgba(254,178,59,0.15)' }}>
-              <CreditCard className="h-5 w-5 text-amber" />
-            </div>
-            <div>
-              <p className="font-display text-lg font-extrabold text-amber">Plan {MOCK_PLAN.name}</p>
-              <p className="text-sm text-ink-soft">{MOCK_PLAN.price} · Renueva el {MOCK_PLAN.renewsOn}</p>
-            </div>
-          </div>
-          <div className="flex gap-2">
-            <button className="button-secondary text-sm" type="button">Cambiar Plan</button>
-            <button className="rounded-lg px-4 py-2 text-sm font-semibold text-red-400 transition" style={{ background: 'rgba(248,113,113,0.10)', border: '1px solid rgba(248,113,113,0.2)' }} type="button">Cancelar</button>
-          </div>
-        </div>
-
-        {/* Seats */}
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-          {[
-            { label: 'Usuarios activos', value: `${MOCK_PLAN.usedSeats} / ${MOCK_PLAN.seats}` },
-            { label: 'Cotizaciones / mes', value: 'Ilimitadas' },
-            { label: 'Almacenamiento', value: '5 GB' },
-            { label: 'Soporte', value: 'Prioritario' },
-          ].map((s) => (
+        {subscription ? (
+          <>
             <div
-              className="rounded-xl p-4 text-center"
-              key={s.label}
-              style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border-faint)' }}
+              className="flex flex-wrap items-center justify-between gap-4 rounded-xl p-5"
+              style={{ background: 'rgba(254,178,59,0.06)', border: '1px solid rgba(254,178,59,0.2)' }}
             >
-              <p className="font-mono text-lg font-bold text-ink">{s.value}</p>
-              <p className="text-xs text-ink-soft">{s.label}</p>
+              <div className="flex items-center gap-3">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl" style={{ background: 'rgba(254,178,59,0.15)' }}>
+                  <CreditCard className="h-5 w-5 text-amber" />
+                </div>
+                <div>
+                  <p className="font-display text-lg font-extrabold text-amber">Plan {subscription.plan?.name ?? '—'}</p>
+                  <p className="text-sm text-ink-soft">
+                    {subscription.agreedPrice ? `${subscription.currency} $${subscription.agreedPrice}/mes` : 'Sin plan asignado'}
+                    {subscription.status === 'TRIAL' && subscription.trialEnd
+                      ? ` · Prueba hasta el ${formatDate(subscription.trialEnd)}`
+                      : ''}
+                  </p>
+                </div>
+              </div>
+              <span
+                className="rounded-full px-3 py-1.5 text-xs font-bold"
+                style={{
+                  background: subscription.status === 'ACTIVE' ? 'rgba(74,222,128,0.12)' : 'rgba(245,158,11,0.12)',
+                  color: subscription.status === 'ACTIVE' ? '#16a34a' : '#b45309',
+                }}
+              >
+                {SUBSCRIPTION_STATUS_LABELS[subscription.status]}
+              </span>
             </div>
-          ))}
-        </div>
+
+            {subscription.plan?.features?.length ? (
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                {subscription.plan.features.map((feature) => (
+                  <div
+                    className="flex items-center gap-2 rounded-lg p-3 text-sm text-ink-soft"
+                    key={feature}
+                    style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border-faint)' }}
+                  >
+                    <CheckCircle className="h-4 w-4 shrink-0 text-teal" /> {feature}
+                  </div>
+                ))}
+              </div>
+            ) : null}
+
+            <p className="text-xs text-ink-muted">
+              Los pagos en línea con Bold estarán disponibles próximamente. Por ahora, para cambiar de plan o cancelar contacta a soporte.
+            </p>
+          </>
+        ) : (
+          <p className="text-sm text-ink-soft">Esta empresa no tiene un plan de suscripción asignado.</p>
+        )}
       </Card>
 
       {/* Billing history */}
-      <Card title="Historial de Facturación" subtitle="Descarga los comprobantes de tus pagos anteriores.">
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[500px] text-sm">
-            <thead>
-              <tr style={{ borderBottom: '1px solid var(--border-faint)' }}>
-                {['FECHA', 'DESCRIPCIÓN', 'MONTO', 'ESTADO', 'COMPROBANTE'].map((h) => (
-                  <th className="label-caps pb-3 text-left text-ink-soft" key={h}>{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {[
-                { date: '10 Sep 2026', desc: 'Plan Pro · Septiembre 2026', amount: '$49.00 USD', status: 'Pagado' },
-                { date: '10 Ago 2026', desc: 'Plan Pro · Agosto 2026',     amount: '$49.00 USD', status: 'Pagado' },
-                { date: '10 Jul 2026', desc: 'Plan Pro · Julio 2026',      amount: '$49.00 USD', status: 'Pagado' },
-              ].map((row, i) => (
-                <tr
-                  key={i}
-                  style={{ borderBottom: '1px solid var(--border-faint)' }}
-                >
-                  <td className="py-3 text-ink-soft">{row.date}</td>
-                  <td className="py-3 text-ink">{row.desc}</td>
-                  <td className="py-3 font-mono font-semibold text-ink">{row.amount}</td>
-                  <td className="py-3">
-                    <span className="rounded-full px-2.5 py-1 text-xs font-bold text-green-400" style={{ background: 'rgba(74,222,128,0.12)' }}>
-                      {row.status}
-                    </span>
-                  </td>
-                  <td className="py-3">
-                    <button className="flex items-center gap-1.5 text-xs font-semibold text-ink-soft transition hover:text-ink" type="button">
-                      <Download className="h-3.5 w-3.5" /> PDF
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
+      <Card subtitle="Aquí verás tus comprobantes una vez esté disponible el cobro en línea." title="Historial de Facturación">
         <div
-          className="mt-2 flex items-start gap-3 rounded-xl p-4 text-xs text-ink-soft"
+          className="flex items-start gap-3 rounded-xl p-4 text-xs text-ink-soft"
           style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border-faint)' }}
         >
           <Receipt className="mt-0.5 h-4 w-4 shrink-0 text-ink-muted" />
-          <span>Los comprobantes se emiten automáticamente y se envían a tu correo de facturación. Para cambiar el correo de facturación contacta a soporte.</span>
+          <span>Aún no hay pagos registrados. Esta sección se completará cuando se active el cobro en línea.</span>
         </div>
       </Card>
     </>

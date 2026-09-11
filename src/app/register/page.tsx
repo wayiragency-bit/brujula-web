@@ -4,11 +4,14 @@ import { BarChart3, Compass, FileText, ShieldCheck, Users } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState, type FormEvent } from 'react';
+import { usePlans } from '@/hooks/use-billing';
 import { ApiError } from '@/lib/api';
 import { useAuth } from '@/lib/auth-context';
+import { getRecaptchaToken } from '@/lib/recaptcha';
 import { AGENCY_TYPE_LABELS } from '@/lib/types';
 import type { AgencyType } from '@/lib/types';
 import { inputClass, labelClass, selectClass } from '@/components/ui/form';
+import { PlanList } from '@/components/billing/plan-list';
 
 const FEATURES: { icon: React.ElementType; label: string }[] = [
   { icon: FileText, label: 'Cotizaciones con seguimiento en tiempo real' },
@@ -17,17 +20,31 @@ const FEATURES: { icon: React.ElementType; label: string }[] = [
   { icon: BarChart3, label: 'Dashboard de ventas y comisiones por equipo' },
 ];
 
+const TRIAL_DAYS = 7;
+
 export default function RegisterPage() {
   const { register, status } = useAuth();
   const router = useRouter();
+  const [step, setStep] = useState<1 | 2>(1);
+
   const [agencyName, setAgencyName] = useState('');
   const [type, setType] = useState<AgencyType>('AGENCIA_VIAJES');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [manualPlanId, setManualPlanId] = useState<string | null>(null);
+
+  const [stepOneError, setStepOneError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+
+  const { data: plans, isLoading: plansLoading } = usePlans(type);
+
+  // Default to the plan recommended for the chosen business type, unless the user picked one manually.
+  const selectedPlanId = manualPlanId && plans?.some((p) => p.id === manualPlanId)
+    ? manualPlanId
+    : (plans?.find((p) => p.recommended)?.id ?? plans?.[0]?.id ?? null);
 
   useEffect(() => {
     if (status === 'authenticated') router.replace('/');
@@ -35,16 +52,23 @@ export default function RegisterPage() {
 
   if (status === 'authenticated') return null;
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  function handleStepOneSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setError(null);
+    setStepOneError(null);
     if (password !== confirmPassword) {
-      setError('Las contraseñas no coinciden.');
+      setStepOneError('Las contraseñas no coinciden.');
       return;
     }
+    setStep(2);
+  }
+
+  async function handleCreateAccount() {
+    if (!selectedPlanId) return;
+    setError(null);
     setSubmitting(true);
     try {
-      await register({ agencyName, type, name, email, password });
+      const recaptchaToken = await getRecaptchaToken('register');
+      await register({ agencyName, type, planId: selectedPlanId, name, email, password, recaptchaToken });
       router.replace('/');
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'No se pudo crear la cuenta. Intenta de nuevo.');
@@ -99,86 +123,136 @@ export default function RegisterPage() {
             </div>
             <h1 className="font-display text-2xl font-extrabold text-ink">Brújula</h1>
           </div>
-          <div className="mb-6">
-            <h2 className="font-display text-xl font-extrabold text-ink">Empieza tu prueba gratis</h2>
-            <p className="mt-1 text-sm text-ink-soft">Registro rápido para tu agencia — sin tarjeta de crédito.</p>
+
+          <div className="mb-6 flex items-center gap-2">
+            <span className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold ${step === 1 ? 'bg-amber text-[#0a1628]' : 'bg-teal/20 text-teal'}`}>1</span>
+            <span className={`text-xs font-semibold ${step === 1 ? 'text-ink' : 'text-ink-soft'}`}>Tu empresa</span>
+            <span className="h-px flex-1" style={{ background: 'var(--border)' }} />
+            <span className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold ${step === 2 ? 'bg-amber text-[#0a1628]' : 'bg-ink/10 text-ink-soft'}`}>2</span>
+            <span className={`text-xs font-semibold ${step === 2 ? 'text-ink' : 'text-ink-soft'}`}>Tu plan</span>
           </div>
 
-          <form className="space-y-4" onSubmit={handleSubmit}>
-            <div>
-              <label className={labelClass} htmlFor="agencyName">Nombre de la Empresa</label>
-              <input
-                className={inputClass}
-                id="agencyName" onChange={(e) => setAgencyName(e.target.value)}
-                placeholder="Ej. Viajes del Caribe" required value={agencyName}
-              />
-            </div>
-
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div>
-                <label className={labelClass} htmlFor="name">Tu Nombre</label>
-                <input
-                  autoComplete="name"
-                  className={inputClass}
-                  id="name" onChange={(e) => setName(e.target.value)}
-                  placeholder="Juan Pérez" required value={name}
-                />
+          {step === 1 ? (
+            <>
+              <div className="mb-6">
+                <h2 className="font-display text-xl font-extrabold text-ink">Empieza tu prueba gratis</h2>
+                <p className="mt-1 text-sm text-ink-soft">Registro rápido para tu agencia — sin tarjeta de crédito.</p>
               </div>
-              <div>
-                <label className={labelClass} htmlFor="type">Tipo de Empresa</label>
-                <select
-                  className={selectClass}
-                  id="type" onChange={(e) => setType(e.target.value as AgencyType)} value={type}
-                >
-                  {Object.entries(AGENCY_TYPE_LABELS).map(([value, label]) => (
-                    <option key={value} value={value}>{label}</option>
-                  ))}
-                </select>
-              </div>
-            </div>
 
-            <div>
-              <label className={labelClass} htmlFor="email">Correo Electrónico</label>
-              <input
-                autoComplete="email"
-                className={inputClass}
-                id="email" onChange={(e) => setEmail(e.target.value)}
-                placeholder="tucorreo@ejemplo.com" required type="email" value={email}
-              />
-            </div>
+              <form className="space-y-4" onSubmit={handleStepOneSubmit}>
+                <div>
+                  <label className={labelClass} htmlFor="agencyName">Nombre de la Empresa</label>
+                  <input
+                    className={inputClass}
+                    id="agencyName" onChange={(e) => setAgencyName(e.target.value)}
+                    placeholder="Ej. Viajes del Caribe" required value={agencyName}
+                  />
+                </div>
 
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div>
-                <label className={labelClass} htmlFor="password">Contraseña</label>
-                <input
-                  autoComplete="new-password"
-                  className={inputClass}
-                  id="password" minLength={10} onChange={(e) => setPassword(e.target.value)}
-                  required type="password" value={password}
-                />
-              </div>
-              <div>
-                <label className={labelClass} htmlFor="confirmPassword">Confirmar Contraseña</label>
-                <input
-                  autoComplete="new-password"
-                  className={inputClass}
-                  id="confirmPassword" onChange={(e) => setConfirmPassword(e.target.value)}
-                  required type="password" value={confirmPassword}
-                />
-              </div>
-            </div>
-            <p className="text-xs text-ink-muted">Mínimo 10 caracteres, con mayúscula, minúscula y número.</p>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div>
+                    <label className={labelClass} htmlFor="name">Tu Nombre</label>
+                    <input
+                      autoComplete="name"
+                      className={inputClass}
+                      id="name" onChange={(e) => setName(e.target.value)}
+                      placeholder="Juan Pérez" required value={name}
+                    />
+                  </div>
+                  <div>
+                    <label className={labelClass} htmlFor="type">Tipo de Empresa</label>
+                    <select
+                      className={selectClass}
+                      id="type" onChange={(e) => setType(e.target.value as AgencyType)} value={type}
+                    >
+                      {Object.entries(AGENCY_TYPE_LABELS).map(([value, label]) => (
+                        <option key={value} value={value}>{label}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
 
-            {error ? (
-              <p className="rounded-lg px-3 py-2 text-sm" role="alert" style={{ background: 'rgba(239,68,68,0.12)', color: '#dc2626', border: '1px solid rgba(239,68,68,0.2)' }}>
-                {error}
+                <div>
+                  <label className={labelClass} htmlFor="email">Correo Electrónico</label>
+                  <input
+                    autoComplete="email"
+                    className={inputClass}
+                    id="email" onChange={(e) => setEmail(e.target.value)}
+                    placeholder="tucorreo@ejemplo.com" required type="email" value={email}
+                  />
+                </div>
+
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div>
+                    <label className={labelClass} htmlFor="password">Contraseña</label>
+                    <input
+                      autoComplete="new-password"
+                      className={inputClass}
+                      id="password" minLength={10} onChange={(e) => setPassword(e.target.value)}
+                      required type="password" value={password}
+                    />
+                  </div>
+                  <div>
+                    <label className={labelClass} htmlFor="confirmPassword">Confirmar Contraseña</label>
+                    <input
+                      autoComplete="new-password"
+                      className={inputClass}
+                      id="confirmPassword" onChange={(e) => setConfirmPassword(e.target.value)}
+                      required type="password" value={confirmPassword}
+                    />
+                  </div>
+                </div>
+                <p className="text-xs text-ink-muted">Mínimo 10 caracteres, con mayúscula, minúscula y número.</p>
+
+                {stepOneError ? (
+                  <p className="rounded-lg px-3 py-2 text-sm" role="alert" style={{ background: 'rgba(239,68,68,0.12)', color: '#dc2626', border: '1px solid rgba(239,68,68,0.2)' }}>
+                    {stepOneError}
+                  </p>
+                ) : null}
+
+                <button className="button-primary mt-2 w-full" type="submit">Continuar</button>
+              </form>
+            </>
+          ) : (
+            <>
+              <div className="mb-6">
+                <h2 className="font-display text-xl font-extrabold text-ink">Elige tu plan</h2>
+                <p className="mt-1 text-sm text-ink-soft">
+                  {TRIAL_DAYS} días gratis, sin cobro durante la prueba. Cancela cuando quieras.
+                </p>
+              </div>
+
+              {plansLoading || !plans ? (
+                <p className="text-sm text-ink-soft">Cargando planes…</p>
+              ) : (
+                <PlanList onSelect={setManualPlanId} plans={plans} selectedPlanId={selectedPlanId} />
+              )}
+
+              <p className="mt-4 text-xs text-ink-muted">
+                Hoy no se realiza ningún cobro. Al finalizar los {TRIAL_DAYS} días de prueba podrás elegir un método de pago para continuar.
               </p>
-            ) : null}
 
-            <button className="button-primary mt-2 w-full" disabled={submitting} type="submit">
-              {submitting ? 'Creando cuenta…' : 'Crear mi Cuenta Gratis'}
-            </button>
-          </form>
+              {error ? (
+                <p className="mt-4 rounded-lg px-3 py-2 text-sm" role="alert" style={{ background: 'rgba(239,68,68,0.12)', color: '#dc2626', border: '1px solid rgba(239,68,68,0.2)' }}>
+                  {error}
+                </p>
+              ) : null}
+
+              <div className="mt-6 flex gap-3">
+                <button className="button-secondary" disabled={submitting} onClick={() => setStep(1)} type="button">
+                  Atrás
+                </button>
+                <button
+                  className="button-primary flex-1"
+                  disabled={submitting || !selectedPlanId}
+                  onClick={handleCreateAccount}
+                  type="button"
+                >
+                  {submitting ? 'Creando cuenta…' : 'Crear mi Cuenta Gratis'}
+                </button>
+              </div>
+            </>
+          )}
 
           <p className="mt-6 text-center text-xs text-ink-muted">
             ¿Ya tienes cuenta? <Link className="font-semibold text-amber hover:underline" href="/login">Inicia sesión</Link>

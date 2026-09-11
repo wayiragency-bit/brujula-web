@@ -2,7 +2,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { api, refreshOnce, setAccessToken } from '@/lib/api';
-import type { AgencyType } from '@/lib/types';
+import type { AgencyType, SubscriptionSummary } from '@/lib/types';
 
 export interface AuthUser {
   id: string;
@@ -13,6 +13,9 @@ export interface AuthUser {
   avatarUrl: string | null;
   phone: string | null;
   agency: { id: string; name: string; slug: string } | null;
+  // null for agencies with no subscription row at all (created before this feature existed) —
+  // treated the same as "no trial limit".
+  subscription: SubscriptionSummary | null;
   roles: { id: string; name: string; slug: string }[];
   permissions: string[];
 }
@@ -20,8 +23,15 @@ export interface AuthUser {
 export interface RegisterValues {
   agencyName: string;
   type: AgencyType;
+  planId: string;
   name: string;
   email: string;
+  password: string;
+  recaptchaToken: string;
+}
+
+export interface AcceptInviteValues {
+  token: string;
   password: string;
 }
 
@@ -42,6 +52,7 @@ interface AuthContextValue {
   status: AuthStatus;
   login: (email: string, password: string) => Promise<void>;
   register: (values: RegisterValues) => Promise<void>;
+  acceptInvite: (values: AcceptInviteValues) => Promise<void>;
   logout: () => Promise<void>;
   hasPermission: (code: string) => boolean;
   updateProfile: (values: UpdateProfileValues) => Promise<AuthUser>;
@@ -99,6 +110,13 @@ export function AuthProvider({ children }: Readonly<{ children: React.ReactNode 
     setStatus('authenticated');
   }, []);
 
+  const acceptInvite = useCallback(async (values: AcceptInviteValues) => {
+    const data = await api.post<{ accessToken: string; user: AuthUser }>('/auth/accept-invite', values);
+    setAccessToken(data.accessToken);
+    setUser(data.user);
+    setStatus('authenticated');
+  }, []);
+
   const logout = useCallback(async () => {
     try {
       await api.post('/auth/logout');
@@ -119,8 +137,8 @@ export function AuthProvider({ children }: Readonly<{ children: React.ReactNode 
   }, []);
 
   const value = useMemo(
-    () => ({ user, status, login, register, logout, hasPermission, updateProfile }),
-    [user, status, login, register, logout, hasPermission, updateProfile],
+    () => ({ user, status, login, register, acceptInvite, logout, hasPermission, updateProfile }),
+    [user, status, login, register, acceptInvite, logout, hasPermission, updateProfile],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

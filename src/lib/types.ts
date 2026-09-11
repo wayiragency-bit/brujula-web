@@ -400,3 +400,34 @@ export interface QuoteAccessRow {
   grantedBy: string;
   createdAt: string;
 }
+
+export type SubscriptionStatus = 'TRIAL' | 'ACTIVE' | 'EXPIRED' | 'PAST_DUE' | 'CANCELLED';
+export type BillingPeriod = 'MONTHLY';
+
+export interface SubscriptionSummary {
+  status: SubscriptionStatus;
+  trialStart: string | null;
+  trialEnd: string | null;
+}
+
+export interface Plan {
+  id: string;
+  code: string;
+  name: string;
+  description: string | null;
+  price: string;
+  currency: string;
+  billingPeriod: BillingPeriod;
+  features: string[];
+  recommended: boolean;
+}
+
+export interface AgencySubscriptionDetail {
+  status: SubscriptionStatus;
+  plan: { id: string; name: string; features: string[] } | null;
+  agreedPrice: string | null;
+  currency: string | null;
+  billingPeriod: BillingPeriod | null;
+  trialStart: string | null;
+  trialEnd: string | null;
+}

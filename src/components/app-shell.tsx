@@ -1,6 +1,7 @@
 'use client';
 
 import {
+  AlertTriangle,
   BarChart3,
   Bell,
   CalendarDays,
@@ -20,6 +21,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { useAuth } from '@/lib/auth-context';
+import { TrialExpiredScreen } from '@/components/billing/trial-expired-screen';
 
 const navigation = [
   { label: 'Dashboard',       href: '/',                icon: LayoutDashboard, permission: undefined },
@@ -50,6 +52,13 @@ export function AppShell({ children }: Readonly<{ children: React.ReactNode }>) 
   const { user, status, logout, hasPermission } = useAuth();
 
   const visibleNav = navigation.filter((item) => !item.permission || hasPermission(item.permission));
+  const subscription = user?.subscription ?? null;
+  // No subscription row (agencies created before this feature) is never blocked — only EXPIRED/CANCELLED are.
+  const subscriptionBlocked = subscription?.status === 'EXPIRED' || subscription?.status === 'CANCELLED';
+  const trialDaysLeft = subscription?.status === 'TRIAL' && subscription.trialEnd
+    ? Math.ceil((new Date(subscription.trialEnd).getTime() - new Date().getTime()) / (24 * 60 * 60 * 1000))
+    : null;
+  const showTrialReminder = trialDaysLeft !== null && trialDaysLeft <= 7;
 
   useEffect(() => {
     if (status === 'unauthenticated') router.replace('/login');
@@ -73,6 +82,8 @@ export function AppShell({ children }: Readonly<{ children: React.ReactNode }>) 
       </div>
     );
   }
+
+  if (subscriptionBlocked) return <TrialExpiredScreen />;
 
   return (
     <div className="min-h-screen bg-paper text-ink">
@@ -181,6 +192,21 @@ export function AppShell({ children }: Readonly<{ children: React.ReactNode }>) 
             </div>
           </div>
         </header>
+
+        {showTrialReminder ? (
+          <div
+            className="flex items-center gap-2 px-4 py-2.5 text-sm sm:px-6 lg:px-6"
+            role="alert"
+            style={{ background: 'rgba(245,158,11,0.12)', borderBottom: '1px solid rgba(245,158,11,0.25)', color: '#b45309' }}
+          >
+            <AlertTriangle className="h-4 w-4 shrink-0" />
+            <span>
+              {trialDaysLeft && trialDaysLeft > 0
+                ? `Tu prueba gratis termina en ${trialDaysLeft} día${trialDaysLeft === 1 ? '' : 's'}. Elige un plan en Configuración para no perder acceso.`
+                : 'Tu prueba gratis termina hoy. Elige un plan en Configuración para no perder acceso.'}
+            </span>
+          </div>
+        ) : null}
 
         <main>{children}</main>
       </div>

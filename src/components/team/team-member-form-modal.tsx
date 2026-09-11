@@ -14,20 +14,12 @@ interface TeamMemberFormModalProps {
   initial?: TeamMember;
 }
 
-function generatePassword(): string {
-  const chars = 'ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';
-  let value = '';
-  for (let i = 0; i < 12; i += 1) value += chars[Math.floor(Math.random() * chars.length)];
-  return `${value}1!`;
-}
-
 export function TeamMemberFormModal({ open, onClose, onSubmit, initial }: TeamMemberFormModalProps) {
   const { data: roles } = useTeamRoles();
   const [name, setName] = useState(() => initial?.name ?? '');
   const [email, setEmail] = useState(() => initial?.email ?? '');
   const [phone, setPhone] = useState(() => initial?.phone ?? '');
   const [pickedRoleId, setPickedRoleId] = useState(() => initial?.roles[0]?.id ?? '');
-  const [password, setPassword] = useState(() => (initial ? '' : generatePassword()));
   const [active, setActive] = useState(() => initial?.active ?? true);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -43,7 +35,7 @@ export function TeamMemberFormModal({ open, onClose, onSubmit, initial }: TeamMe
       if (initial) {
         await onSubmit({ name, phone: phone || undefined, roleId: roleId || undefined, active } satisfies UpdateMemberValues);
       } else {
-        await onSubmit({ name, email, password, roleId, phone: phone || undefined } satisfies InviteMemberValues);
+        await onSubmit({ name, email, roleId, phone: phone || undefined } satisfies InviteMemberValues);
       }
       onClose();
     } catch (err) {
@@ -84,13 +76,9 @@ export function TeamMemberFormModal({ open, onClose, onSubmit, initial }: TeamMe
               <label className={labelClass} htmlFor="email">Correo Electrónico</label>
               <input className={inputClass} id="email" onChange={(e) => setEmail(e.target.value)} required type="email" value={email} />
             </div>
-            <div>
-              <label className={labelClass} htmlFor="password">Contraseña de Acceso</label>
-              <div className="flex gap-2">
-                <input className={inputClass} id="password" onChange={(e) => setPassword(e.target.value)} required value={password} />
-                <button className="button-secondary shrink-0" onClick={() => setPassword(generatePassword())} type="button">Generar</button>
-              </div>
-            </div>
+            <p className="text-xs text-ink-muted">
+              Se enviará un enlace a este correo para que el agente cree su propia contraseña.
+            </p>
           </>
         )}
 
