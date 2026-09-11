@@ -129,6 +129,7 @@ export function QuoteBuilder({ initial }: { initial?: Quote }) {
   const [showCatalogModal, setShowCatalogModal] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
   const [clientSearch, setClientSearch] = useState(initial?.client?.name ?? '');
+  const [clientSearchFocused, setClientSearchFocused] = useState(false);
   const [showNewClientForm, setShowNewClientForm] = useState(false);
   const [newClientModalKey, setNewClientModalKey] = useState(0);
   const [error, setError] = useState<string | null>(null);
@@ -322,41 +323,48 @@ export function QuoteBuilder({ initial }: { initial?: Quote }) {
                 <input
                   className={inputClass}
                   id="client-search"
+                  onBlur={() => setTimeout(() => setClientSearchFocused(false), 150)}
                   onChange={(e) => { setClientSearch(e.target.value); setHeaderField('clientId', ''); }}
+                  onFocus={() => setClientSearchFocused(true)}
                   placeholder="Nombre del cliente…"
                   value={clientSearch}
                 />
-                {clientSearch && !header.clientId && clientOptions && clientOptions.length > 0 ? (
-                  <ul className="absolute z-10 mt-1 w-full rounded-lg border border-ink/10 bg-paper-card shadow-floating">
-                    {clientOptions.map((client) => (
-                      <li key={client.id}>
-                        <button
-                          className="w-full px-3 py-2 text-left text-sm hover:bg-ink/5"
-                          onClick={() => { setHeaderField('clientId', client.id); setClientSearch(client.name); }}
-                          type="button"
-                        >
-                          {client.name}
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
+                {clientSearchFocused && !header.clientId ? (
+                  <div className="absolute z-10 mt-1 w-full overflow-hidden rounded-lg border border-ink/10 bg-paper-card shadow-floating">
+                    {clientOptionsLoading ? (
+                      <p className="px-3 py-2 text-sm text-ink-soft">Buscando…</p>
+                    ) : clientOptions && clientOptions.length > 0 ? (
+                      <ul>
+                        {clientOptions.map((client) => (
+                          <li key={client.id}>
+                            <button
+                              className="w-full px-3 py-2 text-left text-sm hover:bg-ink/5"
+                              onClick={() => { setHeaderField('clientId', client.id); setClientSearch(client.name); }}
+                              type="button"
+                            >
+                              {client.name}
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="px-3 py-2 text-sm text-ink-soft">
+                        {clientSearch ? `No se encontraron clientes con "${clientSearch}".` : 'Aún no tienes clientes registrados.'}
+                      </p>
+                    )}
+                    <button
+                      className="w-full border-t border-ink/10 px-3 py-2 text-left text-sm font-semibold text-teal hover:bg-ink/5"
+                      onClick={() => { setNewClientModalKey((k) => k + 1); setShowNewClientForm(true); }}
+                      type="button"
+                    >
+                      + Crear Nuevo Cliente
+                    </button>
+                  </div>
                 ) : null}
               </div>
             ) : (
               <p className="text-sm text-ink">{initial?.client?.name}</p>
             )}
-            {editable && clientSearch && !header.clientId && !clientOptionsLoading && clientOptions?.length === 0 ? (
-              <div className="space-y-2 rounded-lg border border-ink/10 p-3" style={{ background: 'var(--surface)' }}>
-                <p className="text-sm text-ink-soft">No se encontraron clientes con &quot;{clientSearch}&quot;.</p>
-                <button
-                  className="button-primary w-full text-sm"
-                  onClick={() => { setNewClientModalKey((k) => k + 1); setShowNewClientForm(true); }}
-                  type="button"
-                >
-                  + Nuevo Cliente
-                </button>
-              </div>
-            ) : null}
           </section>
 
           <section className="space-y-4 rounded-2xl border border-ink/10 bg-paper-card p-6 shadow-card">
