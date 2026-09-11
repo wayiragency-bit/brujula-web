@@ -174,20 +174,10 @@ function KanbanCard({ card, onDragStart }: { card: PipelineCard; onDragStart: (c
       {/* Quote number + issue date */}
       <div className="flex items-center justify-between gap-1 pl-2">
         <p className="text-[11px] font-bold" style={{ color: sc.text }}>{card.number}</p>
-        <span className="text-[10px] font-medium" style={{ color: 'var(--ink-muted)' }}>
-          Emisión {formatShortDate(card.createdAt)}
+        <span className="rounded px-1.5 py-0.5 text-[10px] font-medium" style={{ background: 'var(--surface)', color: 'var(--ink-muted)' }}>
+          {formatShortDate(card.createdAt)}
         </span>
       </div>
-
-      {/* Reservation date — the one advisors need to track */}
-      {card.startDate && (
-        <div className="mt-1 flex items-center gap-1 pl-2">
-          <CalendarDays className="h-3 w-3 shrink-0" style={{ color: 'var(--ink-soft)' }} />
-          <span className="text-[11px] font-bold" style={{ color: 'var(--ink)' }}>
-            Reserva {formatShortDate(card.startDate)}
-          </span>
-        </div>
-      )}
 
       {/* Client row */}
       <div className="mt-2 flex items-center gap-2 pl-2">
@@ -206,8 +196,19 @@ function KanbanCard({ card, onDragStart }: { card: PipelineCard; onDragStart: (c
       {/* Destination */}
       {card.destination && <p className="mt-1 truncate pl-2 text-[10px]" style={{ color: 'var(--ink-muted)' }}>{card.destination}</p>}
 
-      {/* Amount */}
-      <p className="mt-2 pl-2 text-[11px] font-semibold" style={{ color: 'var(--ink-soft)' }}>{formatMoney(card.total, card.currency)}</p>
+      {/* Amount + reservation date — the date advisors need to track */}
+      <div className="mt-2 flex items-center justify-between gap-1 pl-2">
+        <p className="text-[11px] font-semibold" style={{ color: 'var(--ink-soft)' }}>{formatMoney(card.total, card.currency)}</p>
+        {card.startDate && (
+          <span
+            className="flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] font-bold"
+            style={{ background: sc.badge, color: sc.text }}
+          >
+            <CalendarDays className="h-3 w-3 shrink-0" />
+            {formatShortDate(card.startDate)}
+          </span>
+        )}
+      </div>
     </Link>
   );
 }
