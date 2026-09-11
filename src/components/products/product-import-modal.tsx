@@ -1,132 +1,172 @@
 'use client';
 
-import { useState } from 'react';
+import { type ClipboardEvent, useState } from 'react';
 import { Modal } from '@/components/ui/modal';
-import { parseCsv } from '@/lib/csv';
 import { useImportProducts } from '@/hooks/use-products';
-import type { MarkupType, ProductFormValues, ProductType, ProductUnit } from '@/lib/types';
+import type { ProductFormValues } from '@/lib/types';
 
 interface ProductImportModalProps {
   open: boolean;
   onClose: () => void;
 }
 
-const PRODUCT_TYPES: ProductType[] = ['HOTEL', 'TOUR', 'TRANSPORT', 'FLIGHT', 'INSURANCE', 'EXPERIENCE', 'OTHER'];
-const PRODUCT_UNITS: ProductUnit[] = ['PER_SERVICE', 'PER_NIGHT', 'PER_PERSON'];
-const MARKUP_TYPES: MarkupType[] = ['PERCENT', 'FIXED'];
-
-function toNumber(value: string | undefined, fallback: number): number {
-  const parsed = Number(value);
-  return value && Number.isFinite(parsed) ? parsed : fallback;
+interface Row {
+  name: string;
+  category: string;
+  cost: string;
+  margin: string;
+  shortDesc: string;
+  details: string;
+  imageUrl: string;
 }
 
-function rowsToProducts(rows: string[][]): ProductFormValues[] {
-  const [header, ...body] = rows;
-  const index = (key: string) => header.findIndex((h) => h.trim().toLowerCase() === key);
-  const col = {
-    name: index('name'), type: index('type'), category: index('category'),
-    netCost: index('netcost'), currency: index('currency'), unit: index('unit'),
-    markupType: index('markuptype'), markupValue: index('markupvalue'), taxPct: index('taxpct'),
-    tags: index('tags'), description: index('description'),
-  };
-  return body
-    .filter((cells) => col.name >= 0 && cells[col.name]?.trim())
-    .map((cells) => {
-      const rawType = cells[col.type]?.trim().toUpperCase();
-      const rawUnit = cells[col.unit]?.trim().toUpperCase();
-      const rawMarkupType = cells[col.markupType]?.trim().toUpperCase();
-      return {
-        name: cells[col.name].trim(),
-        type: (PRODUCT_TYPES as string[]).includes(rawType ?? '') ? (rawType as ProductType) : 'TOUR',
-        category: col.category >= 0 ? cells[col.category]?.trim() || undefined : undefined,
-        netCost: toNumber(cells[col.netCost], 0),
-        currency: (cells[col.currency]?.trim().toUpperCase() || 'COP').slice(0, 3),
-        unit: (PRODUCT_UNITS as string[]).includes(rawUnit ?? '') ? (rawUnit as ProductUnit) : 'PER_SERVICE',
-        markupType: (MARKUP_TYPES as string[]).includes(rawMarkupType ?? '') ? (rawMarkupType as MarkupType) : 'PERCENT',
-        markupValue: toNumber(cells[col.markupValue], 0),
-        taxPct: toNumber(cells[col.taxPct], 0),
-        tags: col.tags >= 0 ? (cells[col.tags]?.split(';').map((t) => t.trim()).filter(Boolean) ?? []) : [],
-        description: col.description >= 0 ? cells[col.description]?.trim() || undefined : undefined,
-        reservationMode: 'DAY',
-        blockedDates: [],
-        extras: [],
-      } satisfies ProductFormValues;
-    });
+const COLUMNS: { key: keyof Row; label: string }[] = [
+  { key: 'name', label: 'Nombre *' },
+  { key: 'category', label: 'Categoría' },
+  { key: 'cost', label: 'Costo' },
+  { key: 'margin', label: 'Margen (%)' },
+  { key: 'shortDesc', label: 'Desc. Corta' },
+  { key: 'details', label: 'Detalles' },
+  { key: 'imageUrl', label: 'URL Imagen' },
+];
+
+const INITIAL_ROWS = 10;
+const MAX_ROWS = 500;
+
+function emptyRow(): Row {
+  return { name: '', category: '', cost: '', margin: '', shortDesc: '', details: '', imageUrl: '' };
+}
+
+function withTrailingRow(rows: Row[]): Row[] {
+  const last = rows[rows.length - 1];
+  if (last.name.trim().length > 0 && rows.length < MAX_ROWS) return [...rows, emptyRow()];
+  return rows;
 }
 
 export function ProductImportModal({ open, onClose }: ProductImportModalProps) {
-  const [fileName, setFileName] = useState('');
-  const [preview, setPreview] = useState<ProductFormValues[]>([]);
+  const [rows, setRows] = useState<Row[]>(() => Array.from({ length: INITIAL_ROWS }, emptyRow));
   const [error, setError] = useState<string | null>(null);
   const importProducts = useImportProducts();
 
-  async function handleFile(file: File) {
+  const readyCount = rows.filter((row) => row.name.trim().length > 0).length;
+
+  function updateCell(rowIndex: number, key: keyof Row, value: string) {
+    setRows((prev) => withTrailingRow(prev.map((row, i) => (i === rowIndex ? { ...row, [key]: value } : row))));
+  }
+
+  function handlePaste(rowIndex: number, colIndex: number, event: ClipboardEvent<HTMLInputElement>) {
+    const text = event.clipboardData.getData('text/plain');
+    if (!text.includes('\t') && !text.includes('\n')) return;
+    event.preventDefault();
+    const lines = text.replace(/\r/g, '').split('\n').filter((line, i, arr) => !(i === arr.length - 1 && line === ''));
+    setRows((prev) => {
+      const next = prev.map((row) => ({ ...row }));
+      lines.forEach((line, lineIndex) => {
+        const cells = line.split('\t');
+        const targetRow = rowIndex + lineIndex;
+        while (next.length <= targetRow) next.push(emptyRow());
+        cells.forEach((cell, cellIndex) => {
+          const column = COLUMNS[colIndex + cellIndex];
+          if (column) next[targetRow][column.key] = cell.trim();
+        });
+      });
+      return withTrailingRow(next);
+    });
+  }
+
+  function reset() {
+    setRows(Array.from({ length: INITIAL_ROWS }, emptyRow));
     setError(null);
-    setFileName(file.name);
-    try {
-      const text = await file.text();
-      const rows = parseCsv(text);
-      if (rows.length < 2) { setError('El archivo no tiene filas de datos.'); setPreview([]); return; }
-      setPreview(rowsToProducts(rows));
-    } catch {
-      setError('No se pudo leer el archivo. Verifica que sea un CSV válido.');
-      setPreview([]);
-    }
+  }
+
+  function handleClose() {
+    reset();
+    onClose();
   }
 
   async function handleImport() {
-    if (preview.length === 0) return;
     setError(null);
+    const payload: ProductFormValues[] = rows
+      .filter((row) => row.name.trim().length > 0)
+      .map((row) => ({
+        name: row.name.trim(),
+        type: 'TOUR',
+        category: row.category.trim() || undefined,
+        tags: [],
+        netCost: Number(row.cost) || 0,
+        currency: 'COP',
+        unit: 'PER_SERVICE',
+        markupType: 'PERCENT',
+        markupValue: Number(row.margin) || 0,
+        taxPct: 0,
+        description: row.shortDesc.trim() || undefined,
+        longDescription: row.details.trim() || undefined,
+        imageUrl: row.imageUrl.trim() || undefined,
+        reservationMode: 'DAY',
+        blockedDates: [],
+        extras: [],
+      }));
+    if (payload.length === 0) return;
     try {
-      await importProducts.mutateAsync(preview);
+      await importProducts.mutateAsync(payload);
       handleClose();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'No se pudo importar los productos.');
     }
   }
 
-  function handleClose() {
-    setFileName('');
-    setPreview([]);
-    setError(null);
-    onClose();
-  }
-
   return (
-    <Modal onClose={handleClose} open={open} subtitle="Carga masiva desde un archivo CSV." title="Importar Rápido">
+    <Modal onClose={handleClose} open={open} subtitle="Carga masiva de tu catálogo de productos." title="Importar Productos" xl>
       <div className="space-y-4">
-        <div>
-          <label className="label-caps mb-1.5 block text-ink-soft" htmlFor="import-file">Archivo CSV</label>
-          <input
-            accept=".csv,text/csv"
-            className="w-full rounded-lg border border-ink/15 bg-paper px-3 py-2.5 text-sm text-ink outline-none file:mr-3 file:rounded-md file:border-0 file:bg-teal/10 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-teal"
-            id="import-file"
-            onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])}
-            type="file"
-          />
-          <p className="mt-1.5 text-xs text-ink-soft/70">
-            Columnas esperadas: name, type, category, netCost, currency, unit, markupType, markupValue, taxPct, tags, description.
-            Usa <code>;</code> para separar varias etiquetas. Este import cubre los datos base — disponibilidad, capacidad y extras se editan después por producto.
-          </p>
+        <div className="flex items-center justify-between">
+          <p className="label-caps text-ink-soft">Tabla de Datos</p>
+          <p className="text-sm font-semibold text-teal">{readyCount} producto{readyCount === 1 ? '' : 's'} listos</p>
         </div>
 
-        {fileName && preview.length > 0 ? (
-          <div className="rounded-xl border border-ink/10 bg-paper p-4">
-            <p className="label-caps text-ink-soft">Vista previa</p>
-            <p className="mt-1 text-sm text-ink">{preview.length} producto(s) listos para importar desde <span className="font-semibold">{fileName}</span>.</p>
-            <ul className="mt-2 max-h-40 space-y-1 overflow-y-auto text-xs text-ink-soft">
-              {preview.slice(0, 8).map((p, i) => <li key={i}>• {p.name}</li>)}
-              {preview.length > 8 ? <li>… y {preview.length - 8} más</li> : null}
-            </ul>
-          </div>
-        ) : null}
+        <div className="max-h-[26rem] overflow-auto rounded-xl border border-ink/10">
+          <table className="w-full border-collapse text-sm">
+            <thead className="sticky top-0 z-10 bg-paper-card">
+              <tr>
+                <th className="w-10 border-b border-ink/10 px-2 py-2 text-left text-xs font-semibold text-ink-soft">#</th>
+                {COLUMNS.map((column) => (
+                  <th className="border-b border-l border-ink/10 px-2 py-2 text-left text-xs font-semibold text-ink-soft" key={column.key}>
+                    {column.label}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((row, rowIndex) => (
+                <tr key={rowIndex}>
+                  <td className="border-b border-ink/5 px-2 py-1 text-center text-xs text-ink-soft/60">{rowIndex + 1}</td>
+                  {COLUMNS.map((column, colIndex) => (
+                    <td className="border-b border-l border-ink/5 p-0" key={column.key}>
+                      <input
+                        className="w-full bg-transparent px-2 py-1.5 text-sm text-ink outline-none focus:bg-teal/5"
+                        onChange={(e) => updateCell(rowIndex, column.key, e.target.value)}
+                        onPaste={(e) => handlePaste(rowIndex, colIndex, e)}
+                        type="text"
+                        value={row[column.key]}
+                      />
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        <p className="text-xs text-ink-soft/70">
+          Escribe directamente o pega filas copiadas desde Excel/Numbers/Google Sheets. La fila se agrega sola al completar el nombre de la última.
+          Este import cubre los datos base — disponibilidad, capacidad y extras se editan después por producto.
+        </p>
 
         {error ? <p className="text-sm text-red-600" role="alert">{error}</p> : null}
 
         <div className="flex justify-end gap-3 pt-2">
           <button className="button-secondary" onClick={handleClose} type="button">Cancelar</button>
-          <button className="button-primary" disabled={preview.length === 0 || importProducts.isPending} onClick={handleImport} type="button">
-            {importProducts.isPending ? 'Importando…' : `Importar ${preview.length || ''}`.trim()}
+          <button className="button-primary" disabled={readyCount === 0 || importProducts.isPending} onClick={handleImport} type="button">
+            {importProducts.isPending ? 'Importando…' : `Importar ${readyCount} producto${readyCount === 1 ? '' : 's'}`}
           </button>
         </div>
       </div>

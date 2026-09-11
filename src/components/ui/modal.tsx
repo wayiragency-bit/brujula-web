@@ -9,10 +9,11 @@ interface ModalProps {
   title: string;
   subtitle?: string;
   wide?: boolean;
+  xl?: boolean;
   children: React.ReactNode;
 }
 
-export function Modal({ open, onClose, title, subtitle, wide, children }: ModalProps) {
+export function Modal({ open, onClose, title, subtitle, wide, xl, children }: ModalProps) {
   useEffect(() => {
     if (!open) return;
     function onKey(event: KeyboardEvent) {
@@ -29,7 +30,7 @@ export function Modal({ open, onClose, title, subtitle, wide, children }: ModalP
       className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-ink/40 p-4 py-10 backdrop-blur-sm"
     >
       <div
-        className={`w-full ${wide ? 'max-w-2xl' : 'max-w-lg'} rounded-2xl bg-paper-card p-6 shadow-floating sm:p-8`}
+        className={`w-full ${xl ? 'max-w-5xl' : wide ? 'max-w-2xl' : 'max-w-lg'} rounded-2xl bg-paper-card p-6 shadow-floating sm:p-8`}
         onClick={(event) => event.stopPropagation()}
       >
         <div className="mb-6 flex items-start justify-between gap-4">
