@@ -339,7 +339,8 @@ export function QuoteBuilder({ initial }: { initial?: Quote }) {
                           <li key={client.id}>
                             <button
                               className="w-full px-3 py-2 text-left text-sm hover:bg-ink/5"
-                              onClick={() => { setHeaderField('clientId', client.id); setClientSearch(client.name); }}
+                              onClick={() => { setHeaderField('clientId', client.id); setClientSearch(client.name); setClientSearchFocused(false); }}
+                              onMouseDown={(e) => e.preventDefault()}
                               type="button"
                             >
                               {client.name}
@@ -354,7 +355,8 @@ export function QuoteBuilder({ initial }: { initial?: Quote }) {
                     )}
                     <button
                       className="w-full border-t border-ink/10 px-3 py-2 text-left text-sm font-semibold text-teal hover:bg-ink/5"
-                      onClick={() => { setNewClientModalKey((k) => k + 1); setShowNewClientForm(true); }}
+                      onClick={() => { setNewClientModalKey((k) => k + 1); setShowNewClientForm(true); setClientSearchFocused(false); }}
+                      onMouseDown={(e) => e.preventDefault()}
                       type="button"
                     >
                       + Crear Nuevo Cliente
