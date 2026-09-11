@@ -67,7 +67,7 @@ export function AppShell({ children }: Readonly<{ children: React.ReactNode }>) 
   return (
     <div className="min-h-screen bg-paper text-ink">
       {/* ── SIDEBAR (desktop) ── */}
-      <aside className="glass-panel fixed top-4 bottom-4 left-4 z-40 hidden w-[108px] flex-col items-center py-2 rounded-2xl overflow-hidden lg:flex">
+      <aside className="glass-panel fixed top-4 bottom-4 left-4 z-40 hidden w-[92px] flex-col items-center py-2 rounded-2xl overflow-hidden lg:flex">
 
         {/* Logo mark */}
         <Link
@@ -94,7 +94,11 @@ export function AppShell({ children }: Readonly<{ children: React.ReactNode }>) 
                 key={label}
               >
                 <Icon className="h-[22px] w-[22px]" />
-                <span className="text-[10px] font-medium leading-tight text-center break-words w-full">{label}</span>
+                <span className="text-[10px] font-medium leading-tight text-center w-full">
+                  {label.split(' ').map((word) => (
+                    <span className="block" key={word}>{word}</span>
+                  ))}
+                </span>
               </Link>
             );
           })}
@@ -113,7 +117,7 @@ export function AppShell({ children }: Readonly<{ children: React.ReactNode }>) 
       </aside>
 
       {/* ── CONTENT AREA ── */}
-      <div className="lg:pl-[140px]">
+      <div className="lg:pl-[124px]">
 
         {/* Top bar */}
         <header className="sticky top-0 z-30 flex h-16 items-center gap-4 px-4 sm:px-6 lg:px-6"
