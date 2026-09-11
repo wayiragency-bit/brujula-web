@@ -331,7 +331,7 @@ function KanbanBoard() {
               {/* Cards area */}
               <div
                 className="flex flex-1 flex-col gap-2 p-2 min-h-[200px]"
-                style={{ background: 'var(--surface)' }}
+                style={{ background: 'var(--paper)' }}
                 onDragOver={(e) => e.preventDefault()}
                 onDrop={() => handleDrop(column.status)}
               >
