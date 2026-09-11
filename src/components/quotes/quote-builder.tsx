@@ -356,14 +356,6 @@ export function QuoteBuilder({ initial }: { initial?: Quote }) {
                 </select>
               </div>
               <div>
-                <label className={labelClass} htmlFor="startDate">Check-in</label>
-                <input className={inputClass} disabled={!editable} id="startDate" onChange={(e) => setHeaderField('startDate', e.target.value)} type="date" value={header.startDate ?? ''} />
-              </div>
-              <div>
-                <label className={labelClass} htmlFor="endDate">Check-out</label>
-                <input className={inputClass} disabled={!editable} id="endDate" onChange={(e) => setHeaderField('endDate', e.target.value)} type="date" value={header.endDate ?? ''} />
-              </div>
-              <div>
                 <label className={labelClass} htmlFor="adults">Adultos</label>
                 <input className={inputClass} disabled={!editable} id="adults" min={0} onChange={(e) => setHeaderField('adults', Number(e.target.value))} type="number" value={header.adults ?? 1} />
               </div>
@@ -388,19 +380,6 @@ export function QuoteBuilder({ initial }: { initial?: Quote }) {
             ) : null}
           </section>
 
-          {canViewFinancial && editable ? (
-            <section className="space-y-4 rounded-2xl border border-ink/10 bg-paper-card p-6 shadow-card">
-              <h2 className="label-caps text-ink-soft">Comisión</h2>
-              <div className="grid grid-cols-2 gap-3">
-                <select className={selectClass} disabled={!canEditPricing} onChange={(e) => setHeaderField('commissionBase', e.target.value as 'MARGIN' | 'TOTAL')} value={header.commissionBase ?? 'MARGIN'}>
-                  <option value="MARGIN">Sobre margen</option>
-                  <option value="TOTAL">Sobre total</option>
-                </select>
-                <input className={inputClass} disabled={!canEditPricing} min={0} onChange={(e) => setHeaderField('commissionPct', e.target.value)} placeholder="%" type="number" value={header.commissionPct ?? '0'} />
-              </div>
-              {preview?.commissionAmount ? <p className="text-xs text-ink-soft">Comisión estimada: {formatMoney(preview.commissionAmount, currency)}</p> : null}
-            </section>
-          ) : null}
         </div>
 
         <div className="space-y-6 lg:col-span-2">
