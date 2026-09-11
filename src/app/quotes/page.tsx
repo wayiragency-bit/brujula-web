@@ -179,39 +179,39 @@ export default function QuotesPage() {
         </header>
 
         {/* Metric summary cards */}
-        <div className="grid grid-cols-2 gap-3 lg:grid-cols-5">
+        <div className="grid grid-cols-2 gap-4 lg:grid-cols-5">
           {METRIC_DEFS.map((def) => {
             const Icon = def.icon;
             const val  = getMetricValue(def);
             return (
               <div
-                className="glass-card rounded-2xl p-4"
+                className="glass-card rounded-2xl p-5"
                 key={def.key}
               >
-                <div className="mb-3 flex items-center gap-3">
+                <div className="mb-4 flex items-center gap-3">
                   <div
-                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-white"
+                    className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-white"
                     style={{ background: def.iconBg, boxShadow: `0 4px 10px ${def.iconShadow}` }}
                   >
-                    <Icon className="h-5 w-5" />
+                    <Icon className="h-6 w-6" />
                   </div>
                   <p
                     className="min-w-0 flex-1 font-black uppercase leading-tight text-ink-soft"
-                    style={{ fontSize: '10px', letterSpacing: '1.5px' }}
+                    style={{ fontSize: '11px', letterSpacing: '1.5px' }}
                   >
                     {def.label}
                   </p>
                 </div>
                 <p
                   className="font-black text-ink leading-none"
-                  style={{ fontSize: '24px', letterSpacing: '-1.2px' }}
+                  style={{ fontSize: '27px', letterSpacing: '-1.2px' }}
                 >
                   {val > 0 ? formatCompact(val, baseCurrency) : '—'}
                 </p>
-                <div className="mt-2 flex items-center justify-between gap-2">
+                <div className="mt-3 flex items-center justify-between gap-2">
                   <span
                     className="inline-block shrink-0 rounded-md px-1.5 py-0.5 text-ink-soft"
-                    style={{ background: 'var(--surface)', fontSize: '11px', fontWeight: 700 }}
+                    style={{ background: 'var(--surface)', fontSize: '12px', fontWeight: 700 }}
                   >
                     {def.trend === 'down' ? '↘' : '↗'} {def.footnote}
                   </span>
