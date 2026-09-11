@@ -166,7 +166,7 @@ export function QuotesAnalyticsChart() {
           <div className="flex h-full items-center justify-center text-sm text-ink-soft">Aún no hay cotizaciones en este período.</div>
         ) : (
           <ResponsiveContainer height="100%" width="100%">
-            <LineChart data={chartData} margin={{ top: 4, right: 4, bottom: 0, left: 0 }}>
+            <LineChart data={chartData} margin={{ top: 12, right: 12, bottom: 0, left: 0 }}>
               <CartesianGrid stroke="var(--border-faint)" strokeDasharray="3 3" vertical={false} />
               <XAxis axisLine={false} dataKey="label" tick={{ fill: 'var(--ink-muted)', fontSize: 11 }} tickLine={false} />
               <YAxis
