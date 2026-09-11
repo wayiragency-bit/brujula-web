@@ -37,6 +37,11 @@ const STATUS_LABELS: Record<QuoteStatus, string> = {
   VENCIDA: 'Vencida',
 };
 
+// Mirrors assertEditable() in the API's quote-policy.ts — a sent/accepted/partially-paid booking can
+// still need a date or product change; only PAGADA (paidAt set) locks the historical cost basis, and
+// RECHAZADA/VENCIDA must be reopened first.
+const EDITABLE_STATUSES: QuoteStatus[] = ['BORRADOR', 'ENVIADA', 'ACEPTADA', 'ABONADA'];
+
 const STATUS_COLORS: Record<QuoteStatus, string> = {
   BORRADOR: 'bg-ink/10 text-ink-soft',
   ENVIADA: 'bg-amber/15 text-amber',
@@ -116,7 +121,7 @@ export function QuoteBuilder({ initial }: { initial?: Quote }) {
   const canManageAccess = Boolean(initial && (initial.sellerId === user?.id || hasPermission('quotes.manage_access')));
 
   const isNew = !initial;
-  const editable = !initial || initial.status === 'BORRADOR';
+  const editable = !initial || (EDITABLE_STATUSES.includes(initial.status) && !initial.paidAt);
 
   const [header, setHeader] = useState<QuoteHeaderDraft>(() => draftFromQuote(initial).header);
   const [items, setItems] = useState<DraftItem[]>(() => draftFromQuote(initial).items);
