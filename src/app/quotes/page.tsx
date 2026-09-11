@@ -7,8 +7,17 @@ import {
 import Link from 'next/link';
 import { useMemo, useState } from 'react';
 import { AppShell } from '@/components/app-shell';
+import { Sparkline } from '@/components/dashboard/sparkline';
 import { useQuotes } from '@/hooks/use-quotes';
 import type { QuoteStatus } from '@/lib/types';
+
+const SPARKLINES = [
+  [10, 18, 14, 24, 20, 30],
+  [20, 16, 28, 22, 32, 27],
+  [12, 20, 16, 24, 18, 26],
+  [8,  22, 18, 30, 26, 34],
+  [16, 24, 14, 28, 20, 32],
+];
 
 const PAGE_SIZE = 24;
 
@@ -44,51 +53,61 @@ const METRIC_DEFS = [
     key: 'cotizado',
     label: 'Total Cotizado',
     footnote: 'Histórico general',
+    trend: 'up' as const,
     icon: FileText,
     iconBg: '#3b82f6',
     iconShadow: 'rgba(59,130,246,0.35)',
     statuses: ALL_STATUSES,
     field: 'total' as const,
+    spark: SPARKLINES[0],
   },
   {
     key: 'aceptado',
     label: 'Total Aceptado',
     footnote: 'Ganancias',
+    trend: 'up' as const,
     icon: CheckCircle2,
     iconBg: '#22c55e',
     iconShadow: 'rgba(34,197,94,0.35)',
     statuses: ['ACEPTADA', 'ABONADA', 'PAGADA'] as QuoteStatus[],
     field: 'total' as const,
+    spark: SPARKLINES[1],
   },
   {
     key: 'rechazado',
     label: 'Total Rechazado',
     footnote: 'Pérdidas',
+    trend: 'down' as const,
     icon: XCircle,
     iconBg: '#ef4444',
     iconShadow: 'rgba(239,68,68,0.35)',
     statuses: ['RECHAZADA'] as QuoteStatus[],
     field: 'total' as const,
+    spark: SPARKLINES[2],
   },
   {
     key: 'vencido',
     label: 'Total Vencido',
     footnote: 'Expiradas',
+    trend: 'down' as const,
     icon: AlertCircle,
     iconBg: '#f97316',
     iconShadow: 'rgba(249,115,22,0.35)',
     statuses: ['VENCIDA'] as QuoteStatus[],
     field: 'total' as const,
+    spark: SPARKLINES[3],
   },
   {
     key: 'ganancia',
     label: 'Ganancia Total',
     footnote: 'De cot. aceptadas',
+    trend: 'up' as const,
     icon: TrendingUp,
     iconBg: '#8b5cf6',
     iconShadow: 'rgba(139,92,246,0.35)',
     statuses: ['ACEPTADA', 'ABONADA', 'PAGADA'] as QuoteStatus[],
     field: 'marginTotal' as const,
+    spark: SPARKLINES[4],
   },
 ];
 
@@ -169,19 +188,22 @@ export default function QuotesPage() {
                 key={def.key}
                 className="glass-card rounded-2xl p-4"
               >
-                <div className="flex items-center gap-3 mb-3">
-                  <div
-                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-white"
-                    style={{ background: def.iconBg, boxShadow: `0 4px 10px ${def.iconShadow}` }}
-                  >
-                    <Icon className="h-5 w-5" />
+                <div className="mb-3 flex items-center justify-between gap-2">
+                  <div className="flex min-w-0 items-center gap-3">
+                    <div
+                      className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-white"
+                      style={{ background: def.iconBg, boxShadow: `0 4px 10px ${def.iconShadow}` }}
+                    >
+                      <Icon className="h-5 w-5" />
+                    </div>
+                    <p
+                      className="truncate font-black uppercase text-ink-soft"
+                      style={{ fontSize: '10px', letterSpacing: '2px' }}
+                    >
+                      {def.label}
+                    </p>
                   </div>
-                  <p
-                    className="font-black uppercase text-ink-soft"
-                    style={{ fontSize: '10px', letterSpacing: '2px' }}
-                  >
-                    {def.label}
-                  </p>
+                  <Sparkline color={def.iconBg} points={def.spark} />
                 </div>
                 <p
                   className="font-black text-ink leading-none"
@@ -189,9 +211,12 @@ export default function QuotesPage() {
                 >
                   {val > 0 ? formatCompact(val, baseCurrency) : '—'}
                 </p>
-                <p className="mt-2 text-ink-muted" style={{ fontSize: '11px', fontWeight: 700 }}>
-                  {def.footnote}
-                </p>
+                <span
+                  className="mt-2 inline-block rounded-md px-1.5 py-0.5 text-ink-soft"
+                  style={{ background: 'var(--surface)', fontSize: '11px', fontWeight: 700 }}
+                >
+                  {def.trend === 'down' ? '↘' : '↗'} {def.footnote}
+                </span>
               </div>
             );
           })}
