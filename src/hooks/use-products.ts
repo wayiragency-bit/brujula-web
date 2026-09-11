@@ -60,3 +60,11 @@ export function useDeactivateProduct() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['products'] }),
   });
 }
+
+export function useImportProducts() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (products: ProductFormValues[]) => api.post<{ imported: number }>('/products/import', { products }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['products'] }),
+  });
+}
