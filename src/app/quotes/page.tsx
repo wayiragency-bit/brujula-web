@@ -2,7 +2,7 @@
 
 import {
   AlertCircle, BarChart3, Calendar, CheckCircle2, ChevronLeft, ChevronRight,
-  Circle, Clock, DollarSign, FileText, Plus, Search, Send, Trash2, TrendingUp, XCircle,
+  Circle, Clock, DollarSign, FileText, Filter, Plus, Search, Send, Trash2, TrendingUp, XCircle,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useMemo, useState } from 'react';
@@ -133,6 +133,7 @@ export default function QuotesPage() {
   const [search, setSearch]   = useState('');
   const [status, setStatus]   = useState<QuoteStatus | undefined>(undefined);
   const [page, setPage]       = useState(1);
+  const [pageSize, setPageSize] = useState(PAGE_SIZE);
   const [dateFilterOpen, setDateFilterOpen] = useState(false);
   const [createdFrom, setCreatedFrom] = useState('');
   const [createdTo, setCreatedTo] = useState('');
@@ -141,7 +142,7 @@ export default function QuotesPage() {
   const hasDateFilter = Boolean(createdFrom || createdTo || checkinFrom || checkinTo);
 
   const { data, isLoading } = useQuotes({
-    q: search || undefined, status, page, limit: PAGE_SIZE,
+    q: search || undefined, status, page, limit: pageSize,
     createdFrom: createdFrom || undefined, createdTo: createdTo || undefined,
     from: checkinFrom || undefined, to: checkinTo || undefined,
   });
@@ -372,6 +373,29 @@ export default function QuotesPage() {
               </>
             ) : null}
           </div>
+
+          <label className="inline-flex items-center gap-2 rounded-xl px-3.5 py-2.5 text-sm" style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
+            <span className="text-ink-soft">Mostrar:</span>
+            <select
+              className="bg-transparent font-semibold text-ink outline-none"
+              onChange={(e) => { setPageSize(Number(e.target.value)); setPage(1); }}
+              value={pageSize}
+            >
+              {[12, 24, 48, 96].map((size) => <option key={size} value={size}>{size}</option>)}
+            </select>
+          </label>
+
+          <label className="inline-flex items-center gap-2 rounded-xl px-3.5 py-2.5 text-sm" style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
+            <Filter className="h-4 w-4 text-ink-soft" />
+            <select
+              className="bg-transparent font-semibold text-ink outline-none"
+              onChange={(e) => { setStatus((e.target.value || undefined) as QuoteStatus | undefined); setPage(1); }}
+              value={status ?? ''}
+            >
+              <option value="">Todos Los Estados</option>
+              {ALL_STATUSES.map((s) => <option key={s} value={s}>{STATUS_LABELS[s]}</option>)}
+            </select>
+          </label>
         </div>
 
         {/* Table */}
