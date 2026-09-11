@@ -1,6 +1,6 @@
 'use client';
 
-import { ArrowLeft, ExternalLink, Plus, Search, UserPlus } from 'lucide-react';
+import { ArrowLeft, ExternalLink, Lock, Plus, Search, UserPlus, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '@/lib/auth-context';
@@ -8,8 +8,10 @@ import {
   useChangeQuoteStatus,
   useCreateQuote,
   usePreviewQuote,
+  useQuoteAccess,
   useQuoteClientOptions,
   useRecordPayment,
+  useRevokeQuoteAccess,
   useUpdateQuote,
 } from '@/hooks/use-quotes';
 import { useCreateClient } from '@/hooks/use-clients';
@@ -138,6 +140,8 @@ export function QuoteBuilder({ initial }: { initial?: Quote }) {
   const updateQuote = useUpdateQuote(initial?.id ?? 'none');
   const changeStatus = useChangeQuoteStatus(initial?.id ?? 'none');
   const recordPayment = useRecordPayment(initial?.id ?? 'none');
+  const { data: sharedAccess } = useQuoteAccess(initial?.id);
+  const revokeAccess = useRevokeQuoteAccess(initial?.id ?? 'none');
 
   useEffect(() => {
     if (!editable) return;
@@ -281,11 +285,6 @@ export function QuoteBuilder({ initial }: { initial?: Quote }) {
               <ExternalLink className="h-3.5 w-3.5" /> Página del cliente
             </a>
           ) : null}
-          {canManageAccess ? (
-            <button className="button-secondary inline-flex items-center gap-1.5" onClick={() => setShowShareModal(true)} type="button">
-              <UserPlus className="h-3.5 w-3.5" /> Agregar Vendedor
-            </button>
-          ) : null}
           {editable ? (
             <button className="button-primary" disabled={submitting} onClick={handleSave} type="button">
               {submitting ? 'Guardando…' : 'Guardar Cotización'}
@@ -358,14 +357,41 @@ export function QuoteBuilder({ initial }: { initial?: Quote }) {
           <section className="space-y-4 rounded-2xl border border-ink/10 bg-paper-card p-6 shadow-card">
             <h2 className="label-caps text-ink-soft">Detalles de la Cotización</h2>
             <div className="grid gap-4 sm:grid-cols-2">
-              <div>
-                <label className={labelClass}>Asesor Responsable</label>
+              <div className="sm:col-span-2">
+                <label className={labelClass}>Asesor Propietario</label>
                 <div
-                  className="flex h-10 items-center rounded-lg px-3 text-sm text-ink-soft"
+                  className="flex h-10 items-center gap-2 rounded-lg px-3 text-sm text-ink-soft"
                   style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}
                 >
-                  {initial ? initial.seller?.name ?? '—' : user?.name}
+                  <span className="flex-1">{initial ? initial.seller?.name ?? '—' : user?.name}</span>
+                  <Lock className="h-3.5 w-3.5 shrink-0" />
                 </div>
+
+                {initial ? (
+                  <div className="mt-2 space-y-1.5">
+                    {sharedAccess?.map((row) => (
+                      <div className="flex items-center justify-between rounded-lg px-3 py-1.5 text-sm" key={row.userId} style={{ background: 'var(--surface)' }}>
+                        <span className="text-ink-soft">{row.name ?? row.userId}</span>
+                        {canManageAccess ? (
+                          <button
+                            aria-label="Quitar acceso"
+                            className="rounded-lg p-1 text-ink-soft transition hover:bg-red-50 hover:text-red-600"
+                            disabled={revokeAccess.isPending}
+                            onClick={() => revokeAccess.mutate(row.userId)}
+                            type="button"
+                          >
+                            <X className="h-3.5 w-3.5" />
+                          </button>
+                        ) : null}
+                      </div>
+                    ))}
+                    {canManageAccess ? (
+                      <button className="inline-flex items-center gap-1.5 text-xs font-semibold text-teal" onClick={() => setShowShareModal(true)} type="button">
+                        <UserPlus className="h-3.5 w-3.5" /> Agregar Asesor
+                      </button>
+                    ) : null}
+                  </div>
+                ) : null}
               </div>
               <div>
                 <label className={labelClass} htmlFor="pax">Número de Pax</label>
