@@ -336,22 +336,22 @@ export function QuoteBuilder({ initial }: { initial?: Quote }) {
                     ))}
                   </ul>
                 ) : null}
-                {clientSearch && !header.clientId && !clientOptionsLoading && clientOptions?.length === 0 ? (
-                  <div className="absolute z-10 mt-1 w-full space-y-2 rounded-lg border border-ink/10 bg-paper-card p-3 shadow-floating">
-                    <p className="text-sm text-ink-soft">No se encontraron clientes.</p>
-                    <button
-                      className="button-primary w-full text-sm"
-                      onClick={() => { setNewClientModalKey((k) => k + 1); setShowNewClientForm(true); }}
-                      type="button"
-                    >
-                      + Nuevo Cliente
-                    </button>
-                  </div>
-                ) : null}
               </div>
             ) : (
               <p className="text-sm text-ink">{initial?.client?.name}</p>
             )}
+            {editable && clientSearch && !header.clientId && !clientOptionsLoading && clientOptions?.length === 0 ? (
+              <div className="space-y-2 rounded-lg border border-ink/10 p-3" style={{ background: 'var(--surface)' }}>
+                <p className="text-sm text-ink-soft">No se encontraron clientes con &quot;{clientSearch}&quot;.</p>
+                <button
+                  className="button-primary w-full text-sm"
+                  onClick={() => { setNewClientModalKey((k) => k + 1); setShowNewClientForm(true); }}
+                  type="button"
+                >
+                  + Nuevo Cliente
+                </button>
+              </div>
+            ) : null}
           </section>
 
           <section className="space-y-4 rounded-2xl border border-ink/10 bg-paper-card p-6 shadow-card">
