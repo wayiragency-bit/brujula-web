@@ -1,12 +1,3 @@
-declare global {
-  interface Window {
-    grecaptcha?: {
-      ready: (callback: () => void) => void;
-      execute: (siteKey: string, options: { action: string }) => Promise<string>;
-    };
-  }
-}
-
 const SCRIPT_ID = 'grecaptcha-v3';
 // Read at module top level (matching lib/api.ts's NEXT_PUBLIC_API_URL) — Next's build-time inlining
 // of NEXT_PUBLIC_* vars doesn't reliably reach a process.env access nested inside a function body.
