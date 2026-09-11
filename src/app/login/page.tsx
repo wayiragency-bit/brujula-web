@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState, type FormEvent } from 'react';
 import { ApiError } from '@/lib/api';
 import { useAuth } from '@/lib/auth-context';
+import { inputClass, labelClass } from '@/components/ui/form';
 
 export default function LoginPage() {
   const { login, status } = useAuth();
@@ -36,26 +37,17 @@ export default function LoginPage() {
   }
 
   return (
-    <div
-      className="flex min-h-screen items-center justify-center px-4"
-      style={{
-        background: 'radial-gradient(ellipse 80% 60% at 50% -10%, rgba(17,67,63,0.35) 0%, #0d1117 70%)',
-      }}
-    >
+    <div className="flex min-h-screen items-center justify-center bg-paper px-4">
       {/* Card */}
       <div
-        className="w-full max-w-sm rounded-2xl p-8"
-        style={{
-          background: '#111827',
-          border: '1px solid rgba(255,255,255,0.10)',
-          boxShadow: '0 24px 48px -12px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.05)',
-        }}
+        className="w-full max-w-sm rounded-2xl bg-paper-card p-8 shadow-card"
+        style={{ border: '1px solid var(--border)' }}
       >
         {/* Header */}
         <div className="mb-8 flex flex-col items-center text-center">
           <div
             className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl"
-            style={{ background: 'rgba(17,67,63,0.8)', border: '1px solid rgba(254,178,59,0.3)' }}
+            style={{ background: 'rgba(17,67,63,0.15)', border: '1px solid rgba(254,178,59,0.3)' }}
           >
             <Compass className="h-6 w-6 text-amber" />
           </div>
@@ -65,43 +57,27 @@ export default function LoginPage() {
 
         <form className="space-y-4" onSubmit={handleSubmit}>
           <div>
-            <label className="label-caps mb-1.5 block text-ink-soft" htmlFor="email">
-              Correo electrónico
-            </label>
+            <label className={labelClass} htmlFor="email">Correo electrónico</label>
             <input
               autoComplete="email"
-              className="w-full rounded-lg px-3 py-2.5 text-sm text-ink outline-none transition"
+              className={inputClass}
               id="email"
               onChange={(e) => setEmail(e.target.value)}
               required
-              style={{
-                background: 'rgba(255,255,255,0.05)',
-                border: '1px solid rgba(255,255,255,0.12)',
-              }}
               type="email"
               value={email}
-              onFocus={(e) => { e.currentTarget.style.borderColor = '#feb23b'; e.currentTarget.style.boxShadow = '0 0 0 3px rgba(254,178,59,0.12)'; }}
-              onBlur={(e) => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.12)'; e.currentTarget.style.boxShadow = 'none'; }}
             />
           </div>
           <div>
-            <label className="label-caps mb-1.5 block text-ink-soft" htmlFor="password">
-              Contraseña
-            </label>
+            <label className={labelClass} htmlFor="password">Contraseña</label>
             <input
               autoComplete="current-password"
-              className="w-full rounded-lg px-3 py-2.5 text-sm text-ink outline-none transition"
+              className={inputClass}
               id="password"
               onChange={(e) => setPassword(e.target.value)}
               required
-              style={{
-                background: 'rgba(255,255,255,0.05)',
-                border: '1px solid rgba(255,255,255,0.12)',
-              }}
               type="password"
               value={password}
-              onFocus={(e) => { e.currentTarget.style.borderColor = '#feb23b'; e.currentTarget.style.boxShadow = '0 0 0 3px rgba(254,178,59,0.12)'; }}
-              onBlur={(e) => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.12)'; e.currentTarget.style.boxShadow = 'none'; }}
             />
           </div>
 
@@ -109,7 +85,7 @@ export default function LoginPage() {
             <p
               className="rounded-lg px-3 py-2 text-sm"
               role="alert"
-              style={{ background: 'rgba(239,68,68,0.12)', color: '#f87171', border: '1px solid rgba(239,68,68,0.2)' }}
+              style={{ background: 'rgba(239,68,68,0.12)', color: '#dc2626', border: '1px solid rgba(239,68,68,0.2)' }}
             >
               {error}
             </p>

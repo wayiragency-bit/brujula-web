@@ -8,6 +8,7 @@ import { ApiError } from '@/lib/api';
 import { useAuth } from '@/lib/auth-context';
 import { AGENCY_TYPE_LABELS } from '@/lib/types';
 import type { AgencyType } from '@/lib/types';
+import { inputClass, labelClass, selectClass } from '@/components/ui/form';
 
 const FEATURES: { icon: React.ElementType; label: string }[] = [
   { icon: FileText, label: 'Cotizaciones con seguimiento en tiempo real' },
@@ -15,20 +16,6 @@ const FEATURES: { icon: React.ElementType; label: string }[] = [
   { icon: ShieldCheck, label: 'Roles y permisos para Administrador, Supervisor y Agente' },
   { icon: BarChart3, label: 'Dashboard de ventas y comisiones por equipo' },
 ];
-
-const fieldStyle: React.CSSProperties = {
-  background: 'rgba(255,255,255,0.05)',
-  border: '1px solid rgba(255,255,255,0.12)',
-};
-
-function focusField(e: React.FocusEvent<HTMLInputElement | HTMLSelectElement>) {
-  e.currentTarget.style.borderColor = '#feb23b';
-  e.currentTarget.style.boxShadow = '0 0 0 3px rgba(254,178,59,0.12)';
-}
-function blurField(e: React.FocusEvent<HTMLInputElement | HTMLSelectElement>) {
-  e.currentTarget.style.borderColor = 'rgba(255,255,255,0.12)';
-  e.currentTarget.style.boxShadow = 'none';
-}
 
 export default function RegisterPage() {
   const { register, status } = useAuth();
@@ -67,46 +54,47 @@ export default function RegisterPage() {
   }
 
   return (
-    <div
-      className="flex min-h-screen items-center justify-center px-4 py-10"
-      style={{
-        background: 'radial-gradient(ellipse 80% 60% at 50% -10%, rgba(17,67,63,0.35) 0%, #0d1117 70%)',
-      }}
-    >
-      <div className="flex w-full max-w-4xl overflow-hidden rounded-2xl" style={{ border: '1px solid rgba(255,255,255,0.10)', boxShadow: '0 24px 48px -12px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.05)' }}>
+    <div className="flex min-h-screen items-center justify-center bg-paper px-4 py-10">
+      <div
+        className="flex w-full max-w-4xl overflow-hidden rounded-2xl shadow-card"
+        style={{ border: '1px solid var(--border)' }}
+      >
         {/* Marketing panel */}
-        <div className="hidden w-[42%] flex-col justify-between p-10 lg:flex" style={{ background: '#0a1628' }}>
+        <div
+          className="hidden w-[42%] flex-col justify-between p-10 lg:flex"
+          style={{ background: 'linear-gradient(160deg, rgba(17,67,63,0.92), rgba(10,22,40,0.96))' }}
+        >
           <div>
             <div className="mb-8 flex items-center gap-2.5">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl" style={{ background: 'rgba(17,67,63,0.8)', border: '1px solid rgba(254,178,59,0.3)' }}>
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl" style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(254,178,59,0.3)' }}>
                 <Compass className="h-5 w-5 text-amber" />
               </div>
-              <span className="font-display text-xl font-extrabold text-ink">Brújula</span>
+              <span className="font-display text-xl font-extrabold text-white">Brújula</span>
             </div>
-            <h1 className="font-display text-2xl font-extrabold leading-tight text-ink">
+            <h1 className="font-display text-2xl font-extrabold leading-tight text-white">
               Lleva tu agencia al siguiente nivel.
             </h1>
-            <p className="mt-3 text-sm leading-relaxed text-ink-soft">
+            <p className="mt-3 text-sm leading-relaxed text-white/70">
               Cotizador y operación comercial para agencias, operadores y hoteles — con roles, permisos
               y visibilidad de ventas por asesor desde el primer día.
             </p>
           </div>
           <ul className="space-y-3">
             {FEATURES.map(({ icon: Icon, label }) => (
-              <li className="flex items-center gap-3 rounded-xl px-3 py-2.5" key={label} style={{ background: 'rgba(255,255,255,0.04)' }}>
-                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg" style={{ background: 'rgba(254,178,59,0.15)' }}>
+              <li className="flex items-center gap-3 rounded-xl px-3 py-2.5" key={label} style={{ background: 'rgba(255,255,255,0.08)' }}>
+                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg" style={{ background: 'rgba(254,178,59,0.2)' }}>
                   <Icon className="h-3.5 w-3.5 text-amber" />
                 </span>
-                <span className="text-xs font-medium text-ink-soft">{label}</span>
+                <span className="text-xs font-medium text-white/80">{label}</span>
               </li>
             ))}
           </ul>
         </div>
 
         {/* Form panel */}
-        <div className="w-full p-8 sm:p-10 lg:w-[58%]" style={{ background: '#111827' }}>
+        <div className="w-full bg-paper-card p-8 sm:p-10 lg:w-[58%]">
           <div className="mb-6 flex flex-col items-center text-center lg:hidden">
-            <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl" style={{ background: 'rgba(17,67,63,0.8)', border: '1px solid rgba(254,178,59,0.3)' }}>
+            <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl" style={{ background: 'rgba(17,67,63,0.15)', border: '1px solid rgba(254,178,59,0.3)' }}>
               <Compass className="h-6 w-6 text-amber" />
             </div>
             <h1 className="font-display text-2xl font-extrabold text-ink">Brújula</h1>
@@ -118,72 +106,71 @@ export default function RegisterPage() {
 
           <form className="space-y-4" onSubmit={handleSubmit}>
             <div>
-              <label className="label-caps mb-1.5 block text-ink-soft" htmlFor="agencyName">Nombre de la Empresa</label>
+              <label className={labelClass} htmlFor="agencyName">Nombre de la Empresa</label>
               <input
-                className="w-full rounded-lg px-3 py-2.5 text-sm text-ink outline-none transition"
-                id="agencyName" onBlur={blurField} onChange={(e) => setAgencyName(e.target.value)} onFocus={focusField}
-                placeholder="Ej. Viajes del Caribe" required style={fieldStyle} value={agencyName}
+                className={inputClass}
+                id="agencyName" onChange={(e) => setAgencyName(e.target.value)}
+                placeholder="Ej. Viajes del Caribe" required value={agencyName}
               />
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
-                <label className="label-caps mb-1.5 block text-ink-soft" htmlFor="name">Tu Nombre</label>
+                <label className={labelClass} htmlFor="name">Tu Nombre</label>
                 <input
                   autoComplete="name"
-                  className="w-full rounded-lg px-3 py-2.5 text-sm text-ink outline-none transition"
-                  id="name" onBlur={blurField} onChange={(e) => setName(e.target.value)} onFocus={focusField}
-                  placeholder="Juan Pérez" required style={fieldStyle} value={name}
+                  className={inputClass}
+                  id="name" onChange={(e) => setName(e.target.value)}
+                  placeholder="Juan Pérez" required value={name}
                 />
               </div>
               <div>
-                <label className="label-caps mb-1.5 block text-ink-soft" htmlFor="type">Tipo de Empresa</label>
+                <label className={labelClass} htmlFor="type">Tipo de Empresa</label>
                 <select
-                  className="w-full rounded-lg px-3 py-2.5 text-sm text-ink outline-none transition"
-                  id="type" onBlur={blurField} onChange={(e) => setType(e.target.value as AgencyType)} onFocus={focusField}
-                  style={fieldStyle} value={type}
+                  className={selectClass}
+                  id="type" onChange={(e) => setType(e.target.value as AgencyType)} value={type}
                 >
                   {Object.entries(AGENCY_TYPE_LABELS).map(([value, label]) => (
-                    <option key={value} style={{ background: '#111827' }} value={value}>{label}</option>
+                    <option key={value} value={value}>{label}</option>
                   ))}
                 </select>
               </div>
             </div>
 
             <div>
-              <label className="label-caps mb-1.5 block text-ink-soft" htmlFor="email">Correo Electrónico</label>
+              <label className={labelClass} htmlFor="email">Correo Electrónico</label>
               <input
                 autoComplete="email"
-                className="w-full rounded-lg px-3 py-2.5 text-sm text-ink outline-none transition"
-                id="email" onBlur={blurField} onChange={(e) => setEmail(e.target.value)} onFocus={focusField}
-                placeholder="tucorreo@ejemplo.com" required style={fieldStyle} type="email" value={email}
+                className={inputClass}
+                id="email" onChange={(e) => setEmail(e.target.value)}
+                placeholder="tucorreo@ejemplo.com" required type="email" value={email}
               />
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
-                <label className="label-caps mb-1.5 block text-ink-soft" htmlFor="password">Contraseña</label>
+                <label className={labelClass} htmlFor="password">Contraseña</label>
                 <input
                   autoComplete="new-password"
-                  className="w-full rounded-lg px-3 py-2.5 text-sm text-ink outline-none transition"
-                  id="password" minLength={10} onBlur={blurField} onChange={(e) => setPassword(e.target.value)} onFocus={focusField}
-                  required style={fieldStyle} type="password" value={password}
+                  className={inputClass}
+                  id="password" minLength={10} onChange={(e) => setPassword(e.target.value)}
+                  required type="password" value={password}
                 />
               </div>
               <div>
-                <label className="label-caps mb-1.5 block text-ink-soft" htmlFor="confirmPassword">Confirmar Contraseña</label>
+                <label className={labelClass} htmlFor="confirmPassword">Confirmar Contraseña</label>
                 <input
                   autoComplete="new-password"
-                  className="w-full rounded-lg px-3 py-2.5 text-sm text-ink outline-none transition"
-                  id="confirmPassword" onBlur={blurField} onChange={(e) => setConfirmPassword(e.target.value)} onFocus={focusField}
-                  required style={fieldStyle} type="password" value={confirmPassword}
+                  className={inputClass}
+                  id="confirmPassword" onChange={(e) => setConfirmPassword(e.target.value)}
+                  required type="password" value={confirmPassword}
                 />
               </div>
             </div>
             <p className="text-xs text-ink-muted">Mínimo 10 caracteres, con mayúscula, minúscula y número.</p>
 
             {error ? (
-              <p className="rounded-lg px-3 py-2 text-sm" role="alert" style={{ background: 'rgba(239,68,68,0.12)', color: '#f87171', border: '1px solid rgba(239,68,68,0.2)' }}>
+              <p className="rounded-lg px-3 py-2 text-sm" role="alert" style={{ background: 'rgba(239,68,68,0.12)', color: '#dc2626', border: '1px solid rgba(239,68,68,0.2)' }}>
                 {error}
               </p>
             ) : null}
