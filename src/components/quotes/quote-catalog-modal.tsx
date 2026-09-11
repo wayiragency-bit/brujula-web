@@ -102,9 +102,9 @@ export function QuoteCatalogModal({ open, onClose, onConfirm }: QuoteCatalogModa
           </div>
         ) : null}
 
-        <div className="grid max-h-[55vh] grid-cols-1 gap-3 overflow-y-auto sm:grid-cols-2">
+        <div className="grid max-h-[55vh] grid-cols-2 gap-3 overflow-y-auto sm:grid-cols-3 lg:grid-cols-4">
           {filtered.length === 0 ? (
-            <p className="col-span-2 py-10 text-center text-sm text-ink-soft">Sin resultados.</p>
+            <p className="col-span-full py-10 text-center text-sm text-ink-soft">Sin resultados.</p>
           ) : (
             filtered.map((product) => {
               const selection = selected[product.id];
@@ -114,48 +114,48 @@ export function QuoteCatalogModal({ open, onClose, onConfirm }: QuoteCatalogModa
                   className={`overflow-hidden rounded-xl border transition ${isSelected ? 'border-teal ring-1 ring-teal' : 'border-ink/10'}`}
                   key={product.id}
                 >
-                  <div className="relative h-32 w-full bg-ink/5">
+                  <div className="relative h-20 w-full bg-ink/5">
                     {product.imageUrl ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img alt="" className="h-full w-full object-cover" src={product.imageUrl} />
                     ) : null}
-                    <span className="absolute left-2 top-2 rounded-md bg-ink/70 px-2 py-0.5 text-[10px] font-bold uppercase text-white">
+                    <span className="absolute left-1.5 top-1.5 rounded-md bg-ink/70 px-1.5 py-0.5 text-[9px] font-bold uppercase text-white">
                       {product.type}
                     </span>
                   </div>
-                  <div className="space-y-2 p-3">
-                    <p className="text-sm font-semibold text-ink">{product.name}</p>
-                    {product.description ? <p className="line-clamp-2 text-xs text-ink-soft">{product.description}</p> : null}
-                    <div className="flex items-center justify-between gap-2 border-t border-ink/10 pt-2">
-                      <p className="font-mono text-sm font-bold text-teal">{formatMoney(product.sellPrice, product.currency)}</p>
+                  <div className="space-y-1.5 p-2">
+                    <p className="truncate text-xs font-semibold text-ink" title={product.name}>{product.name}</p>
+                    {product.description ? <p className="line-clamp-1 text-[11px] text-ink-soft">{product.description}</p> : null}
+                    <div className="flex items-center justify-between gap-1 border-t border-ink/10 pt-1.5">
+                      <p className="truncate font-mono text-xs font-bold text-teal">{formatMoney(product.sellPrice, product.currency)}</p>
                       {isSelected ? (
-                        <div className="flex items-center gap-2 rounded-lg border border-ink/10 px-1.5 py-0.5">
+                        <div className="flex shrink-0 items-center gap-1 rounded-lg border border-ink/10 px-1 py-0.5">
                           <button
                             aria-label="Restar"
                             className="text-ink-soft hover:text-ink"
                             onClick={() => setQuantity(product.id, selection.quantity - 1)}
                             type="button"
                           >
-                            <Minus className="h-3.5 w-3.5" />
+                            <Minus className="h-3 w-3" />
                           </button>
-                          <span className="w-4 text-center text-xs font-bold text-ink">{selection.quantity}</span>
+                          <span className="w-3 text-center text-[11px] font-bold text-ink">{selection.quantity}</span>
                           <button
                             aria-label="Sumar"
                             className="text-ink-soft hover:text-ink"
                             onClick={() => setQuantity(product.id, selection.quantity + 1)}
                             type="button"
                           >
-                            <Plus className="h-3.5 w-3.5" />
+                            <Plus className="h-3 w-3" />
                           </button>
                         </div>
                       ) : (
                         <button
                           aria-label="Agregar"
-                          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-teal text-white shadow-sm transition hover:bg-teal/90"
+                          className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-teal text-white shadow-sm transition hover:bg-teal/90"
                           onClick={() => toggle(product)}
                           type="button"
                         >
-                          <Plus className="h-4 w-4" strokeWidth={2.5} />
+                          <Plus className="h-3.5 w-3.5" strokeWidth={2.5} />
                         </button>
                       )}
                     </div>
