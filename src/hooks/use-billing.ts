@@ -1,6 +1,6 @@
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
-import type { AgencySubscriptionDetail, AgencyType, Plan } from '@/lib/types';
+import type { AgencySubscriptionDetail, AgencyType, BillingPayment, Plan } from '@/lib/types';
 
 export function usePlans(businessType?: AgencyType) {
   return useQuery({
@@ -13,5 +13,22 @@ export function useSubscription() {
   return useQuery({
     queryKey: ['settings', 'subscription'],
     queryFn: () => api.get<AgencySubscriptionDetail | null>('/settings/subscription'),
+  });
+}
+
+export function usePayments() {
+  return useQuery({
+    queryKey: ['billing', 'payments'],
+    queryFn: () => api.get<BillingPayment[]>('/billing/payments'),
+  });
+}
+
+export function useCreatePaymentLink() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: () => api.post<{ url: string }>('/billing/payment-link'),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['billing', 'payments'] });
+    },
   });
 }

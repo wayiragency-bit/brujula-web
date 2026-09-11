@@ -1,16 +1,17 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Settings, User, Palette, Mail, CreditCard,
   Building2, CheckCircle, Shield, Globe2,
-  Receipt,
+  Receipt, AlertCircle, ExternalLink, Loader2,
 } from 'lucide-react';
 import { useTheme } from '@/lib/theme-context';
 import type { Theme } from '@/lib/theme-context';
 import { AppShell } from '@/components/app-shell';
 import { useAgency, useUpdateAgency } from '@/hooks/use-agency';
-import { useSubscription } from '@/hooks/use-billing';
+import { useCreatePaymentLink, usePayments, useSubscription } from '@/hooks/use-billing';
+import { ApiError } from '@/lib/api';
 import { useAuth } from '@/lib/auth-context';
 import { AGENCY_TYPE_LABELS } from '@/lib/types';
 import type { Agency, AgencyFormValues, AgencyType, PaymentMethod, SubscriptionStatus } from '@/lib/types';
@@ -86,7 +87,13 @@ export default function SettingsPage() {
   const canEditAgency = hasPermission('settings.edit_agency');
   // Supervisor/Agente only manage their own profile and appearance; company config and billing stay with Administrador/Propietario.
   const visibleTabs = TABS.filter((t) => canEditAgency || t.id === 'perfil' || t.id === 'apariencia');
-  const [tab, setTab] = useState<Tab>(canEditAgency ? 'empresa' : 'perfil');
+  const [tab, setTab] = useState<Tab>(() => {
+    if (typeof window !== 'undefined') {
+      const t = new URLSearchParams(window.location.search).get('tab') as Tab | null;
+      if (t && (['empresa', 'perfil', 'apariencia', 'correo', 'pagos'] as Tab[]).includes(t)) return t;
+    }
+    return canEditAgency ? 'empresa' : 'perfil';
+  });
 
   return (
     <AppShell>
@@ -648,13 +655,71 @@ function formatDate(value: string): string {
   return new Date(value).toLocaleDateString('es-CO', { day: '2-digit', month: 'short', year: 'numeric' });
 }
 
+const PAYMENT_STATUS_LABELS: Record<string, string> = {
+  PENDING: 'Pendiente',
+  APPROVED: 'Aprobado',
+  REJECTED: 'Rechazado',
+  CANCELLED: 'Cancelado',
+  EXPIRED: 'Expirado',
+};
+
 export function PagosTab() {
-  const { data: subscription, isLoading } = useSubscription();
+  const { data: subscription, isLoading, refetch: refetchSub } = useSubscription();
+  const { data: payments, isLoading: paymentsLoading, refetch: refetchPayments } = usePayments();
+  const createLink = useCreatePaymentLink();
+  const [fromBold] = useState<boolean>(() =>
+    typeof window !== 'undefined'
+      ? new URLSearchParams(window.location.search).get('from') === 'bold'
+      : false
+  );
+  const [payError, setPayError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (fromBold) {
+      void refetchSub();
+      void refetchPayments();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handlePay = async () => {
+    setPayError(null);
+    try {
+      const { url } = await createLink.mutateAsync();
+      window.location.href = url;
+    } catch (err) {
+      setPayError(err instanceof ApiError ? err.message : 'No se pudo generar el enlace de pago. Intenta de nuevo.');
+    }
+  };
+
+  const canPay =
+    Boolean(subscription?.agreedPrice) &&
+    ['TRIAL', 'EXPIRED', 'PAST_DUE', 'CANCELLED'].includes(subscription?.status ?? '');
 
   if (isLoading) return <Card title="Plan Actual"><p className="text-ink-soft">Cargando…</p></Card>;
 
   return (
     <>
+      {/* Return from Bold — show result */}
+      {fromBold && subscription?.status === 'ACTIVE' && (
+        <div
+          className="flex items-center gap-3 rounded-xl p-4 text-sm font-medium"
+          style={{ background: 'rgba(74,222,128,0.08)', border: '1px solid rgba(74,222,128,0.3)', color: '#16a34a' }}
+        >
+          <CheckCircle className="h-5 w-5 shrink-0" />
+          ¡Pago procesado exitosamente! Tu suscripción ya está activa.
+        </div>
+      )}
+      {fromBold && subscription?.status !== 'ACTIVE' && (
+        <div
+          className="flex items-center gap-3 rounded-xl p-4 text-sm font-medium"
+          style={{ background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.3)', color: '#b45309' }}
+        >
+          <AlertCircle className="h-5 w-5 shrink-0" />
+          El pago aún no se ha confirmado. Si ya lo completaste, espera unos minutos y recarga la página.
+        </div>
+      )}
+
       {/* Current plan */}
       <Card title="Plan Actual">
         {subscription ? (
@@ -702,9 +767,28 @@ export function PagosTab() {
               </div>
             ) : null}
 
-            <p className="text-xs text-ink-muted">
-              Los pagos en línea con Bold estarán disponibles próximamente. Por ahora, para cambiar de plan o cancelar contacta a soporte.
-            </p>
+            {canPay && (
+              <div className="flex flex-col gap-2">
+                {payError && <p className="text-xs" style={{ color: '#ef4444' }}>{payError}</p>}
+                <button
+                  className="flex w-full items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-bold transition-opacity hover:opacity-90 disabled:opacity-50 sm:w-auto"
+                  disabled={createLink.isPending}
+                  onClick={() => void handlePay()}
+                  style={{ background: '#feb23b', color: '#1a1a1a' }}
+                  type="button"
+                >
+                  {createLink.isPending
+                    ? <><Loader2 className="h-4 w-4 animate-spin" /> Generando enlace…</>
+                    : <><ExternalLink className="h-4 w-4" /> Pagar plan con Bold</>}
+                </button>
+              </div>
+            )}
+
+            {subscription.status === 'ACTIVE' && (
+              <p className="text-xs text-ink-muted">
+                Para cambiar de plan o cancelar tu suscripción, contacta a soporte.
+              </p>
+            )}
           </>
         ) : (
           <p className="text-sm text-ink-soft">Esta empresa no tiene un plan de suscripción asignado.</p>
@@ -712,14 +796,53 @@ export function PagosTab() {
       </Card>
 
       {/* Billing history */}
-      <Card subtitle="Aquí verás tus comprobantes una vez esté disponible el cobro en línea." title="Historial de Facturación">
-        <div
-          className="flex items-start gap-3 rounded-xl p-4 text-xs text-ink-soft"
-          style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border-faint)' }}
-        >
-          <Receipt className="mt-0.5 h-4 w-4 shrink-0 text-ink-muted" />
-          <span>Aún no hay pagos registrados. Esta sección se completará cuando se active el cobro en línea.</span>
-        </div>
+      <Card title="Historial de Facturación">
+        {paymentsLoading ? (
+          <p className="text-sm text-ink-soft">Cargando…</p>
+        ) : payments?.length ? (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="text-left text-xs text-ink-muted" style={{ borderBottom: '1px solid var(--border-faint)' }}>
+                  <th className="pb-2 pr-4 font-medium">Fecha</th>
+                  <th className="pb-2 pr-4 font-medium">Monto</th>
+                  <th className="pb-2 pr-4 font-medium">Estado</th>
+                  <th className="pb-2 font-medium">ID transacción</th>
+                </tr>
+              </thead>
+              <tbody>
+                {payments.map((p) => (
+                  <tr key={p.id} style={{ borderBottom: '1px solid var(--border-faint)' }}>
+                    <td className="py-3 pr-4 text-ink-soft">{formatDate(p.createdAt)}</td>
+                    <td className="py-3 pr-4 font-medium text-ink">{p.currency} ${parseFloat(p.amount).toFixed(2)}</td>
+                    <td className="py-3 pr-4">
+                      <span
+                        className="rounded-full px-2 py-0.5 text-xs font-bold"
+                        style={{
+                          background: p.status === 'APPROVED' ? 'rgba(74,222,128,0.12)' : 'rgba(245,158,11,0.10)',
+                          color: p.status === 'APPROVED' ? '#16a34a' : p.status === 'REJECTED' ? '#ef4444' : '#b45309',
+                        }}
+                      >
+                        {PAYMENT_STATUS_LABELS[p.status] ?? p.status}
+                      </span>
+                    </td>
+                    <td className="py-3 font-mono text-xs text-ink-muted">
+                      {p.boldTransactionId ? `···${p.boldTransactionId.slice(-8)}` : '—'}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <div
+            className="flex items-start gap-3 rounded-xl p-4 text-xs text-ink-soft"
+            style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border-faint)' }}
+          >
+            <Receipt className="mt-0.5 h-4 w-4 shrink-0 text-ink-muted" />
+            <span>Aún no hay pagos registrados.</span>
+          </div>
+        )}
       </Card>
     </>
   );

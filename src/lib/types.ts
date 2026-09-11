@@ -431,3 +431,17 @@ export interface AgencySubscriptionDetail {
   trialStart: string | null;
   trialEnd: string | null;
 }
+
+export type BillingPaymentStatus = 'PENDING' | 'APPROVED' | 'REJECTED' | 'CANCELLED' | 'EXPIRED';
+
+export interface BillingPayment {
+  id: string;
+  boldLinkId: string;
+  boldTransactionId: string | null;
+  reference: string;
+  amount: string;
+  currency: string;
+  status: BillingPaymentStatus;
+  createdAt: string;
+  updatedAt: string;
+}
