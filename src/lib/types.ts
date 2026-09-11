@@ -52,6 +52,13 @@ export interface TeamRole {
 export type ProductType = 'HOTEL' | 'TOUR' | 'TRANSPORT' | 'FLIGHT' | 'INSURANCE' | 'EXPERIENCE' | 'OTHER';
 export type ProductUnit = 'PER_PERSON' | 'PER_NIGHT' | 'PER_SERVICE';
 export type MarkupType = 'PERCENT' | 'FIXED';
+export type ReservationMode = 'DAY' | 'NIGHT' | 'HOUR';
+
+export interface ProductExtra {
+  title: string;
+  quantity: number;
+  price: number;
+}
 
 export interface Supplier {
   id: string;
@@ -101,6 +108,19 @@ export interface Product {
   marginAmount: number;
   marginPct: number;
   createdAt: string;
+  longDescription: string | null;
+  reservationMode: ReservationMode;
+  durationHours: number | null;
+  startTime: string | null;
+  endTime: string | null;
+  capacityTotal: number | null;
+  capacityAdults: number | null;
+  capacityChildren: number | null;
+  pmsEnabled: boolean;
+  blockedDates: string[];
+  stockPerDayEnabled: boolean;
+  stockPerDayMax: number | null;
+  extras: ProductExtra[];
 }
 
 export interface ProductFormValues {
@@ -117,6 +137,19 @@ export interface ProductFormValues {
   markupValue: number;
   taxPct: number;
   supplierId?: string;
+  longDescription?: string;
+  reservationMode: ReservationMode;
+  durationHours?: number;
+  startTime?: string;
+  endTime?: string;
+  capacityTotal?: number;
+  capacityAdults?: number;
+  capacityChildren?: number;
+  pmsEnabled?: boolean;
+  blockedDates: string[];
+  stockPerDayEnabled?: boolean;
+  stockPerDayMax?: number;
+  extras: ProductExtra[];
 }
 
 export type QuoteStatus = 'BORRADOR' | 'ENVIADA' | 'ACEPTADA' | 'ABONADA' | 'PAGADA' | 'RECHAZADA' | 'VENCIDA';
