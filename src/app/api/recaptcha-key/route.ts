@@ -1,11 +1,14 @@
 import { NextResponse } from 'next/server';
 
 /**
- * Serves the reCAPTCHA site key at request time instead of relying on build-time inlining of
- * NEXT_PUBLIC_RECAPTCHA_SITE_KEY — that inlining wasn't reliably reaching this one variable in
- * production Turbopack builds. A route handler reads process.env at runtime, sidestepping it
- * entirely (the site key isn't sensitive; it's meant to be public).
+ * Serves the reCAPTCHA site key to the browser at request time.
+ *
+ * The bracket lookup is deliberate: Next inlines `process.env.NEXT_PUBLIC_*` at build time
+ * everywhere — server code included — and that substitution was landing as `undefined` in this
+ * project's production builds. A dynamic lookup is explicitly *not* inlined, so this reads the
+ * real runtime environment instead. The site key is public by design.
  */
 export async function GET() {
-  return NextResponse.json({ siteKey: process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY ?? null });
+  const siteKey = process.env['NEXT_PUBLIC_RECAPTCHA_SITE_KEY'] ?? null;
+  return NextResponse.json({ siteKey });
 }
