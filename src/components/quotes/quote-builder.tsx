@@ -1,6 +1,6 @@
 'use client';
 
-import { ExternalLink, Plus, Search, Trash2 } from 'lucide-react';
+import { ExternalLink, Plus, Search } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '@/lib/auth-context';
@@ -16,6 +16,8 @@ import {
 } from '@/hooks/use-quotes';
 import type { MarkupType, ProductUnit, Quote, QuoteHeaderDraft, QuoteItemDraft, QuoteStatus } from '@/lib/types';
 import { inputClass, labelClass, selectClass } from '@/components/ui/form';
+import { QuoteItemCard } from '@/components/quotes/quote-item-card';
+import { QuoteItinerary } from '@/components/quotes/quote-itinerary';
 
 interface DraftItem extends QuoteItemDraft {
   key: string;
@@ -75,6 +77,10 @@ function toPayloadItem(item: DraftItem): QuoteItemDraft {
     markupValue: item.markupValue,
     discountItem: item.discountItem,
     taxPct: item.taxPct,
+    serviceDate: item.serviceDate,
+    serviceEndDate: item.serviceEndDate,
+    priceTier: item.priceTier,
+    extras: item.extras,
   };
 }
 
@@ -126,6 +132,8 @@ export function QuoteBuilder({ initial }: { initial?: Quote }) {
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [paymentAmount, setPaymentAmount] = useState('');
+  const [paymentDate, setPaymentDate] = useState(() => new Date().toISOString().slice(0, 10));
+  const [paymentReference, setPaymentReference] = useState('');
 
   const { data: sellers } = useQuoteSellers();
   const { data: clientOptions } = useQuoteClientOptions(clientSearch);
@@ -154,7 +162,20 @@ export function QuoteBuilder({ initial }: { initial?: Quote }) {
   }
 
   function addProductItem(product: { id: string; name: string; unit: ProductUnit; currency: string; imageUrl: string | null }) {
-    setItems((prev) => [...prev, { key: newKey(), productId: product.id, name: product.name, unit: product.unit, quantity: '1' }]);
+    setItems((prev) => [
+      ...prev,
+      {
+        key: newKey(),
+        productId: product.id,
+        name: product.name,
+        unit: product.unit,
+        quantity: '1',
+        adults: header.adults ?? 1,
+        children: header.children ?? 0,
+        priceTier: 'IDEAL',
+        extras: [],
+      },
+    ]);
     setShowCatalog(false);
     setCatalogSearch('');
   }
@@ -164,6 +185,7 @@ export function QuoteBuilder({ initial }: { initial?: Quote }) {
     setItems((prev) => [...prev, {
       key: newKey(), name: manual.name, unit: 'PER_SERVICE', quantity: '1',
       netCost: manual.netCost, markupType: manual.markupType, markupValue: manual.markupValue, taxPct: manual.taxPct,
+      adults: header.adults ?? 1, children: header.children ?? 0, priceTier: 'IDEAL', extras: [],
     }]);
     setManual({ name: '', netCost: '0', markupType: 'PERCENT', markupValue: '0', taxPct: '0' });
     setShowManualForm(false);
@@ -224,8 +246,16 @@ export function QuoteBuilder({ initial }: { initial?: Quote }) {
     if (!initial || !paymentAmount) return;
     setError(null);
     try {
-      await recordPayment.mutateAsync({ version: initial.version, amount: paymentAmount, idempotencyKey: newKey() });
+      await recordPayment.mutateAsync({
+        version: initial.version,
+        amount: paymentAmount,
+        idempotencyKey: newKey(),
+        paymentDate,
+        reference: paymentReference || undefined,
+      });
       setPaymentAmount('');
+      setPaymentReference('');
+      setPaymentDate(new Date().toISOString().slice(0, 10));
     } catch (err) {
       setError(err instanceof Error ? err.message : 'No se pudo registrar el abono.');
     }
@@ -402,55 +432,28 @@ export function QuoteBuilder({ initial }: { initial?: Quote }) {
               </div>
             ) : null}
 
-            <div className="overflow-x-auto">
-              <table className="w-full min-w-[560px] text-sm">
-                <thead>
-                  <tr className="border-b border-ink/10 text-left">
-                    <th className="label-caps py-2 text-ink-soft">Concepto</th>
-                    <th className="label-caps py-2 text-ink-soft">Cant.</th>
-                    <th className="label-caps py-2 text-right text-ink-soft">Total</th>
-                    {editable ? <th className="py-2" /> : null}
-                  </tr>
-                </thead>
-                <tbody>
-                  {items.length === 0 ? (
-                    <tr><td className="py-6 text-center text-ink-soft" colSpan={4}>No hay servicios agregados.</td></tr>
-                  ) : (
-                    items.map((item) => {
-                      const line = previewItemByKey.get(item.key);
-                      return (
-                        <tr className="border-b border-ink/5 last:border-0" key={item.key}>
-                          <td className="py-2 pr-2">
-                            <p className="font-medium text-ink">{item.name}</p>
-                            {canViewFinancial && line?.marginItem ? <p className="text-xs text-status-accepted">Margen: {formatMoney(line.marginItem, currency)}</p> : null}
-                          </td>
-                          <td className="py-2 pr-2">
-                            <input
-                              className={`${inputClass} w-20 py-1`}
-                              disabled={!editable}
-                              min={0}
-                              onChange={(e) => updateItem(item.key, { quantity: e.target.value })}
-                              step="1"
-                              type="number"
-                              value={Number(item.quantity)}
-                            />
-                          </td>
-                          <td className="py-2 text-right font-mono text-ink">{formatMoney(line?.sellPrice, currency)}</td>
-                          {editable ? (
-                            <td className="py-2 text-right">
-                              <button aria-label="Quitar" className="rounded-lg p-1.5 text-ink-soft hover:bg-red-50 hover:text-red-600" onClick={() => removeItem(item.key)} type="button">
-                                <Trash2 className="h-4 w-4" />
-                              </button>
-                            </td>
-                          ) : null}
-                        </tr>
-                      );
-                    })
-                  )}
-                </tbody>
-              </table>
-            </div>
+            {items.length === 0 ? (
+              <p className="py-6 text-center text-sm text-ink-soft">No hay servicios agregados.</p>
+            ) : (
+              <div className="space-y-3">
+                {items.map((item) => (
+                  <QuoteItemCard
+                    canEditPricing={canEditPricing}
+                    canViewFinancial={canViewFinancial}
+                    currency={currency}
+                    editable={editable}
+                    item={item}
+                    key={item.key}
+                    line={previewItemByKey.get(item.key)}
+                    onChange={(patch) => updateItem(item.key, patch)}
+                    onRemove={() => removeItem(item.key)}
+                  />
+                ))}
+              </div>
+            )}
           </section>
+
+          <QuoteItinerary destination={header.destination} items={items} />
         </div>
 
         <aside className="space-y-4">
@@ -489,7 +492,29 @@ export function QuoteBuilder({ initial }: { initial?: Quote }) {
           {initial && (initial.status === 'ACEPTADA' || initial.status === 'ABONADA') && hasPermission('quotes.record_payment') ? (
             <div className="space-y-3 rounded-2xl border border-ink/10 bg-paper-card p-6 shadow-card">
               <h2 className="label-caps text-ink-soft">Registrar Abono</h2>
-              <input className={inputClass} onChange={(e) => setPaymentAmount(e.target.value)} placeholder="Monto" type="number" value={paymentAmount} />
+              <div>
+                <label className={labelClass}>Monto</label>
+                <div className="flex gap-2">
+                  <input className={inputClass} onChange={(e) => setPaymentAmount(e.target.value)} placeholder="Monto" type="number" value={paymentAmount} />
+                  <button
+                    className="button-secondary shrink-0 whitespace-nowrap text-xs"
+                    onClick={() => setPaymentAmount(initial.balanceDue)}
+                    type="button"
+                  >
+                    Saldo completo
+                  </button>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className={labelClass}>Fecha</label>
+                  <input className={inputClass} onChange={(e) => setPaymentDate(e.target.value)} type="date" value={paymentDate} />
+                </div>
+                <div>
+                  <label className={labelClass}>Referencia</label>
+                  <input className={inputClass} onChange={(e) => setPaymentReference(e.target.value)} placeholder="N.º comprobante" value={paymentReference} />
+                </div>
+              </div>
               <button className="button-primary w-full" disabled={!paymentAmount} onClick={handlePayment} type="button">Registrar Pago</button>
             </div>
           ) : null}

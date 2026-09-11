@@ -154,6 +154,14 @@ export interface ProductFormValues {
 
 export type QuoteStatus = 'BORRADOR' | 'ENVIADA' | 'ACEPTADA' | 'ABONADA' | 'PAGADA' | 'RECHAZADA' | 'VENCIDA';
 
+export type PriceTier = 'BASE' | 'INTERMEDIATE' | 'IDEAL' | 'CUSTOM';
+
+export interface QuoteItemExtra {
+  title: string;
+  quantity: number;
+  price: number;
+}
+
 export interface QuoteItemDraft {
   id?: string;
   productId?: string;
@@ -172,6 +180,10 @@ export interface QuoteItemDraft {
   markupValue?: string;
   discountItem?: string;
   taxPct?: string;
+  serviceDate?: string | null;
+  serviceEndDate?: string | null;
+  priceTier?: PriceTier;
+  extras?: QuoteItemExtra[];
 }
 
 export interface QuoteItemView extends QuoteItemDraft {
@@ -181,6 +193,7 @@ export interface QuoteItemView extends QuoteItemDraft {
   tax: string;
   marginItem?: string;
   base?: string;
+  originalMarkupValue?: string;
 }
 
 export interface QuoteRef { id: string; name: string }
@@ -223,7 +236,7 @@ export interface Quote {
   updatedAt: string;
   items: QuoteItemView[];
   events?: { id: string; type: string; fromStatus: QuoteStatus | null; toStatus: QuoteStatus | null; createdAt: string }[];
-  payments?: { id: string; amount: string; createdAt: string }[];
+  payments?: { id: string; amount: string; createdAt: string; paymentDate: string; reference: string | null }[];
 }
 
 export interface QuoteListSummaryRow {

@@ -115,7 +115,8 @@ export function useDeleteQuote() {
 export function useRecordPayment(id: string) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (payload: { version: number; amount: string; idempotencyKey: string }) => api.post<Quote>(`/quotes/${id}/payments`, payload),
+    mutationFn: (payload: { version: number; amount: string; idempotencyKey: string; paymentDate?: string; reference?: string }) =>
+      api.post<Quote>(`/quotes/${id}/payments`, payload),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['quotes'] }),
   });
 }
