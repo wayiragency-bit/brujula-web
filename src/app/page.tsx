@@ -65,7 +65,7 @@ export default function DashboardPage() {
     queryFn: () => api.get<Paginated<unknown>>(`/clients?limit=1&createdFrom=${encodeURIComponent(startOfMonthIso())}`),
   });
   const { data: clients } = useQuery({ queryKey: ['dashboard', 'clients'], queryFn: () => api.get<Paginated<unknown>>('/clients?limit=1') });
-  const { data: products } = useQuery({ queryKey: ['dashboard', 'products'], queryFn: () => api.get<Paginated<Product>>('/products?limit=50') });
+  const { data: products } = useQuery({ queryKey: ['dashboard', 'products'], queryFn: () => api.get<Paginated<Product>>('/products?limit=50&active=true') });
   const { data: quotes } = useQuery({
     queryKey: ['dashboard', 'quotes'],
     queryFn: () => api.get<Paginated<Quote> & { summary: QuoteListSummaryRow[] }>('/quotes?limit=1'),
