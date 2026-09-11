@@ -210,7 +210,7 @@ export interface Quote {
   client?: QuoteRef;
   sellerId: string;
   seller?: QuoteRef;
-  destination: string;
+  destination: string | null;
   startDate: string | null;
   endDate: string | null;
   adults: number;
@@ -253,8 +253,6 @@ export interface QuoteListSummaryRow {
 
 export interface QuoteHeaderDraft {
   clientId: string;
-  sellerId?: string;
-  destination: string;
   startDate?: string;
   endDate?: string;
   adults?: number;

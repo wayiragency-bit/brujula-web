@@ -12,6 +12,8 @@ interface ClientFormModalProps {
   onClose: () => void;
   onSubmit: (values: ClientFormValues) => Promise<unknown>;
   initial?: Client;
+  /** Pre-fills the name field when creating a new client (e.g. from a search box that found no match). Ignored when `initial` is set. */
+  initialName?: string;
 }
 
 const EMPTY: ClientFormValues = {
@@ -43,9 +45,9 @@ function valuesFrom(initial?: Client): ClientFormValues {
   };
 }
 
-export function ClientFormModal({ open, onClose, onSubmit, initial }: ClientFormModalProps) {
+export function ClientFormModal({ open, onClose, onSubmit, initial, initialName }: ClientFormModalProps) {
   const { data: team } = useTeam();
-  const [values, setValues] = useState<ClientFormValues>(() => valuesFrom(initial));
+  const [values, setValues] = useState<ClientFormValues>(() => (initial ? valuesFrom(initial) : { ...EMPTY, name: initialName ?? '' }));
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 

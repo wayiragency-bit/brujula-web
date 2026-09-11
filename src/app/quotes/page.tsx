@@ -450,11 +450,11 @@ export default function QuotesPage() {
           <table className="w-full min-w-[900px]">
             <thead>
               <tr style={{ borderBottom: '1px solid var(--border)' }}>
-                {['ID', 'Cliente', 'Agente', 'Emisión', 'Válido Hasta', 'Destino', 'Total', 'Depósito', 'Estado', 'Acciones'].map((col, i) => (
+                {['ID', 'Cliente', 'Agente', 'Emisión', 'Válido Hasta', 'Total', 'Depósito', 'Estado', 'Acciones'].map((col, i) => (
                   <th
                     key={col}
                     className="px-4 py-3 text-left text-ink"
-                    style={{ fontSize: '14px', fontWeight: 700, textAlign: i >= 6 && i <= 7 ? 'right' : col === 'Acciones' ? 'center' : 'left' }}
+                    style={{ fontSize: '14px', fontWeight: 700, textAlign: i >= 5 && i <= 6 ? 'right' : col === 'Acciones' ? 'center' : 'left' }}
                   >
                     {col}
                   </th>
@@ -464,13 +464,13 @@ export default function QuotesPage() {
             <tbody>
               {isLoading ? (
                 <tr>
-                  <td className="px-4 py-8 text-center text-sm text-ink-soft" colSpan={10}>
+                  <td className="px-4 py-8 text-center text-sm text-ink-soft" colSpan={9}>
                     Cargando cotizaciones…
                   </td>
                 </tr>
               ) : data?.data.length === 0 ? (
                 <tr>
-                  <td className="px-4 py-8 text-center text-sm text-ink-soft" colSpan={10}>
+                  <td className="px-4 py-8 text-center text-sm text-ink-soft" colSpan={9}>
                     No se encontraron cotizaciones.
                   </td>
                 </tr>
@@ -503,9 +503,6 @@ export default function QuotesPage() {
                       </td>
                       <td className="px-4 py-3" style={{ fontSize: '14px', fontWeight: 400, color: 'var(--ink-soft)' }}>
                         {formatDate(quote.validUntil)}
-                      </td>
-                      <td className="px-4 py-3" style={{ fontSize: '14px', fontWeight: 400, color: 'var(--ink-soft)' }}>
-                        {quote.destination}
                       </td>
                       <td className="px-4 py-3 text-right" style={{ fontSize: '14px', fontWeight: 700, color: 'var(--ink)' }}>
                         {formatFull(quote.total, quote.currency)}

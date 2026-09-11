@@ -42,7 +42,7 @@ interface PublicQuote {
   number: string;
   publicId: string;
   status: string;
-  destination: string;
+  destination: string | null;
   startDate: string | null;
   endDate: string | null;
   adults: number;
@@ -168,10 +168,12 @@ export default function PublicQuotePage({ params }: { params: Promise<{ publicId
 
           {/* Info strip */}
           <div style={{ padding: '16px 32px', ...divider, display: 'flex', flexWrap: 'wrap', gap: 20, alignItems: 'center' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14 }}>
-              <MapPin style={{ width: 16, height: 16, color }} />
-              <span style={{ fontWeight: 600 }}>{quote.destination}</span>
-            </div>
+            {quote.destination && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14 }}>
+                <MapPin style={{ width: 16, height: 16, color }} />
+                <span style={{ fontWeight: 600 }}>{quote.destination}</span>
+              </div>
+            )}
             {quote.startDate && (
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14, ...soft }}>
                 <Calendar style={{ width: 16, height: 16 }} />

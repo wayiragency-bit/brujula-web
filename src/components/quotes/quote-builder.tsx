@@ -1,6 +1,6 @@
 'use client';
 
-import { ArrowLeft, ExternalLink, Plus, Search } from 'lucide-react';
+import { ArrowLeft, ExternalLink, Plus, Search, UserPlus } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '@/lib/auth-context';
@@ -9,15 +9,17 @@ import {
   useCreateQuote,
   usePreviewQuote,
   useQuoteClientOptions,
-  useQuoteSellers,
   useRecordPayment,
   useUpdateQuote,
 } from '@/hooks/use-quotes';
-import type { CatalogProduct, MarkupType, Quote, QuoteHeaderDraft, QuoteItemDraft, QuoteStatus } from '@/lib/types';
-import { inputClass, labelClass, selectClass } from '@/components/ui/form';
+import { useCreateClient } from '@/hooks/use-clients';
+import type { CatalogProduct, ClientFormValues, Quote, QuoteHeaderDraft, QuoteItemDraft, QuoteStatus } from '@/lib/types';
+import { inputClass, labelClass } from '@/components/ui/form';
 import { QuoteItemCard } from '@/components/quotes/quote-item-card';
 import { QuoteItinerary } from '@/components/quotes/quote-itinerary';
 import { QuoteCatalogModal } from '@/components/quotes/quote-catalog-modal';
+import { QuoteShareModal } from '@/components/quotes/quote-share-modal';
+import { ClientFormModal } from '@/components/clients/client-form-modal';
 
 interface DraftItem extends QuoteItemDraft {
   key: string;
@@ -81,15 +83,13 @@ function toPayloadItem(item: DraftItem): QuoteItemDraft {
 function draftFromQuote(quote?: Quote): { header: QuoteHeaderDraft; items: DraftItem[] } {
   if (!quote) {
     return {
-      header: { clientId: '', destination: '', adults: 1, children: 0, validityDays: 7, notes: '', globalDiscount: '0', commissionBase: 'MARGIN', commissionPct: '0' },
+      header: { clientId: '', adults: 1, children: 0, validityDays: 7, notes: '', globalDiscount: '0', commissionBase: 'MARGIN', commissionPct: '0' },
       items: [],
     };
   }
   return {
     header: {
       clientId: quote.clientId,
-      sellerId: quote.sellerId,
-      destination: quote.destination,
       startDate: quote.startDate ?? undefined,
       endDate: quote.endDate ?? undefined,
       adults: quote.adults,
@@ -108,9 +108,10 @@ function draftFromQuote(quote?: Quote): { header: QuoteHeaderDraft; items: Draft
 
 export function QuoteBuilder({ initial }: { initial?: Quote }) {
   const router = useRouter();
-  const { hasPermission } = useAuth();
+  const { user, hasPermission } = useAuth();
   const canViewFinancial = hasPermission('quotes.view_financial');
   const canEditPricing = hasPermission('quotes.edit_pricing');
+  const canManageAccess = Boolean(initial && (initial.sellerId === user?.id || hasPermission('quotes.manage_access')));
 
   const isNew = !initial;
   const editable = !initial || initial.status === 'BORRADOR';
@@ -119,9 +120,10 @@ export function QuoteBuilder({ initial }: { initial?: Quote }) {
   const [items, setItems] = useState<DraftItem[]>(() => draftFromQuote(initial).items);
   const [preview, setPreview] = useState<Quote | null>(initial ?? null);
   const [showCatalogModal, setShowCatalogModal] = useState(false);
-  const [showManualForm, setShowManualForm] = useState(false);
-  const [manual, setManual] = useState({ name: '', netCost: '0', markupType: 'PERCENT' as MarkupType, markupValue: '0', taxPct: '0' });
+  const [showShareModal, setShowShareModal] = useState(false);
   const [clientSearch, setClientSearch] = useState(initial?.client?.name ?? '');
+  const [showNewClientForm, setShowNewClientForm] = useState(false);
+  const [newClientModalKey, setNewClientModalKey] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [paymentAmount, setPaymentAmount] = useState('');
@@ -129,10 +131,10 @@ export function QuoteBuilder({ initial }: { initial?: Quote }) {
   const [paymentReference, setPaymentReference] = useState('');
   const [showPaymentForm, setShowPaymentForm] = useState(false);
 
-  const { data: sellers } = useQuoteSellers();
-  const { data: clientOptions } = useQuoteClientOptions(clientSearch);
+  const { data: clientOptions, isLoading: clientOptionsLoading } = useQuoteClientOptions(clientSearch);
   const previewQuote = usePreviewQuote();
   const createQuote = useCreateQuote();
+  const createClient = useCreateClient();
   const updateQuote = useUpdateQuote(initial?.id ?? 'none');
   const changeStatus = useChangeQuoteStatus(initial?.id ?? 'none');
   const recordPayment = useRecordPayment(initial?.id ?? 'none');
@@ -178,15 +180,10 @@ export function QuoteBuilder({ initial }: { initial?: Quote }) {
     setShowCatalogModal(false);
   }
 
-  function addManualItem() {
-    if (!manual.name.trim()) return;
-    setItems((prev) => [...prev, {
-      key: newKey(), name: manual.name, unit: 'PER_SERVICE', quantity: '1',
-      netCost: manual.netCost, markupType: manual.markupType, markupValue: manual.markupValue, taxPct: manual.taxPct,
-      adults: header.adults ?? 1, children: header.children ?? 0, priceTier: 'IDEAL', extras: [],
-    }]);
-    setManual({ name: '', netCost: '0', markupType: 'PERCENT', markupValue: '0', taxPct: '0' });
-    setShowManualForm(false);
+  async function handleCreateClient(values: ClientFormValues) {
+    const created = await createClient.mutateAsync(values);
+    setHeaderField('clientId', created.id);
+    setClientSearch(created.name);
   }
 
   function updateItem(key: string, patch: Partial<DraftItem>) {
@@ -284,6 +281,11 @@ export function QuoteBuilder({ initial }: { initial?: Quote }) {
               <ExternalLink className="h-3.5 w-3.5" /> Página del cliente
             </a>
           ) : null}
+          {canManageAccess ? (
+            <button className="button-secondary inline-flex items-center gap-1.5" onClick={() => setShowShareModal(true)} type="button">
+              <UserPlus className="h-3.5 w-3.5" /> Agregar Vendedor
+            </button>
+          ) : null}
           {editable ? (
             <button className="button-primary" disabled={submitting} onClick={handleSave} type="button">
               {submitting ? 'Guardando…' : 'Guardar Cotización'}
@@ -335,6 +337,18 @@ export function QuoteBuilder({ initial }: { initial?: Quote }) {
                     ))}
                   </ul>
                 ) : null}
+                {clientSearch && !header.clientId && !clientOptionsLoading && clientOptions?.length === 0 ? (
+                  <div className="absolute z-10 mt-1 w-full space-y-2 rounded-lg border border-ink/10 bg-paper-card p-3 shadow-floating">
+                    <p className="text-sm text-ink-soft">No se encontraron clientes.</p>
+                    <button
+                      className="button-primary w-full text-sm"
+                      onClick={() => { setNewClientModalKey((k) => k + 1); setShowNewClientForm(true); }}
+                      type="button"
+                    >
+                      + Nuevo Cliente
+                    </button>
+                  </div>
+                ) : null}
               </div>
             ) : (
               <p className="text-sm text-ink">{initial?.client?.name}</p>
@@ -345,15 +359,13 @@ export function QuoteBuilder({ initial }: { initial?: Quote }) {
             <h2 className="label-caps text-ink-soft">Detalles de la Cotización</h2>
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
-                <label className={labelClass} htmlFor="destination">Destino</label>
-                <input className={inputClass} disabled={!editable} id="destination" onChange={(e) => setHeaderField('destination', e.target.value)} value={header.destination} />
-              </div>
-              <div>
-                <label className={labelClass} htmlFor="sellerId">Agente Responsable</label>
-                <select className={selectClass} disabled={!editable} id="sellerId" onChange={(e) => setHeaderField('sellerId', e.target.value)} value={header.sellerId ?? ''}>
-                  <option value="">Sin asignar</option>
-                  {sellers?.map((seller) => <option key={seller.id} value={seller.id}>{seller.name}</option>)}
-                </select>
+                <label className={labelClass}>Asesor Responsable</label>
+                <div
+                  className="flex h-10 items-center rounded-lg px-3 text-sm text-ink-soft"
+                  style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}
+                >
+                  {initial ? initial.seller?.name ?? '—' : user?.name}
+                </div>
               </div>
               <div>
                 <label className={labelClass} htmlFor="pax">Número de Pax</label>
@@ -383,25 +395,11 @@ export function QuoteBuilder({ initial }: { initial?: Quote }) {
             <div className="flex items-center justify-between">
               <h2 className="label-caps text-ink-soft">Itinerario de Servicios</h2>
               {editable ? (
-                <div className="flex gap-2">
-                  <button className="button-secondary inline-flex items-center gap-1.5 text-xs" onClick={() => setShowManualForm((v) => !v)} type="button">
-                    <Plus className="h-3.5 w-3.5" /> Ítem Manual
-                  </button>
-                  <button className="button-primary inline-flex items-center gap-1.5 text-xs" onClick={() => setShowCatalogModal(true)} type="button">
-                    <Search className="h-3.5 w-3.5" /> Agregar Servicio
-                  </button>
-                </div>
+                <button className="button-primary inline-flex items-center gap-1.5 text-xs" onClick={() => setShowCatalogModal(true)} type="button">
+                  <Search className="h-3.5 w-3.5" /> Agregar Servicio
+                </button>
               ) : null}
             </div>
-
-            {showManualForm ? (
-              <div className="grid gap-3 rounded-xl border border-ink/10 p-3 sm:grid-cols-5">
-                <input className={`${inputClass} sm:col-span-2`} onChange={(e) => setManual((m) => ({ ...m, name: e.target.value }))} placeholder="Nombre del ítem" value={manual.name} />
-                <input className={inputClass} onChange={(e) => setManual((m) => ({ ...m, netCost: e.target.value }))} placeholder="Costo" type="number" value={manual.netCost} />
-                <input className={inputClass} onChange={(e) => setManual((m) => ({ ...m, markupValue: e.target.value }))} placeholder="Margen %" type="number" value={manual.markupValue} />
-                <button className="button-primary" onClick={addManualItem} type="button">Añadir</button>
-              </div>
-            ) : null}
 
             {items.length === 0 ? (
               <div className="py-6 text-center text-sm text-ink-soft">
@@ -484,11 +482,19 @@ export function QuoteBuilder({ initial }: { initial?: Quote }) {
             </dl>
           </section>
 
-          <QuoteItinerary destination={header.destination} items={items} />
+          <QuoteItinerary items={items} />
         </div>
       </div>
 
       <QuoteCatalogModal onClose={() => setShowCatalogModal(false)} onConfirm={addProductItems} open={showCatalogModal} />
+      {initial && showShareModal ? <QuoteShareModal onClose={() => setShowShareModal(false)} quote={initial} /> : null}
+      <ClientFormModal
+        initialName={clientSearch}
+        key={newClientModalKey}
+        onClose={() => setShowNewClientForm(false)}
+        onSubmit={handleCreateClient}
+        open={showNewClientForm}
+      />
     </div>
   );
 }
