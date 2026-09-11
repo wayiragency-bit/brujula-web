@@ -442,16 +442,7 @@ export function QuoteBuilder({ initial }: { initial?: Quote }) {
               ) : null}
             </div>
 
-            {items.length === 0 ? (
-              <div className="py-6 text-center text-sm text-ink-soft">
-                <p>No hay servicios agregados.</p>
-                {editable ? (
-                  <button className="mt-1 font-semibold text-teal hover:underline" onClick={() => setShowCatalogModal(true)} type="button">
-                    Agregar el primero
-                  </button>
-                ) : null}
-              </div>
-            ) : (
+            {items.length === 0 ? null : (
               <div className="space-y-3">
                 {items.map((item) => (
                   <QuoteItemCard
