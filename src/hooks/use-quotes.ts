@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
-import type { CatalogProduct, Paginated, Quote, QuoteAccessRow, QuoteHeaderDraft, QuoteItemDraft, QuoteListSummaryRow, QuoteRef, QuoteStatus } from '@/lib/types';
+import type { CatalogProduct, Paginated, Quote, QuoteAccessRow, QuoteHeaderDraft, QuoteItemDraft, QuoteListSummaryRow, QuoteRef, QuoteSpecialStatus, QuoteStatus } from '@/lib/types';
 
 export interface QuotesFilters {
   q?: string;
@@ -94,6 +94,15 @@ export function useChangeQuoteStatus(id: string) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (payload: { version: number; status: QuoteStatus }) => api.post<Quote>(`/quotes/${id}/status`, payload),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['quotes'] }),
+  });
+}
+
+// On Vacation only — the API itself rejects this for any other business type.
+export function useSetSpecialStatus(id: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: { version: number; specialStatus: QuoteSpecialStatus | null }) => api.post<Quote>(`/quotes/${id}/special-status`, payload),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['quotes'] }),
   });
 }

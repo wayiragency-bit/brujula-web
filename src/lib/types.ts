@@ -153,6 +153,9 @@ export interface ProductFormValues {
 
 export type QuoteStatus = 'BORRADOR' | 'ENVIADA' | 'ACEPTADA' | 'ABONADA' | 'PAGADA' | 'RECHAZADA' | 'VENCIDA';
 
+// On Vacation only — a manual tag layered on top of QuoteStatus, never inferred automatically.
+export type QuoteSpecialStatus = 'NO_PAGO_INICIAL' | 'NO_PAGO_TOTAL' | 'FECHA_ABIERTA' | 'PROTECCION_CUPOS' | 'NO_SHOW';
+
 export type PriceTier = 'BASE' | 'INTERMEDIATE' | 'IDEAL' | 'CUSTOM';
 
 export interface QuoteItemExtra {
@@ -221,6 +224,9 @@ export interface Quote {
   notes: string;
   internalNotes?: string;
   status: QuoteStatus;
+  statusLabel: string;
+  specialStatus: QuoteSpecialStatus | null;
+  specialStatusLabel: string | null;
   version: number;
   subtotal: string;
   taxTotal: string;
@@ -290,6 +296,9 @@ export interface PipelineCard {
   version: number;
   number: string;
   status: QuoteStatus;
+  statusLabel: string;
+  specialStatus: QuoteSpecialStatus | null;
+  specialStatusLabel: string | null;
   client?: QuoteRef;
   seller?: QuoteRef;
   destination: string;

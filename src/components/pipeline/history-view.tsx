@@ -4,17 +4,14 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { Bar, BarChart, CartesianGrid, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { useQuotes } from '@/hooks/use-quotes';
-import type { QuoteStatus } from '@/lib/types';
+import { useAuth } from '@/lib/auth-context';
+import { quoteStatusLabel } from '@/lib/on-vacation-status';
+import type { AgencyType, QuoteStatus } from '@/lib/types';
 
 const MONTH_NAMES = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
 
 const ALL_STATUSES: QuoteStatus[] = ['BORRADOR', 'ENVIADA', 'ACEPTADA', 'ABONADA', 'PAGADA', 'RECHAZADA', 'VENCIDA'];
 const ACCEPTED_LIKE: QuoteStatus[] = ['ACEPTADA', 'ABONADA', 'PAGADA'];
-
-const STATUS_LABELS: Record<QuoteStatus, string> = {
-  BORRADOR: 'Borrador', ENVIADA: 'Enviada', ACEPTADA: 'Aceptada', ABONADA: 'Abonada',
-  PAGADA: 'Pagada', RECHAZADA: 'Rechazada', VENCIDA: 'Vencida',
-};
 
 const STATUS_COLORS: Record<QuoteStatus, string> = {
   BORRADOR: '#94a3b8', ENVIADA: '#3b82f6', ACEPTADA: '#10b981', ABONADA: '#0ea5e9',
@@ -37,12 +34,12 @@ function StatTile({ label, count, value, currency, color }: { label: string; cou
   );
 }
 
-function ChartTooltip({ active, payload, currency }: { active?: boolean; payload?: { payload: { status: QuoteStatus; count: number; total: number } }[]; currency: string }) {
+function ChartTooltip({ active, payload, currency, agencyType }: { active?: boolean; payload?: { payload: { status: QuoteStatus; count: number; total: number } }[]; currency: string; agencyType: AgencyType | null | undefined }) {
   if (!active || !payload?.length) return null;
   const row = payload[0].payload;
   return (
     <div className="rounded-lg p-3 text-xs" style={{ background: 'var(--paper-elevated)', border: '1px solid var(--border)' }}>
-      <p className="label-caps mb-1 text-ink-soft">{STATUS_LABELS[row.status]}</p>
+      <p className="label-caps mb-1 text-ink-soft">{quoteStatusLabel(row.status, agencyType)}</p>
       <p className="font-mono font-semibold text-ink">{formatMoney(row.total, currency)}</p>
       <p className="text-ink-muted">{row.count} cotización{row.count === 1 ? '' : 'es'}</p>
     </div>
@@ -50,6 +47,8 @@ function ChartTooltip({ active, payload, currency }: { active?: boolean; payload
 }
 
 export function PipelineHistoryView() {
+  const { user } = useAuth();
+  const agencyType = user?.agency?.type;
   const now = new Date();
   const [month, setMonth] = useState(now.getMonth() + 1);
   const [year, setYear] = useState(now.getFullYear());
@@ -133,11 +132,11 @@ export function PipelineHistoryView() {
                     axisLine={false}
                     dataKey="status"
                     tick={{ fill: 'var(--ink-muted)', fontSize: 11 }}
-                    tickFormatter={(s: QuoteStatus) => STATUS_LABELS[s]}
+                    tickFormatter={(s: QuoteStatus) => quoteStatusLabel(s, agencyType)}
                     tickLine={false}
                   />
                   <YAxis axisLine={false} tick={{ fill: 'var(--ink-muted)', fontSize: 11 }} tickFormatter={(v: number) => formatMoney(v, currency)} tickLine={false} width={64} />
-                  <Tooltip content={<ChartTooltip currency={currency} />} cursor={{ fill: 'var(--surface)' }} />
+                  <Tooltip content={<ChartTooltip agencyType={agencyType} currency={currency} />} cursor={{ fill: 'var(--surface)' }} />
                   <Bar dataKey="total" radius={[6, 6, 0, 0]}>
                     {rows.map((row) => <Cell fill={STATUS_COLORS[row.status]} key={row.status} />)}
                   </Bar>

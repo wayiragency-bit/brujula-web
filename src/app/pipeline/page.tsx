@@ -11,12 +11,9 @@ import { AppShell } from '@/components/app-shell';
 import { PipelineHistoryView } from '@/components/pipeline/history-view';
 import { usePipelineCalendar, usePipelineKanban } from '@/hooks/use-pipeline';
 import { api } from '@/lib/api';
-import type { PipelineCard, QuoteStatus } from '@/lib/types';
-
-const STATUS_LABELS: Record<QuoteStatus, string> = {
-  BORRADOR: 'Borrador', ENVIADA: 'Enviada', ACEPTADA: 'Aceptada', ABONADA: 'Abonada',
-  PAGADA: 'Pagada', RECHAZADA: 'Rechazada', VENCIDA: 'Vencida',
-};
+import { useAuth } from '@/lib/auth-context';
+import { quoteStatusLabel } from '@/lib/on-vacation-status';
+import type { AgencyType, PipelineCard, QuoteStatus } from '@/lib/types';
 
 const STATUS_COLORS: Record<QuoteStatus, { dot: string; badge: string; text: string }> = {
   BORRADOR:  { dot: '#94a3b8', badge: 'rgba(148,163,184,0.15)', text: '#94a3b8' },
@@ -33,7 +30,7 @@ const STATUS_ICONS: Record<QuoteStatus, React.ElementType> = {
   PAGADA: BadgeCheck, RECHAZADA: XCircle, VENCIDA: AlertTriangle,
 };
 
-function ColumnHeader({ status, count }: { status: QuoteStatus; count: number }) {
+function ColumnHeader({ status, count, agencyType }: { status: QuoteStatus; count: number; agencyType: AgencyType | null | undefined }) {
   const sc = STATUS_COLORS[status];
   const Icon = STATUS_ICONS[status];
   return (
@@ -43,7 +40,7 @@ function ColumnHeader({ status, count }: { status: QuoteStatus; count: number })
     >
       <div className="flex items-center gap-2">
         <Icon className="h-4 w-4 shrink-0" style={{ color: sc.dot }} />
-        <h3 className="text-sm font-bold uppercase tracking-wide" style={{ color: 'var(--ink)' }}>{STATUS_LABELS[status]}</h3>
+        <h3 className="text-sm font-bold uppercase tracking-wide" style={{ color: 'var(--ink)' }}>{quoteStatusLabel(status, agencyType)}</h3>
       </div>
       <span
         className="flex h-5 min-w-[22px] shrink-0 items-center justify-center rounded-full px-2 text-xs font-bold"
@@ -196,6 +193,16 @@ function KanbanCard({ card, onDragStart }: { card: PipelineCard; onDragStart: (c
       {/* Destination */}
       {card.destination && <p className="mt-1 truncate pl-2 text-[10px]" style={{ color: 'var(--ink-muted)' }}>{card.destination}</p>}
 
+      {/* Special status (On Vacation only) */}
+      {card.specialStatusLabel && (
+        <span
+          className="mt-1 ml-2 inline-block rounded px-1.5 py-0.5 text-[9px] font-bold uppercase"
+          style={{ background: 'rgba(239,68,68,0.12)', color: '#dc2626' }}
+        >
+          {card.specialStatusLabel}
+        </span>
+      )}
+
       {/* Amount + reservation date — the date advisors need to track */}
       <div className="mt-2 flex items-center justify-between gap-1 pl-2">
         <p className="text-[11px] font-semibold" style={{ color: 'var(--ink-soft)' }}>{formatMoney(card.total, card.currency)}</p>
@@ -269,6 +276,8 @@ function SidePanel({
 }
 
 function KanbanBoard() {
+  const { user } = useAuth();
+  const agencyType = user?.agency?.type;
   const { data, isLoading } = usePipelineKanban();
   const changeStatus   = useChangeStatusMutation();
   const recordPayment  = useRecordPaymentMutation();
@@ -291,7 +300,7 @@ function KanbanBoard() {
     }
 
     if (!dragging.availableTransitions.includes(status)) {
-      setError(`No se puede mover ${dragging.number} de ${STATUS_LABELS[dragging.status]} a ${STATUS_LABELS[status]}.`);
+      setError(`No se puede mover ${dragging.number} de ${dragging.statusLabel} a ${quoteStatusLabel(status, agencyType)}.`);
       setDragging(null);
       return;
     }
@@ -334,7 +343,7 @@ function KanbanBoard() {
                 className="flex flex-1 flex-col overflow-hidden rounded-2xl"
                 style={{ border: '1px solid var(--border-faint)' }}
               >
-                <ColumnHeader count={column.cards.length} status={column.status} />
+                <ColumnHeader agencyType={agencyType} count={column.cards.length} status={column.status} />
 
                 {/* Cards area */}
                 <div
