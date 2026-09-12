@@ -201,7 +201,7 @@ export default function QuotesPage() {
 
         {/* Metric summary cards */}
         <div className="grid grid-cols-2 gap-4 lg:grid-cols-5">
-          {METRIC_DEFS.map((def) => {
+          {METRIC_DEFS.filter((def) => agencyType !== 'ON_VACATION' || def.key !== 'ganancia').map((def) => {
             const Icon = def.icon;
             const val  = getMetricValue(def);
             return (

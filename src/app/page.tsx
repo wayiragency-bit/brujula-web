@@ -103,7 +103,7 @@ export default function DashboardPage() {
     { label: 'Nuevos Leads', value: String(totalLeads),    icon: UserPlus, spark: SPARKLINES[0], iconBg: '#06b6d4', iconShadow: 'rgba(6,182,212,0.4)', sub: 'Este mes' },
     { label: 'Total Clientes', value: String(totalClients), icon: Users,   spark: SPARKLINES[1], iconBg: '#10b981', iconShadow: 'rgba(16,185,129,0.4)', sub: 'Cartera activa' },
     { label: 'Cotizaciones',  value: String(totalQuoteCount), icon: FileText, spark: SPARKLINES[2], iconBg: '#f59e0b', iconShadow: 'rgba(245,158,11,0.4)', sub: `${pendingCount} enviadas` },
-    ...(totalMargin !== null
+    ...(totalMargin !== null && user?.agency?.type !== 'ON_VACATION'
       ? [{ label: 'Ganancia', value: formatMoneyFull(totalMargin, currency), icon: TrendingUp, spark: SPARKLINES[4], iconBg: '#ec4899', iconShadow: 'rgba(236,72,153,0.4)', sub: 'Cotizaciones aceptadas' }]
       : []),
   ];
