@@ -20,6 +20,7 @@ export function QuoteActionsMenu({ quote, onDelete, onShare }: QuoteActionsMenuP
   const [copied, setCopied] = useState(false);
   const resendEmail = useResendQuoteEmail();
   const { user, hasPermission } = useAuth();
+  const isOnVacation = user?.agency?.type === 'ON_VACATION';
   const canDelete = hasPermission('quotes.delete');
   const canManageAccess = quote.sellerId === user?.id || hasPermission('quotes.manage_access');
 
@@ -103,7 +104,7 @@ export function QuoteActionsMenu({ quote, onDelete, onShare }: QuoteActionsMenuP
                   >
                     <Link2 className="h-4 w-4" />
                   </button>
-                  {canManageAccess && onShare ? (
+                  {canManageAccess && onShare && !isOnVacation ? (
                     <button
                       aria-label="Compartir"
                       className="rounded-lg p-1.5 text-ink-soft transition hover:bg-ink/5 hover:text-teal"
