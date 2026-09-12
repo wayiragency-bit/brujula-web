@@ -1,6 +1,6 @@
 'use client';
 
-import { ArrowLeft, ExternalLink, Lock, Plus, Search, UserPlus, X } from 'lucide-react';
+import { ArrowLeft, ExternalLink, FileText, Lock, Plus, Search, User, UserPlus, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '@/lib/auth-context';
@@ -364,8 +364,16 @@ export function QuoteBuilder({ initial }: { initial?: Quote }) {
 
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="space-y-6 lg:col-span-1">
+          {/* ── Información del Cliente ── */}
           <section className="space-y-4 rounded-2xl border border-ink/10 bg-paper-card p-6 shadow-card">
-            <h2 className="label-caps text-ink-soft">Información del Cliente</h2>
+            <div className="flex items-center gap-2.5">
+              {isOnVacation ? (
+                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-teal/10">
+                  <User className="h-4 w-4 text-teal" />
+                </div>
+              ) : null}
+              <h2 className="label-caps text-ink-soft">Información del Cliente</h2>
+            </div>
             {editable ? (
               <div className="relative">
                 <label className={labelClass} htmlFor="client-search">Buscar Cliente</label>
@@ -418,106 +426,223 @@ export function QuoteBuilder({ initial }: { initial?: Quote }) {
             )}
           </section>
 
+          {/* ── Detalles de la Cotización ── */}
           <section className="space-y-4 rounded-2xl border border-ink/10 bg-paper-card p-6 shadow-card">
-            <h2 className="label-caps text-ink-soft">Detalles de la Cotización</h2>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="sm:col-span-2">
-                <label className={labelClass}>Asesor Propietario</label>
-                <div
-                  className="flex h-10 items-center gap-2 rounded-lg px-3 text-sm text-ink-soft"
-                  style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}
-                >
-                  <span className="flex-1">{initial ? initial.seller?.name ?? '—' : user?.name}</span>
-                  <Lock className="h-3.5 w-3.5 shrink-0" />
+            <div className="flex items-center gap-2.5">
+              {isOnVacation ? (
+                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-teal/10">
+                  <FileText className="h-4 w-4 text-teal" />
                 </div>
+              ) : null}
+              <h2 className="label-caps text-ink-soft">Detalles de la Cotización</h2>
+            </div>
 
+            {isOnVacation ? (
+              /* ON_VACATION field order: PAX → Válido por → Estado → Agente → Notas */
+              <div className="space-y-4">
+                <div>
+                  <label className={labelClass} htmlFor="pax">Número de Pax</label>
+                  <input className={inputClass} disabled={!editable} id="pax" min={0} onChange={(e) => setHeaderField('adults', Number(e.target.value))} type="number" value={header.adults ?? 1} />
+                </div>
+                <div>
+                  <label className={labelClass} htmlFor="validityDays">Válido por (días)</label>
+                  <input className={inputClass} disabled={!editable} id="validityDays" min={1} onChange={(e) => setHeaderField('validityDays', Number(e.target.value))} type="number" value={header.validityDays ?? 7} />
+                </div>
                 {initial ? (
-                  <div className="mt-2 space-y-1.5">
-                    {sharedAccess?.map((row) => (
-                      <div className="flex items-center justify-between rounded-lg px-3 py-1.5 text-sm" key={row.userId} style={{ background: 'var(--surface)' }}>
-                        <span className="text-ink-soft">{row.name ?? row.userId}</span>
+                  <div>
+                    <label className={labelClass}>Estado</label>
+                    <div className="flex items-center gap-2 pt-0.5">
+                      <span className={`rounded-full px-3 py-1 font-mono text-[11px] font-bold uppercase ${STATUS_COLORS[initial.status]}`}>{initial.statusLabel}</span>
+                      {initial.specialStatusLabel ? (
+                        <span className="rounded-full bg-red-50 px-3 py-1 font-mono text-[11px] font-bold uppercase text-red-600">{initial.specialStatusLabel}</span>
+                      ) : null}
+                    </div>
+                  </div>
+                ) : null}
+                <div>
+                  <label className={labelClass}>Agente Responsable</label>
+                  <div
+                    className="flex h-10 items-center gap-2 rounded-lg px-3 text-sm text-ink-soft"
+                    style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}
+                  >
+                    <span className="flex-1">{initial ? initial.seller?.name ?? '—' : user?.name}</span>
+                    <Lock className="h-3.5 w-3.5 shrink-0" />
+                  </div>
+                  {initial ? (
+                    <div className="mt-2 space-y-1.5">
+                      {sharedAccess?.map((row) => (
+                        <div className="flex items-center justify-between rounded-lg px-3 py-1.5 text-sm" key={row.userId} style={{ background: 'var(--surface)' }}>
+                          <span className="text-ink-soft">{row.name ?? row.userId}</span>
+                          {canManageAccess ? (
+                            <button
+                              aria-label="Quitar acceso"
+                              className="rounded-lg p-1 text-ink-soft transition hover:bg-red-50 hover:text-red-600"
+                              disabled={revokeAccess.isPending}
+                              onClick={() => revokeAccess.mutate(row.userId)}
+                              type="button"
+                            >
+                              <X className="h-3.5 w-3.5" />
+                            </button>
+                          ) : null}
+                        </div>
+                      ))}
+                      {canManageAccess ? (
+                        <button className="inline-flex items-center gap-1.5 text-xs font-semibold text-teal" onClick={() => setShowShareModal(true)} type="button">
+                          <UserPlus className="h-3.5 w-3.5" /> Agregar Asesor
+                        </button>
+                      ) : null}
+                    </div>
+                  ) : null}
+                </div>
+                <div>
+                  <label className={labelClass} htmlFor="notes">Notas para el Cliente</label>
+                  <textarea className={inputClass} disabled={!editable} id="notes" onChange={(e) => setHeaderField('notes', e.target.value)} rows={3} value={header.notes ?? ''} />
+                </div>
+              </div>
+            ) : (
+              /* Layout estándar para otras agencias */
+              <>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="sm:col-span-2">
+                    <label className={labelClass}>Asesor Propietario</label>
+                    <div
+                      className="flex h-10 items-center gap-2 rounded-lg px-3 text-sm text-ink-soft"
+                      style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}
+                    >
+                      <span className="flex-1">{initial ? initial.seller?.name ?? '—' : user?.name}</span>
+                      <Lock className="h-3.5 w-3.5 shrink-0" />
+                    </div>
+                    {initial ? (
+                      <div className="mt-2 space-y-1.5">
+                        {sharedAccess?.map((row) => (
+                          <div className="flex items-center justify-between rounded-lg px-3 py-1.5 text-sm" key={row.userId} style={{ background: 'var(--surface)' }}>
+                            <span className="text-ink-soft">{row.name ?? row.userId}</span>
+                            {canManageAccess ? (
+                              <button
+                                aria-label="Quitar acceso"
+                                className="rounded-lg p-1 text-ink-soft transition hover:bg-red-50 hover:text-red-600"
+                                disabled={revokeAccess.isPending}
+                                onClick={() => revokeAccess.mutate(row.userId)}
+                                type="button"
+                              >
+                                <X className="h-3.5 w-3.5" />
+                              </button>
+                            ) : null}
+                          </div>
+                        ))}
                         {canManageAccess ? (
-                          <button
-                            aria-label="Quitar acceso"
-                            className="rounded-lg p-1 text-ink-soft transition hover:bg-red-50 hover:text-red-600"
-                            disabled={revokeAccess.isPending}
-                            onClick={() => revokeAccess.mutate(row.userId)}
-                            type="button"
-                          >
-                            <X className="h-3.5 w-3.5" />
+                          <button className="inline-flex items-center gap-1.5 text-xs font-semibold text-teal" onClick={() => setShowShareModal(true)} type="button">
+                            <UserPlus className="h-3.5 w-3.5" /> Agregar Asesor
                           </button>
                         ) : null}
                       </div>
-                    ))}
-                    {canManageAccess ? (
-                      <button className="inline-flex items-center gap-1.5 text-xs font-semibold text-teal" onClick={() => setShowShareModal(true)} type="button">
-                        <UserPlus className="h-3.5 w-3.5" /> Agregar Asesor
-                      </button>
                     ) : null}
                   </div>
+                  <div>
+                    <label className={labelClass} htmlFor="pax">Número de Pax</label>
+                    <input className={inputClass} disabled={!editable} id="pax" min={0} onChange={(e) => setHeaderField('adults', Number(e.target.value))} type="number" value={header.adults ?? 1} />
+                  </div>
+                  <div>
+                    <label className={labelClass} htmlFor="validityDays">Válido por (días)</label>
+                    <input className={inputClass} disabled={!editable} id="validityDays" min={1} onChange={(e) => setHeaderField('validityDays', Number(e.target.value))} type="number" value={header.validityDays ?? 7} />
+                  </div>
+                </div>
+                <div>
+                  <label className={labelClass} htmlFor="notes">Notas para el Cliente</label>
+                  <textarea className={inputClass} disabled={!editable} id="notes" onChange={(e) => setHeaderField('notes', e.target.value)} rows={2} value={header.notes ?? ''} />
+                </div>
+                {canViewFinancial ? (
+                  <div>
+                    <label className={labelClass} htmlFor="internalNotes">Notas Internas</label>
+                    <textarea className={inputClass} disabled={!editable} id="internalNotes" onChange={(e) => setHeaderField('internalNotes', e.target.value)} rows={2} value={header.internalNotes ?? ''} />
+                  </div>
                 ) : null}
-              </div>
-              <div>
-                <label className={labelClass} htmlFor="pax">Número de Pax</label>
-                <input className={inputClass} disabled={!editable} id="pax" min={0} onChange={(e) => setHeaderField('adults', Number(e.target.value))} type="number" value={header.adults ?? 1} />
-              </div>
-              <div>
-                <label className={labelClass} htmlFor="validityDays">Válido por (días)</label>
-                <input className={inputClass} disabled={!editable} id="validityDays" min={1} onChange={(e) => setHeaderField('validityDays', Number(e.target.value))} type="number" value={header.validityDays ?? 7} />
-              </div>
-            </div>
-            <div>
-              <label className={labelClass} htmlFor="notes">Notas para el Cliente</label>
-              <textarea className={inputClass} disabled={!editable} id="notes" onChange={(e) => setHeaderField('notes', e.target.value)} rows={2} value={header.notes ?? ''} />
-            </div>
-            {canViewFinancial ? (
-              <div>
-                <label className={labelClass} htmlFor="internalNotes">Notas Internas</label>
-                <textarea className={inputClass} disabled={!editable} id="internalNotes" onChange={(e) => setHeaderField('internalNotes', e.target.value)} rows={2} value={header.internalNotes ?? ''} />
-              </div>
-            ) : null}
+              </>
+            )}
           </section>
 
         </div>
 
         <div className="space-y-6 lg:col-span-2">
-          <section className="space-y-4 rounded-2xl border border-ink/10 bg-paper-card p-6 shadow-card">
-            <div className="flex items-center justify-between">
+          <section className="rounded-2xl border border-ink/10 bg-paper-card shadow-card overflow-hidden">
+            {/* Cabecera de sección */}
+            <div className="flex items-center justify-between px-6 py-4 border-b border-ink/10">
               <h2 className="label-caps text-ink-soft">Itinerario de Servicios</h2>
               {editable ? (
                 <div className="flex flex-wrap items-center gap-2">
-                  {user?.agency?.type === 'ON_VACATION' ? (
-                    <button className="button-secondary inline-flex items-center gap-1.5 text-xs" onClick={() => setShowOfficialCatalogModal(true)} type="button">
+                  {isOnVacation ? (
+                    <button
+                      className="button-secondary inline-flex items-center gap-1.5 text-xs"
+                      onClick={() => setShowOfficialCatalogModal(true)}
+                      type="button"
+                    >
                       <Search className="h-3.5 w-3.5" /> Catálogo Oficial
                     </button>
                   ) : null}
-                  <button className="button-primary inline-flex items-center gap-1.5 text-xs" onClick={() => setShowCatalogModal(true)} type="button">
-                    <Search className="h-3.5 w-3.5" /> Agregar Servicio
+                  <button
+                    className="button-primary inline-flex items-center gap-1.5 text-xs"
+                    onClick={() => setShowCatalogModal(true)}
+                    type="button"
+                  >
+                    <Plus className="h-3.5 w-3.5" /> Agregar Servicio
                   </button>
                 </div>
               ) : null}
             </div>
 
-            {items.length === 0 ? null : (
-              <div className="space-y-3">
-                {items.map((item) => (
-                  <QuoteItemCard
-                    canEditPricing={canEditPricing}
-                    canViewFinancial={canViewFinancial}
-                    currency={currency}
-                    editable={editable}
-                    isOnVacation={isOnVacation}
-                    item={item}
-                    key={item.key}
-                    line={previewItemByKey.get(item.key)}
-                    onChange={(patch) => updateItem(item.key, patch)}
-                    onRemove={() => removeItem(item.key)}
-                  />
-                ))}
+            {/* Cabecera de columnas (solo ON_VACATION) */}
+            {isOnVacation ? (
+              <div
+                className="grid px-6 py-2 text-[10px] font-bold uppercase tracking-wider text-ink-muted"
+                style={{ gridTemplateColumns: '48px 1fr auto auto', gap: '12px', background: 'var(--surface)' }}
+              >
+                <span>Img</span>
+                <span>Concepto</span>
+                <span className="text-right">Cant.</span>
+                <span className="text-right pr-1">Total</span>
               </div>
-            )}
+            ) : null}
 
-            <div className="border-t border-ink/10 pt-4">
+            {/* Lista de ítems */}
+            <div className={items.length > 0 ? 'space-y-3 p-6' : ''}>
+              {items.length === 0 ? (
+                isOnVacation ? (
+                  <div className="flex flex-col items-center justify-center py-14 gap-3">
+                    <button
+                      className="flex h-12 w-12 items-center justify-center rounded-full border-2 border-dashed border-ink/20 text-ink/30 transition hover:border-teal hover:text-teal"
+                      onClick={editable ? () => setShowCatalogModal(true) : undefined}
+                      type="button"
+                    >
+                      <Plus className="h-5 w-5" />
+                    </button>
+                    <div className="text-center">
+                      <p className="text-sm font-medium text-ink-soft">No hay servicios agregados.</p>
+                      <p className="text-xs text-ink-muted">Agrega el primero.</p>
+                    </div>
+                  </div>
+                ) : null
+              ) : (
+                <div className="space-y-3">
+                  {items.map((item) => (
+                    <QuoteItemCard
+                      canEditPricing={canEditPricing}
+                      canViewFinancial={canViewFinancial}
+                      currency={currency}
+                      editable={editable}
+                      isOnVacation={isOnVacation}
+                      item={item}
+                      key={item.key}
+                      line={previewItemByKey.get(item.key)}
+                      onChange={(patch) => updateItem(item.key, patch)}
+                      onRemove={() => removeItem(item.key)}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Abonos / Depósitos */}
+            <div className="border-t border-ink/10 px-6 py-4">
               <div className="flex items-center justify-between">
                 <h3 className="label-caps text-ink-soft">Abonos / Depósitos</h3>
                 {initial && (initial.status === 'ACEPTADA' || initial.status === 'ABONADA') && hasPermission('quotes.record_payment') ? (
@@ -555,8 +680,9 @@ export function QuoteBuilder({ initial }: { initial?: Quote }) {
               ) : null}
             </div>
 
-            <dl className="space-y-2 border-t border-ink/10 pt-4 text-sm">
-              {user?.agency?.type !== 'ON_VACATION' ? (
+            {/* Totales */}
+            <dl className="space-y-2 border-t border-ink/10 px-6 py-4 text-sm">
+              {!isOnVacation ? (
                 <>
                   <div className="flex justify-between"><dt className="text-ink-soft">Subtotal</dt><dd className="font-mono text-ink">{formatMoney(preview?.subtotal, currency)}</dd></div>
                   <div className="flex justify-between"><dt className="text-ink-soft">Impuestos</dt><dd className="font-mono text-ink">{formatMoney(preview?.taxTotal, currency)}</dd></div>
@@ -564,7 +690,10 @@ export function QuoteBuilder({ initial }: { initial?: Quote }) {
               ) : null}
               <div className="flex justify-between border-t border-ink/10 pt-2 text-base font-bold"><dt className="text-ink">Total</dt><dd className="font-mono text-ink">{formatMoney(preview?.total, currency)}</dd></div>
               {canViewFinancial && !isOnVacation ? (
-                <div className="flex justify-between border-t border-ink/10 pt-2"><dt className="text-ink-soft">Ganancia Estimada</dt><dd className="font-mono text-status-accepted">{formatMoney(preview?.marginTotal, currency)}</dd></div>
+                <div className="flex justify-between border-t border-ink/10 pt-2">
+                  <dt className="text-ink-soft">Ganancia Estimada</dt>
+                  <dd className="font-mono text-status-accepted">{formatMoney(preview?.marginTotal, currency)}</dd>
+                </div>
               ) : null}
               {initial ? (
                 <>
