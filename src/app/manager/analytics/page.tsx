@@ -107,9 +107,9 @@ export default function ManagerAnalyticsPage() {
               { label: 'Asesores', value: general?.totalAdvisors ?? '—' },
               { label: 'Clientes', value: general?.totalClients ?? '—' },
               { label: 'Cotizaciones', value: general?.totalQuotes ?? '—' },
-              { label: 'Ventas', value: general ? formatMoneyFull(general.salesValue, 'USD') : '—' },
+              { label: 'Ventas', value: general ? formatMoneyFull(general.salesValue, 'COP') : '—' },
               { label: 'Conversión', value: general ? `${general.conversion}%` : '—' },
-              { label: 'Ticket promedio', value: general ? formatMoneyFull(general.avgTicket, 'USD') : '—' },
+              { label: 'Ticket promedio', value: general ? formatMoneyFull(general.avgTicket, 'COP') : '—' },
             ].map((m) => (
               <article className="glass-card rounded-2xl p-5" key={m.label}>
                 <p className="label-caps text-[11px] text-ink-soft">{m.label}</p>
@@ -130,7 +130,7 @@ export default function ManagerAnalyticsPage() {
             <Table
               headers={['Agencia', 'Cotizaciones', 'Ganadas', 'Ventas', 'Conversión', 'Ticket prom.']}
               rows={(advisors ?? []).map((a) => [
-                a.agencyName, a.quotesCount, a.wonCount, formatMoneyFull(a.salesValue, 'USD'), `${a.conversion}%`, formatMoneyFull(a.avgTicket, 'USD'),
+                a.agencyName, a.quotesCount, a.wonCount, formatMoneyFull(a.salesValue, 'COP'), `${a.conversion}%`, formatMoneyFull(a.avgTicket, 'COP'),
               ])}
             />
           ) : null}
@@ -138,7 +138,7 @@ export default function ManagerAnalyticsPage() {
             <Table
               headers={['Hotel', 'Cotizaciones', 'Ganadas', 'Ventas', 'Asesores que lo venden', 'Conversión']}
               rows={(hotels ?? []).map((h) => [
-                h.hotelName, h.quotesCount, h.wonCount, formatMoneyFull(h.salesValue, 'USD'), h.advisorsSelling, `${h.conversion}%`,
+                h.hotelName, h.quotesCount, h.wonCount, formatMoneyFull(h.salesValue, 'COP'), h.advisorsSelling, `${h.conversion}%`,
               ])}
             />
           ) : null}
@@ -146,7 +146,7 @@ export default function ManagerAnalyticsPage() {
             <Table
               headers={['Acomodación', 'Hotel', 'Cotizaciones', 'Ganadas', 'Ventas']}
               rows={(accommodations ?? []).map((a) => [
-                a.accommodationName, a.hotelName, a.quotesCount, a.wonCount, formatMoneyFull(a.salesValue, 'USD'),
+                a.accommodationName, a.hotelName, a.quotesCount, a.wonCount, formatMoneyFull(a.salesValue, 'COP'),
               ])}
             />
           ) : null}
@@ -154,7 +154,7 @@ export default function ManagerAnalyticsPage() {
             <Table
               headers={['Destino', 'Cotizaciones', 'Ganadas', 'Ventas', '% del total', 'Conversión']}
               rows={(destinations ?? []).map((d) => [
-                d.destination ?? '—', d.quotesCount, d.wonCount, formatMoneyFull(d.salesValue, 'USD'), `${d.share}%`, `${d.conversion}%`,
+                d.destination ?? '—', d.quotesCount, d.wonCount, formatMoneyFull(d.salesValue, 'COP'), `${d.share}%`, `${d.conversion}%`,
               ])}
             />
           ) : null}

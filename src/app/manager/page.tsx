@@ -45,8 +45,8 @@ export default function ManagerDashboardPage() {
             <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl" style={{ background: '#10b981', boxShadow: '0 4px 12px rgba(16,185,129,0.4)' }}>
               <TrendingUp className="h-6 w-6 text-white" />
             </div>
-            <p className="label-caps text-[11px] text-ink-soft">Ventas (USD)</p>
-            <strong className="font-mono text-3xl font-bold text-ink">{general ? formatMoneyFull(general.salesValue, 'USD') : '—'}</strong>
+            <p className="label-caps text-[11px] text-ink-soft">Ventas (COP)</p>
+            <strong className="font-mono text-3xl font-bold text-ink">{general ? formatMoneyFull(general.salesValue, 'COP') : '—'}</strong>
           </article>
           <article className="glass-card rounded-2xl p-6">
             <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl" style={{ background: '#a855f7', boxShadow: '0 4px 12px rgba(168,85,247,0.4)' }}>
