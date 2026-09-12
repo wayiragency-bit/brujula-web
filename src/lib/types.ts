@@ -167,6 +167,11 @@ export interface QuoteItemExtra {
 export interface QuoteItemDraft {
   id?: string;
   productId?: string;
+  // On Vacation only — a snapshot reference into the official catalog. The backend recomputes
+  // name/description/imageUrl from the accommodation itself when this is present; catalogHotelId
+  // is local-only display context and is never sent to the API (not a whitelisted DTO field).
+  catalogAccommodationId?: string;
+  catalogHotelId?: string;
   name: string;
   description?: string;
   imageUrl?: string | null;

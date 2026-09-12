@@ -22,6 +22,8 @@ import { inputClass, labelClass } from '@/components/ui/form';
 import { QuoteItemCard } from '@/components/quotes/quote-item-card';
 import { QuoteItinerary } from '@/components/quotes/quote-itinerary';
 import { QuoteCatalogModal } from '@/components/quotes/quote-catalog-modal';
+import { QuoteCatalogAccommodationModal } from '@/components/quotes/quote-catalog-accommodation-modal';
+import type { CatalogAccommodationListItem, CatalogHotelListItem } from '@/lib/catalog-types';
 import { QuoteShareModal } from '@/components/quotes/quote-share-modal';
 import { ClientFormModal } from '@/components/clients/client-form-modal';
 
@@ -58,6 +60,7 @@ function toPayloadItem(item: DraftItem): QuoteItemDraft {
   return {
     id: item.id,
     productId: item.productId,
+    catalogAccommodationId: item.catalogAccommodationId,
     name: item.name,
     description: item.description,
     unit: item.unit,
@@ -119,6 +122,7 @@ export function QuoteBuilder({ initial }: { initial?: Quote }) {
   const [items, setItems] = useState<DraftItem[]>(() => draftFromQuote(initial).items);
   const [preview, setPreview] = useState<Quote | null>(initial ?? null);
   const [showCatalogModal, setShowCatalogModal] = useState(false);
+  const [showOfficialCatalogModal, setShowOfficialCatalogModal] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
   const [clientSearch, setClientSearch] = useState(initial?.client?.name ?? '');
   const [clientSearchFocused, setClientSearchFocused] = useState(false);
@@ -181,6 +185,30 @@ export function QuoteBuilder({ initial }: { initial?: Quote }) {
       })),
     ]);
     setShowCatalogModal(false);
+  }
+
+  function addCatalogAccommodationItem(selection: { accommodation: CatalogAccommodationListItem; hotel: CatalogHotelListItem; netCost: string }) {
+    const { accommodation, hotel, netCost } = selection;
+    setItems((prev) => [
+      ...prev,
+      {
+        key: newKey(),
+        catalogAccommodationId: accommodation.id,
+        catalogHotelId: hotel.id,
+        name: `${hotel.name} — ${accommodation.name}`,
+        description: accommodation.description ?? hotel.description ?? undefined,
+        unit: 'PER_NIGHT',
+        quantity: '1',
+        adults: header.adults ?? accommodation.capacityAdults,
+        children: header.children ?? accommodation.capacityChildren,
+        netCost,
+        markupType: 'PERCENT',
+        markupValue: '0',
+        priceTier: 'IDEAL' as const,
+        extras: [],
+      },
+    ]);
+    setShowOfficialCatalogModal(false);
   }
 
   async function handleCreateClient(values: ClientFormValues) {
@@ -454,9 +482,16 @@ export function QuoteBuilder({ initial }: { initial?: Quote }) {
             <div className="flex items-center justify-between">
               <h2 className="label-caps text-ink-soft">Itinerario de Servicios</h2>
               {editable ? (
-                <button className="button-primary inline-flex items-center gap-1.5 text-xs" onClick={() => setShowCatalogModal(true)} type="button">
-                  <Search className="h-3.5 w-3.5" /> Agregar Servicio
-                </button>
+                <div className="flex flex-wrap items-center gap-2">
+                  {user?.agency?.type === 'ON_VACATION' ? (
+                    <button className="button-secondary inline-flex items-center gap-1.5 text-xs" onClick={() => setShowOfficialCatalogModal(true)} type="button">
+                      <Search className="h-3.5 w-3.5" /> Catálogo Oficial
+                    </button>
+                  ) : null}
+                  <button className="button-primary inline-flex items-center gap-1.5 text-xs" onClick={() => setShowCatalogModal(true)} type="button">
+                    <Search className="h-3.5 w-3.5" /> Agregar Servicio
+                  </button>
+                </div>
               ) : null}
             </div>
 
@@ -537,6 +572,11 @@ export function QuoteBuilder({ initial }: { initial?: Quote }) {
       </div>
 
       <QuoteCatalogModal onClose={() => setShowCatalogModal(false)} onConfirm={addProductItems} open={showCatalogModal} />
+      <QuoteCatalogAccommodationModal
+        onClose={() => setShowOfficialCatalogModal(false)}
+        onConfirm={addCatalogAccommodationItem}
+        open={showOfficialCatalogModal}
+      />
       {initial && showShareModal ? <QuoteShareModal onClose={() => setShowShareModal(false)} quote={initial} /> : null}
       <ClientFormModal
         initialName={clientSearch}
