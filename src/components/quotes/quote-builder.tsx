@@ -486,7 +486,7 @@ export function QuoteBuilder({ initial }: { initial?: Quote }) {
                           ) : null}
                         </div>
                       ))}
-                      {canManageAccess ? (
+                      {canManageAccess && !isOnVacation ? (
                         <button className="inline-flex items-center gap-1.5 text-xs font-semibold text-teal" onClick={() => setShowShareModal(true)} type="button">
                           <UserPlus className="h-3.5 w-3.5" /> Agregar Asesor
                         </button>
