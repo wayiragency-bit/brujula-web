@@ -3,7 +3,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { FileText, Package, Plus, TrendingUp, UserPlus, Users } from 'lucide-react';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { AppShell } from '@/components/app-shell';
 import { Pager } from '@/components/dashboard/pager';
 import { QuotesAnalyticsChart } from '@/components/dashboard/quotes-analytics-chart';
@@ -76,6 +76,25 @@ export default function DashboardPage() {
   const [agentsPage, setAgentsPage] = useState(1);
   const { data: team } = useTeam();
 
+  const isOnVacation = user?.agency?.type === 'ON_VACATION';
+
+  // ON_VACATION advisors set a personal monthly goal stored per-user in localStorage.
+  // Other agency types use the shared agency-level goal from the API.
+  const ovGoalKey = `ov-goal-${user?.id ?? ''}`;
+  const [localGoal, setLocalGoal] = useState(0);
+  useEffect(() => {
+    if (!isOnVacation || !user?.id) return;
+    try {
+      const stored = localStorage.getItem(ovGoalKey);
+      if (stored) setLocalGoal(Number(stored));
+    } catch {}
+  }, [isOnVacation, user?.id, ovGoalKey]);
+
+  function handleLocalGoalSave(value: number) {
+    setLocalGoal(value);
+    try { localStorage.setItem(ovGoalKey, String(value)); } catch {}
+  }
+
   const currency = agency?.baseCurrency ?? 'COP';
   const summaryInCurrency = (quotes?.summary ?? []).filter((row) => row.currency === currency);
   const totalQuoted   = summaryInCurrency.reduce((sum, row) => sum + Number(row.total), 0);
@@ -91,7 +110,7 @@ export default function DashboardPage() {
 
   const topProducts = [...(products?.data ?? [])].sort((a, b) => b.timesQuoted - a.timesQuoted).slice(0, 3);
 
-  const goal = Number(agency?.monthlySalesGoal ?? 0);
+  const goal = isOnVacation ? localGoal : Number(agency?.monthlySalesGoal ?? 0);
   const pct = goal > 0 ? Math.min(100, (totalAccepted / goal) * 100) : 0;
 
   const sortedAgents = [...(team ?? [])].sort((a, b) => b.sold - a.sold);
@@ -177,7 +196,12 @@ export default function DashboardPage() {
                 <p className="mt-1 text-sm text-ink-soft">de {formatMoneyFull(totalQuoted, currency)} cotizados</p>
               </div>
 
-              <SalesGoalEditor canEdit={hasPermission('settings.edit_agency')} currency={currency} goal={goal} />
+              <SalesGoalEditor
+                canEdit={isOnVacation || hasPermission('settings.edit_agency')}
+                currency={currency}
+                goal={goal}
+                onLocalSave={isOnVacation ? handleLocalGoalSave : undefined}
+              />
 
               {/* Progress bar */}
               <div className="mt-5">

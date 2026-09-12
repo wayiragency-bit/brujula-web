@@ -9,9 +9,11 @@ interface SalesGoalEditorProps {
   goal: number;
   currency: string;
   canEdit: boolean;
+  /** When provided, saving writes locally instead of calling the agency API (ON_VACATION personal goals). */
+  onLocalSave?: (value: number) => void;
 }
 
-export function SalesGoalEditor({ goal, currency, canEdit }: SalesGoalEditorProps) {
+export function SalesGoalEditor({ goal, currency, canEdit, onLocalSave }: SalesGoalEditorProps) {
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState(String(goal));
   const containerRef = useRef<HTMLDivElement>(null);
@@ -36,7 +38,11 @@ export function SalesGoalEditor({ goal, currency, canEdit }: SalesGoalEditorProp
   async function save() {
     const parsed = Number(value);
     if (!Number.isFinite(parsed) || parsed < 0) return;
-    await updateAgency.mutateAsync({ monthlySalesGoal: parsed });
+    if (onLocalSave) {
+      onLocalSave(parsed);
+    } else {
+      await updateAgency.mutateAsync({ monthlySalesGoal: parsed });
+    }
     setOpen(false);
   }
 
