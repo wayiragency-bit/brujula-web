@@ -177,51 +177,135 @@ export default function DashboardPage() {
           })}
         </section>
 
-        {/* Cuerpo principal: columna izquierda (ventas/gráfico/en curso) + derecha (productos/cotizaciones/agentes) */}
-        <section className="grid items-start gap-6 xl:grid-cols-[1fr_1.6fr]">
+        {/* Cuerpo principal */}
+        {isOnVacation ? (
+          /* ── ON_VACATION layout ──────────────────────────────────────────────
+             Left col  : Ventas del mes  →  Top 3 Productos
+             Right col : Últimas Cotizaciones  →  Análisis de Cotizaciones
+             Full width: En Curso (máximo ancho, pipeline activo)
+          ─────────────────────────────────────────────────────────────────── */
+          <section aria-label="Panel de operación" className="space-y-6">
 
-          {/* Columna izquierda */}
-          <div className="space-y-6">
+            <div className="grid items-start gap-6 xl:grid-cols-[1fr_1.3fr]">
 
-            {/* Ventas del mes */}
-            <article
-              className="relative rounded-2xl p-7 sm:p-8"
-              style={{ background: 'var(--paper-card)', border: '1px solid var(--border)' }}
-            >
-              <div className="pr-32 sm:pr-36">
-                <p className="label-caps text-ink-soft">
-                  VENTAS DE {new Date().toLocaleDateString('es-CO', { month: 'long' }).toUpperCase()}
-                </p>
-                <p className="mt-2 font-mono text-3xl font-extrabold text-ink">{formatMoneyFull(totalAccepted, currency)}</p>
-                <p className="mt-1 text-sm text-ink-soft">de {formatMoneyFull(totalQuoted, currency)} cotizados</p>
+              {/* Izquierda: Ventas + Productos */}
+              <div className="space-y-6">
+
+                {/* Ventas del mes */}
+                <article
+                  className="relative rounded-2xl p-7 sm:p-8"
+                  style={{ background: 'var(--paper-card)', border: '1px solid var(--border)' }}
+                >
+                  <div className="pr-32 sm:pr-36">
+                    <p className="label-caps text-ink-soft">
+                      VENTAS DE {new Date().toLocaleDateString('es-CO', { month: 'long' }).toUpperCase()}
+                    </p>
+                    <p className="mt-2 font-mono text-3xl font-extrabold text-ink">{formatMoneyFull(totalAccepted, currency)}</p>
+                    <p className="mt-1 text-sm text-ink-soft">de {formatMoneyFull(totalQuoted, currency)} cotizados</p>
+                  </div>
+                  <SalesGoalEditor canEdit goal={goal} currency={currency} onLocalSave={handleLocalGoalSave} />
+                  <div className="mt-5">
+                    <div className="h-2.5 w-full overflow-hidden rounded-full" style={{ background: 'var(--border-faint)' }}>
+                      <div
+                        className="h-full rounded-full transition-all duration-700"
+                        style={{ width: `${pct}%`, background: 'linear-gradient(90deg, #6366f1, #a855f7, #ec4899)' }}
+                      />
+                    </div>
+                    <div className="mt-2 flex justify-between">
+                      <span className="font-mono text-xs font-bold" style={{ color: '#a855f7' }}>{pct.toFixed(1)}% de la meta</span>
+                      <span className="label-caps text-ink-muted">{acceptedCount} aceptadas · {pendingCount} enviadas</span>
+                    </div>
+                  </div>
+                </article>
+
+                {/* Top 3 Productos del Mes */}
+                <article className="overflow-hidden rounded-2xl" style={{ background: 'var(--paper-card)', border: '1px solid var(--border)' }}>
+                  <div className="px-7 py-5" style={{ borderBottom: '1px solid var(--border-faint)' }}>
+                    <div className="flex items-center justify-between">
+                      <h2 className="font-semibold text-ink">Top 3 Productos del Mes</h2>
+                      <Link className="label-caps text-amber" href="/products">Ver Inventario</Link>
+                    </div>
+                    <p className="mt-1 text-xs text-ink-soft">Los servicios más solicitados en tus cotizaciones.</p>
+                  </div>
+                  <div className="grid grid-cols-1 gap-3 p-4 sm:grid-cols-3">
+                    {topProducts.length === 0 ? (
+                      <p className="col-span-3 px-3 py-6 text-center text-sm text-ink-soft">Aún no hay productos cotizados.</p>
+                    ) : (
+                      topProducts.map((product, i) => (
+                        <div className="rounded-xl p-3" key={product.id} style={{ background: 'var(--surface)', border: '1px solid var(--border-faint)' }}>
+                          <div className="mb-2 flex min-w-0 items-center gap-2">
+                            <span
+                              className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[10px] font-bold text-white"
+                              style={{ background: RANK_COLORS[i] ?? RANK_COLORS[2] }}
+                            >
+                              #{i + 1}
+                            </span>
+                            <span className="label-caps truncate text-ink-muted">{PRODUCT_TYPE_LABEL[product.type] ?? 'Servicio'}</span>
+                          </div>
+                          <div className="relative h-24 w-full overflow-hidden rounded-lg" style={{ background: 'var(--paper-elevated)' }}>
+                            {product.imageUrl ? (
+                              // eslint-disable-next-line @next/next/no-img-element
+                              <img alt={product.name} className="h-full w-full object-cover" src={product.imageUrl} />
+                            ) : (
+                              <div className="flex h-full items-center justify-center"><Package className="h-6 w-6 text-ink-muted" /></div>
+                            )}
+                          </div>
+                          <p className="mt-3 truncate text-sm font-medium text-ink">{product.name}</p>
+                          <div className="mt-1 flex items-center justify-between">
+                            <span className="text-xs text-ink-soft">{product.timesQuoted} Ventas</span>
+                            <span className="font-mono text-sm font-bold text-ink">{formatMoneyFull(product.sellPrice, product.currency)}</span>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </article>
               </div>
 
-              <SalesGoalEditor
-                canEdit={isOnVacation || hasPermission('settings.edit_agency')}
-                currency={currency}
-                goal={goal}
-                onLocalSave={isOnVacation ? handleLocalGoalSave : undefined}
-              />
+              {/* Derecha: Últimas Cotizaciones + Análisis */}
+              <div className="space-y-6">
 
-              {/* Progress bar */}
-              <div className="mt-5">
-                <div className="h-2.5 w-full overflow-hidden rounded-full" style={{ background: 'var(--border-faint)' }}>
-                  <div
-                    className="h-full rounded-full transition-all duration-700"
-                    style={{ width: `${pct}%`, background: 'linear-gradient(90deg, #6366f1, #a855f7, #ec4899)' }}
-                  />
-                </div>
-                <div className="mt-2 flex justify-between">
-                  <span className="font-mono text-xs font-bold" style={{ color: '#a855f7' }}>{pct.toFixed(1)}% de la meta</span>
-                  <span className="label-caps text-ink-muted">{acceptedCount} aceptadas · {pendingCount} enviadas</span>
-                </div>
+                {/* Últimas Cotizaciones */}
+                <article className="overflow-hidden rounded-2xl" style={{ background: 'var(--paper-card)', border: '1px solid var(--border)' }}>
+                  <div className="flex items-center justify-between px-7 py-5" style={{ borderBottom: '1px solid var(--border-faint)' }}>
+                    <h2 className="font-semibold text-ink">Últimas Cotizaciones</h2>
+                    <Pager onChange={setRecentPage} page={recentPage} totalPages={recentQuotes?.meta.totalPages ?? 1} />
+                  </div>
+                  <div className="divide-y" style={{ '--tw-divide-opacity': 1 } as React.CSSProperties}>
+                    {(recentQuotes?.data.length ?? 0) === 0 ? (
+                      <p className="px-6 py-8 text-center text-sm text-ink-soft">Aún no hay cotizaciones.</p>
+                    ) : (
+                      recentQuotes!.data.map((q) => (
+                        <Link
+                          className="flex items-center gap-3 px-7 py-4 transition hover:bg-white/[0.03]"
+                          href={`/quotes/${q.id}`}
+                          key={q.id}
+                        >
+                          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg" style={{ background: 'var(--surface)' }}>
+                            <FileText className="h-4 w-4 text-ink-soft" />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="truncate text-sm font-medium text-ink">{q.client?.name ?? '—'}</p>
+                            <p className="text-xs text-ink-soft">{q.number} · {new Date(q.updatedAt).toLocaleDateString('es-CO')}</p>
+                          </div>
+                          <div className="flex shrink-0 flex-col items-end gap-1">
+                            <span className="font-mono text-sm font-semibold text-ink">{formatMoneyFull(Number(q.total), q.currency)}</span>
+                            <span className={`${STATUS_COLOR[q.status] ?? 'chip-borrador'} rounded-full px-2 py-0.5 text-[10px] font-semibold`}>
+                              {q.statusLabel}
+                            </span>
+                          </div>
+                        </Link>
+                      ))
+                    )}
+                  </div>
+                </article>
+
+                {/* Análisis de Cotizaciones */}
+                <QuotesAnalyticsChart />
               </div>
-            </article>
+            </div>
 
-            {/* Análisis de cotizaciones */}
-            <QuotesAnalyticsChart />
-
-            {/* En Curso */}
+            {/* En Curso — ancho completo para mayor legibilidad del pipeline */}
             <article className="overflow-hidden rounded-2xl" style={{ background: 'var(--paper-card)', border: '1px solid var(--border)' }}>
               <div className="flex items-center justify-between px-7 py-5" style={{ borderBottom: '1px solid var(--border-faint)' }}>
                 <h2 className="font-semibold text-ink">En Curso</h2>
@@ -259,81 +343,70 @@ export default function DashboardPage() {
                 </span>
               </div>
             </article>
-          </div>
+          </section>
+        ) : (
+          /* ── Layout estándar (no ON_VACATION) — sin cambios ─────────────── */
+          <section className="grid items-start gap-6 xl:grid-cols-[1fr_1.6fr]">
 
-          {/* Columna derecha */}
-          <div className="space-y-6">
+            {/* Columna izquierda */}
+            <div className="space-y-6">
 
-            {/* Top productos */}
-            <article className="overflow-hidden rounded-2xl" style={{ background: 'var(--paper-card)', border: '1px solid var(--border)' }}>
-              <div className="px-7 py-5" style={{ borderBottom: '1px solid var(--border-faint)' }}>
-                <div className="flex items-center justify-between">
-                  <h2 className="font-semibold text-ink">Top 3 Productos del Mes</h2>
-                  <Link className="label-caps text-amber" href="/products">Ver Inventario</Link>
+              {/* Ventas del mes */}
+              <article
+                className="relative rounded-2xl p-7 sm:p-8"
+                style={{ background: 'var(--paper-card)', border: '1px solid var(--border)' }}
+              >
+                <div className="pr-32 sm:pr-36">
+                  <p className="label-caps text-ink-soft">
+                    VENTAS DE {new Date().toLocaleDateString('es-CO', { month: 'long' }).toUpperCase()}
+                  </p>
+                  <p className="mt-2 font-mono text-3xl font-extrabold text-ink">{formatMoneyFull(totalAccepted, currency)}</p>
+                  <p className="mt-1 text-sm text-ink-soft">de {formatMoneyFull(totalQuoted, currency)} cotizados</p>
                 </div>
-                <p className="mt-1 text-xs text-ink-soft">Los servicios más solicitados en tus cotizaciones.</p>
-              </div>
-              <div className="grid grid-cols-1 gap-3 p-4 sm:grid-cols-3">
-                {topProducts.length === 0 ? (
-                  <p className="px-3 py-6 text-center text-sm text-ink-soft">Aún no hay productos cotizados.</p>
-                ) : (
-                  topProducts.map((product, i) => (
-                    <div className="rounded-xl p-3" key={product.id} style={{ background: 'var(--surface)', border: '1px solid var(--border-faint)' }}>
-                      <div className="mb-2 flex min-w-0 items-center gap-2">
-                        <span
-                          className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[10px] font-bold text-white"
-                          style={{ background: RANK_COLORS[i] ?? RANK_COLORS[2] }}
-                        >
-                          #{i + 1}
-                        </span>
-                        <span className="label-caps truncate text-ink-muted">{PRODUCT_TYPE_LABEL[product.type] ?? 'Servicio'}</span>
-                      </div>
-                      <div className="relative h-24 w-full overflow-hidden rounded-lg" style={{ background: 'var(--paper-elevated)' }}>
-                        {product.imageUrl ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img alt={product.name} className="h-full w-full object-cover" src={product.imageUrl} />
-                        ) : (
-                          <div className="flex h-full items-center justify-center"><Package className="h-6 w-6 text-ink-muted" /></div>
-                        )}
-                      </div>
-                      <p className="mt-3 truncate text-sm font-medium text-ink">{product.name}</p>
-                      <div className="mt-1 flex items-center justify-between">
-                        <span className="text-xs text-ink-soft">{product.timesQuoted} Ventas</span>
-                        <span className="font-mono text-sm font-bold text-ink">{formatMoneyFull(product.sellPrice, product.currency)}</span>
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-            </article>
+                <SalesGoalEditor
+                  canEdit={hasPermission('settings.edit_agency')}
+                  currency={currency}
+                  goal={goal}
+                />
+                <div className="mt-5">
+                  <div className="h-2.5 w-full overflow-hidden rounded-full" style={{ background: 'var(--border-faint)' }}>
+                    <div
+                      className="h-full rounded-full transition-all duration-700"
+                      style={{ width: `${pct}%`, background: 'linear-gradient(90deg, #6366f1, #a855f7, #ec4899)' }}
+                    />
+                  </div>
+                  <div className="mt-2 flex justify-between">
+                    <span className="font-mono text-xs font-bold" style={{ color: '#a855f7' }}>{pct.toFixed(1)}% de la meta</span>
+                    <span className="label-caps text-ink-muted">{acceptedCount} aceptadas · {pendingCount} enviadas</span>
+                  </div>
+                </div>
+              </article>
 
-            {/* Últimas cotizaciones + Top agentes */}
-            <div className="grid gap-6 sm:grid-cols-2">
+              {/* Análisis de cotizaciones */}
+              <QuotesAnalyticsChart />
 
-              {/* Últimas cotizaciones */}
+              {/* En Curso */}
               <article className="overflow-hidden rounded-2xl" style={{ background: 'var(--paper-card)', border: '1px solid var(--border)' }}>
                 <div className="flex items-center justify-between px-7 py-5" style={{ borderBottom: '1px solid var(--border-faint)' }}>
-                  <h2 className="font-semibold text-ink">Últimas Cotizaciones</h2>
-                  <Pager onChange={setRecentPage} page={recentPage} totalPages={recentQuotes?.meta.totalPages ?? 1} />
+                  <h2 className="font-semibold text-ink">En Curso</h2>
+                  <Pager onChange={setInProgressPage} page={inProgressPage} totalPages={inProgressQuotes?.meta.totalPages ?? 1} />
                 </div>
                 <div className="divide-y" style={{ '--tw-divide-opacity': 1 } as React.CSSProperties}>
-                  {(recentQuotes?.data.length ?? 0) === 0 ? (
-                    <p className="px-6 py-8 text-center text-sm text-ink-soft">Aún no hay cotizaciones.</p>
+                  {(inProgressQuotes?.data.length ?? 0) === 0 ? (
+                    <p className="px-6 py-8 text-center text-sm text-ink-soft">No hay cotizaciones en curso.</p>
                   ) : (
-                    recentQuotes!.data.map((q) => (
+                    inProgressQuotes!.data.map((q) => (
                       <Link
-                        className="flex items-center gap-3 px-7 py-4 transition hover:bg-white/[0.03]"
+                        className="flex items-center justify-between gap-3 px-7 py-4 transition hover:bg-white/[0.03]"
                         href={`/quotes/${q.id}`}
                         key={q.id}
+                        style={{ borderColor: 'var(--border-faint)' }}
                       >
-                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg" style={{ background: 'var(--surface)' }}>
-                          <FileText className="h-4 w-4 text-ink-soft" />
-                        </div>
                         <div className="min-w-0 flex-1">
-                          <p className="truncate text-sm font-medium text-ink">{q.client?.name ?? '—'}</p>
-                          <p className="text-xs text-ink-soft">{q.number} · {new Date(q.updatedAt).toLocaleDateString('es-CO')}</p>
+                          <p className="truncate text-sm font-medium text-ink">{q.number} · {q.client?.name ?? '—'}</p>
+                          <p className="truncate text-xs text-ink-soft">{q.destination}</p>
                         </div>
-                        <div className="flex shrink-0 flex-col items-end gap-1">
+                        <div className="flex shrink-0 items-center gap-2">
                           <span className="font-mono text-sm font-semibold text-ink">{formatMoneyFull(Number(q.total), q.currency)}</span>
                           <span className={`${STATUS_COLOR[q.status] ?? 'chip-borrador'} rounded-full px-2 py-0.5 text-[10px] font-semibold`}>
                             {q.statusLabel}
@@ -343,10 +416,100 @@ export default function DashboardPage() {
                     ))
                   )}
                 </div>
+                <div className="flex items-center justify-between px-7 py-4" style={{ borderTop: '1px solid var(--border-faint)', background: 'var(--surface)' }}>
+                  <span className="label-caps text-ink-muted">Total en curso</span>
+                  <span className="font-mono text-sm font-bold text-ink">
+                    {formatMoneyFull(summaryInCurrency.filter((r) => IN_PROGRESS.includes(r.status)).reduce((s, r) => s + Number(r.total), 0), currency)}
+                  </span>
+                </div>
+              </article>
+            </div>
+
+            {/* Columna derecha */}
+            <div className="space-y-6">
+
+              {/* Top productos */}
+              <article className="overflow-hidden rounded-2xl" style={{ background: 'var(--paper-card)', border: '1px solid var(--border)' }}>
+                <div className="px-7 py-5" style={{ borderBottom: '1px solid var(--border-faint)' }}>
+                  <div className="flex items-center justify-between">
+                    <h2 className="font-semibold text-ink">Top 3 Productos del Mes</h2>
+                    <Link className="label-caps text-amber" href="/products">Ver Inventario</Link>
+                  </div>
+                  <p className="mt-1 text-xs text-ink-soft">Los servicios más solicitados en tus cotizaciones.</p>
+                </div>
+                <div className="grid grid-cols-1 gap-3 p-4 sm:grid-cols-3">
+                  {topProducts.length === 0 ? (
+                    <p className="px-3 py-6 text-center text-sm text-ink-soft">Aún no hay productos cotizados.</p>
+                  ) : (
+                    topProducts.map((product, i) => (
+                      <div className="rounded-xl p-3" key={product.id} style={{ background: 'var(--surface)', border: '1px solid var(--border-faint)' }}>
+                        <div className="mb-2 flex min-w-0 items-center gap-2">
+                          <span
+                            className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[10px] font-bold text-white"
+                            style={{ background: RANK_COLORS[i] ?? RANK_COLORS[2] }}
+                          >
+                            #{i + 1}
+                          </span>
+                          <span className="label-caps truncate text-ink-muted">{PRODUCT_TYPE_LABEL[product.type] ?? 'Servicio'}</span>
+                        </div>
+                        <div className="relative h-24 w-full overflow-hidden rounded-lg" style={{ background: 'var(--paper-elevated)' }}>
+                          {product.imageUrl ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img alt={product.name} className="h-full w-full object-cover" src={product.imageUrl} />
+                          ) : (
+                            <div className="flex h-full items-center justify-center"><Package className="h-6 w-6 text-ink-muted" /></div>
+                          )}
+                        </div>
+                        <p className="mt-3 truncate text-sm font-medium text-ink">{product.name}</p>
+                        <div className="mt-1 flex items-center justify-between">
+                          <span className="text-xs text-ink-soft">{product.timesQuoted} Ventas</span>
+                          <span className="font-mono text-sm font-bold text-ink">{formatMoneyFull(product.sellPrice, product.currency)}</span>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
               </article>
 
-              {/* Top agentes — not shown for ON_VACATION: single-advisor model, no team ranking */}
-              {!isOnVacation && (
+              {/* Últimas cotizaciones + Top agentes */}
+              <div className="grid gap-6 sm:grid-cols-2">
+
+                {/* Últimas cotizaciones */}
+                <article className="overflow-hidden rounded-2xl" style={{ background: 'var(--paper-card)', border: '1px solid var(--border)' }}>
+                  <div className="flex items-center justify-between px-7 py-5" style={{ borderBottom: '1px solid var(--border-faint)' }}>
+                    <h2 className="font-semibold text-ink">Últimas Cotizaciones</h2>
+                    <Pager onChange={setRecentPage} page={recentPage} totalPages={recentQuotes?.meta.totalPages ?? 1} />
+                  </div>
+                  <div className="divide-y" style={{ '--tw-divide-opacity': 1 } as React.CSSProperties}>
+                    {(recentQuotes?.data.length ?? 0) === 0 ? (
+                      <p className="px-6 py-8 text-center text-sm text-ink-soft">Aún no hay cotizaciones.</p>
+                    ) : (
+                      recentQuotes!.data.map((q) => (
+                        <Link
+                          className="flex items-center gap-3 px-7 py-4 transition hover:bg-white/[0.03]"
+                          href={`/quotes/${q.id}`}
+                          key={q.id}
+                        >
+                          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg" style={{ background: 'var(--surface)' }}>
+                            <FileText className="h-4 w-4 text-ink-soft" />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="truncate text-sm font-medium text-ink">{q.client?.name ?? '—'}</p>
+                            <p className="text-xs text-ink-soft">{q.number} · {new Date(q.updatedAt).toLocaleDateString('es-CO')}</p>
+                          </div>
+                          <div className="flex shrink-0 flex-col items-end gap-1">
+                            <span className="font-mono text-sm font-semibold text-ink">{formatMoneyFull(Number(q.total), q.currency)}</span>
+                            <span className={`${STATUS_COLOR[q.status] ?? 'chip-borrador'} rounded-full px-2 py-0.5 text-[10px] font-semibold`}>
+                              {q.statusLabel}
+                            </span>
+                          </div>
+                        </Link>
+                      ))
+                    )}
+                  </div>
+                </article>
+
+                {/* Top agentes */}
                 <article className="overflow-hidden rounded-2xl" style={{ background: 'var(--paper-card)', border: '1px solid var(--border)' }}>
                   <div className="flex items-center justify-between px-7 py-5" style={{ borderBottom: '1px solid var(--border-faint)' }}>
                     <h2 className="font-semibold text-ink">Top Agentes</h2>
@@ -377,10 +540,10 @@ export default function DashboardPage() {
                     )}
                   </div>
                 </article>
-              )}
+              </div>
             </div>
-          </div>
-        </section>
+          </section>
+        )}
 
       </div>
     </AppShell>
