@@ -10,6 +10,7 @@ import {
   useManagerAnalyticsHotels,
 } from '@/hooks/use-manager';
 import { formatMoneyFull } from '@/lib/format';
+import { quoteStatusLabel } from '@/lib/on-vacation-status';
 
 type Tab = 'general' | 'advisors' | 'hotels' | 'accommodations' | 'destinations';
 
@@ -123,7 +124,7 @@ export default function ManagerAnalyticsPage() {
           {tab === 'general' ? (
             <Table
               headers={['Estatus', 'Cotizaciones']}
-              rows={(general?.funnel ?? []).map((f) => [f.status, f.count])}
+              rows={(general?.funnel ?? []).map((f) => [quoteStatusLabel(f.status, 'ON_VACATION'), f.count])}
             />
           ) : null}
           {tab === 'advisors' ? (
