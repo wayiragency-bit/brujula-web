@@ -12,10 +12,12 @@ import {
   useQuoteClientOptions,
   useRecordPayment,
   useRevokeQuoteAccess,
+  useSetSpecialStatus,
   useUpdateQuote,
 } from '@/hooks/use-quotes';
 import { useCreateClient } from '@/hooks/use-clients';
-import type { CatalogProduct, ClientFormValues, Quote, QuoteHeaderDraft, QuoteItemDraft, QuoteStatus } from '@/lib/types';
+import { QUOTE_SPECIAL_STATUS_LABELS, QUOTE_SPECIAL_STATUS_ORDER } from '@/lib/on-vacation-status';
+import type { CatalogProduct, ClientFormValues, Quote, QuoteHeaderDraft, QuoteItemDraft, QuoteSpecialStatus, QuoteStatus } from '@/lib/types';
 import { inputClass, labelClass } from '@/components/ui/form';
 import { QuoteItemCard } from '@/components/quotes/quote-item-card';
 import { QuoteItinerary } from '@/components/quotes/quote-itinerary';
@@ -26,16 +28,6 @@ import { ClientFormModal } from '@/components/clients/client-form-modal';
 interface DraftItem extends QuoteItemDraft {
   key: string;
 }
-
-const STATUS_LABELS: Record<QuoteStatus, string> = {
-  BORRADOR: 'Borrador',
-  ENVIADA: 'Enviada',
-  ACEPTADA: 'Aceptada',
-  ABONADA: 'Abonada',
-  PAGADA: 'Pagada',
-  RECHAZADA: 'Rechazada',
-  VENCIDA: 'Vencida',
-};
 
 // Mirrors assertEditable() in the API's quote-policy.ts — a sent/accepted/partially-paid booking can
 // still need a date or product change; only PAGADA (paidAt set) locks the historical cost basis, and
@@ -145,6 +137,7 @@ export function QuoteBuilder({ initial }: { initial?: Quote }) {
   const createClient = useCreateClient();
   const updateQuote = useUpdateQuote(initial?.id ?? 'none');
   const changeStatus = useChangeQuoteStatus(initial?.id ?? 'none');
+  const setSpecialStatus = useSetSpecialStatus(initial?.id ?? 'none');
   const recordPayment = useRecordPayment(initial?.id ?? 'none');
   const { data: sharedAccess } = useQuoteAccess(initial?.id);
   const revokeAccess = useRevokeQuoteAccess(initial?.id ?? 'none');
@@ -247,6 +240,16 @@ export function QuoteBuilder({ initial }: { initial?: Quote }) {
     }
   }
 
+  async function handleSpecialStatus(value: string) {
+    if (!initial) return;
+    setError(null);
+    try {
+      await setSpecialStatus.mutateAsync({ version: initial.version, specialStatus: (value || null) as QuoteSpecialStatus | null });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'No se pudo actualizar el estatus especial.');
+    }
+  }
+
   async function handlePayment() {
     if (!initial || !paymentAmount) return;
     setError(null);
@@ -278,7 +281,22 @@ export function QuoteBuilder({ initial }: { initial?: Quote }) {
           </button>
           <span className="text-ink/15">|</span>
           <h1 className="font-display text-2xl font-extrabold uppercase text-ink">{initial ? initial.number : 'Nueva Cotización'}</h1>
-          {initial ? <span className={`rounded-full px-3 py-1 font-mono text-[11px] font-bold uppercase ${STATUS_COLORS[initial.status]}`}>{STATUS_LABELS[initial.status]}</span> : null}
+          {initial ? <span className={`rounded-full px-3 py-1 font-mono text-[11px] font-bold uppercase ${STATUS_COLORS[initial.status]}`}>{initial.statusLabel}</span> : null}
+          {initial?.specialStatusLabel ? (
+            <span className="rounded-full bg-red-50 px-3 py-1 font-mono text-[11px] font-bold uppercase text-red-600">{initial.specialStatusLabel}</span>
+          ) : null}
+          {initial && user?.agency?.type === 'ON_VACATION' ? (
+            <select
+              className="rounded-lg border border-ink/10 bg-paper-card px-2 py-1 text-xs text-ink-soft"
+              onChange={(e) => handleSpecialStatus(e.target.value)}
+              value={initial.specialStatus ?? ''}
+            >
+              <option value="">Sin estatus especial</option>
+              {QUOTE_SPECIAL_STATUS_ORDER.map((code) => (
+                <option key={code} value={code}>{QUOTE_SPECIAL_STATUS_LABELS[code]}</option>
+              ))}
+            </select>
+          ) : null}
         </div>
         <div className="flex flex-wrap gap-2">
           {initial?.publicId ? (

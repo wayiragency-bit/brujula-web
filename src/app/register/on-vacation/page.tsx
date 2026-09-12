@@ -1,6 +1,6 @@
 'use client';
 
-import { BarChart3, Compass, FileText, ShieldCheck, Users } from 'lucide-react';
+import { BedDouble, Images, Palmtree, ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState, type FormEvent } from 'react';
@@ -8,42 +8,40 @@ import { usePlans } from '@/hooks/use-billing';
 import { ApiError } from '@/lib/api';
 import { useAuth } from '@/lib/auth-context';
 import { getRecaptchaToken } from '@/lib/recaptcha';
-import { AGENCY_TYPE_LABELS, GENERIC_AGENCY_TYPES } from '@/lib/types';
-import type { AgencyType } from '@/lib/types';
-import { inputClass, labelClass, selectClass } from '@/components/ui/form';
+import { inputClass, labelClass } from '@/components/ui/form';
 import { PlanList } from '@/components/billing/plan-list';
 
 const FEATURES: { icon: React.ElementType; label: string }[] = [
-  { icon: FileText, label: 'Cotizaciones con seguimiento en tiempo real' },
-  { icon: Users, label: 'Clientes privados por asesor, compartibles cuando lo necesites' },
-  { icon: ShieldCheck, label: 'Roles y permisos para Administrador, Supervisor y Agente' },
-  { icon: BarChart3, label: 'Dashboard de ventas y comisiones por equipo' },
+  { icon: Images, label: 'Catálogo oficial de hoteles con galerías por acomodación' },
+  { icon: BedDouble, label: 'Cotiza por acomodación — Doble, Triple, Suite, la que exista' },
+  { icon: ShieldCheck, label: 'Tú administras tus propios clientes y cotizaciones' },
 ];
 
-export default function RegisterPage() {
+// On Vacation always registers as this business type — there is no dropdown here, unlike the
+// generic /register. See AuthService.createBaseRoles on the backend: only an ON_VACATION agency's
+// roles get catalog.view, which is what makes the rest of this flow useful at all.
+const ON_VACATION_TYPE = 'ON_VACATION';
+
+export default function RegisterOnVacationPage() {
   const { register, status } = useAuth();
   const router = useRouter();
   const [step, setStep] = useState<1 | 2>(1);
 
   const [agencyName, setAgencyName] = useState('');
-  const [type, setType] = useState<AgencyType>('AGENCIA_VIAJES');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [manualPlanId, setManualPlanId] = useState<string | null>(null);
 
   const [stepOneError, setStepOneError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  const { data: plans, isLoading: plansLoading } = usePlans(type);
-
-  // Default to the plan recommended for the chosen business type, unless the user picked one manually.
-  const selectedPlanId = manualPlanId && plans?.some((p) => p.id === manualPlanId)
-    ? manualPlanId
-    : (plans?.find((p) => p.recommended)?.id ?? plans?.[0]?.id ?? null);
-  const trialDays = plans?.find((p) => p.id === selectedPlanId)?.trialDays ?? 7;
+  const { data: allPlans, isLoading: plansLoading } = usePlans(ON_VACATION_TYPE);
+  // On Vacation has one price, not a tier picker — show only the plan(s) actually meant for it.
+  const plans = allPlans?.filter((plan) => plan.recommended) ?? [];
+  const selectedPlanId = plans[0]?.id ?? null;
+  const trialDays = plans[0]?.trialDays ?? 5;
 
   useEffect(() => {
     if (status === 'authenticated') router.replace('/');
@@ -67,7 +65,7 @@ export default function RegisterPage() {
     setSubmitting(true);
     try {
       const recaptchaToken = await getRecaptchaToken('register');
-      await register({ agencyName, type, planId: selectedPlanId, name, email, password, recaptchaToken });
+      await register({ agencyName, type: ON_VACATION_TYPE, planId: selectedPlanId, name, email, password, recaptchaToken });
       router.replace('/');
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'No se pudo crear la cuenta. Intenta de nuevo.');
@@ -85,21 +83,22 @@ export default function RegisterPage() {
         {/* Marketing panel */}
         <div
           className="hidden w-[42%] flex-col justify-between p-10 lg:flex"
-          style={{ background: 'linear-gradient(160deg, rgba(17,67,63,0.92), rgba(10,22,40,0.96))' }}
+          style={{ background: 'linear-gradient(160deg, rgba(14,116,144,0.92), rgba(10,22,40,0.96))' }}
         >
           <div>
             <div className="mb-8 flex items-center gap-2.5">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl" style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(254,178,59,0.3)' }}>
-                <Compass className="h-5 w-5 text-amber" />
+                <Palmtree className="h-5 w-5 text-amber" />
               </div>
-              <span className="font-display text-xl font-extrabold text-white">Brújula</span>
+              <span className="font-display text-xl font-extrabold text-white">On Vacation</span>
             </div>
             <h1 className="font-display text-2xl font-extrabold leading-tight text-white">
-              Lleva tu agencia al siguiente nivel.
+              Vende hoteles reales, sin armar tu propio catálogo.
             </h1>
             <p className="mt-3 text-sm leading-relaxed text-white/70">
-              Cotizador y operación comercial para agencias, operadores y hoteles — con roles, permisos
-              y visibilidad de ventas por asesor desde el primer día.
+              Accede al catálogo oficial de hoteles y acomodaciones de On Vacation — con galerías de
+              fotos por cada tipo de habitación — y cotiza directamente con tus clientes desde el
+              primer día.
             </p>
           </div>
           <ul className="space-y-3">
@@ -117,30 +116,30 @@ export default function RegisterPage() {
         {/* Form panel */}
         <div className="w-full bg-paper-card p-8 sm:p-10 lg:w-[58%]">
           <div className="mb-6 flex flex-col items-center text-center lg:hidden">
-            <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl" style={{ background: 'rgba(17,67,63,0.15)', border: '1px solid rgba(254,178,59,0.3)' }}>
-              <Compass className="h-6 w-6 text-amber" />
+            <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl" style={{ background: 'rgba(14,116,144,0.15)', border: '1px solid rgba(254,178,59,0.3)' }}>
+              <Palmtree className="h-6 w-6 text-amber" />
             </div>
-            <h1 className="font-display text-2xl font-extrabold text-ink">Brújula</h1>
+            <h1 className="font-display text-2xl font-extrabold text-ink">On Vacation</h1>
           </div>
 
           <div className="mb-6 flex items-center gap-2">
             <span className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold ${step === 1 ? 'bg-amber text-[#0a1628]' : 'bg-teal/20 text-teal'}`}>1</span>
-            <span className={`text-xs font-semibold ${step === 1 ? 'text-ink' : 'text-ink-soft'}`}>Tu empresa</span>
+            <span className={`text-xs font-semibold ${step === 1 ? 'text-ink' : 'text-ink-soft'}`}>Tus datos</span>
             <span className="h-px flex-1" style={{ background: 'var(--border)' }} />
             <span className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold ${step === 2 ? 'bg-amber text-[#0a1628]' : 'bg-ink/10 text-ink-soft'}`}>2</span>
-            <span className={`text-xs font-semibold ${step === 2 ? 'text-ink' : 'text-ink-soft'}`}>Tu plan</span>
+            <span className={`text-xs font-semibold ${step === 2 ? 'text-ink' : 'text-ink-soft'}`}>Confirmar</span>
           </div>
 
           {step === 1 ? (
             <>
               <div className="mb-6">
-                <h2 className="font-display text-xl font-extrabold text-ink">Empieza tu prueba gratis</h2>
-                <p className="mt-1 text-sm text-ink-soft">Registro rápido para tu agencia — sin tarjeta de crédito.</p>
+                <h2 className="font-display text-xl font-extrabold text-ink">Regístrate como asesor On Vacation</h2>
+                <p className="mt-1 text-sm text-ink-soft">Crea tu cuenta — el catálogo oficial ya está listo para que empieces a cotizar.</p>
               </div>
 
               <form className="space-y-4" onSubmit={handleStepOneSubmit}>
                 <div>
-                  <label className={labelClass} htmlFor="agencyName">Nombre de la Empresa</label>
+                  <label className={labelClass} htmlFor="agencyName">Nombre de tu agencia</label>
                   <input
                     className={inputClass}
                     id="agencyName" onChange={(e) => setAgencyName(e.target.value)}
@@ -148,27 +147,14 @@ export default function RegisterPage() {
                   />
                 </div>
 
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div>
-                    <label className={labelClass} htmlFor="name">Tu Nombre</label>
-                    <input
-                      autoComplete="name"
-                      className={inputClass}
-                      id="name" onChange={(e) => setName(e.target.value)}
-                      placeholder="Juan Pérez" required value={name}
-                    />
-                  </div>
-                  <div>
-                    <label className={labelClass} htmlFor="type">Tipo de Empresa</label>
-                    <select
-                      className={selectClass}
-                      id="type" onChange={(e) => setType(e.target.value as AgencyType)} value={type}
-                    >
-                      {GENERIC_AGENCY_TYPES.map((value) => (
-                        <option key={value} value={value}>{AGENCY_TYPE_LABELS[value]}</option>
-                      ))}
-                    </select>
-                  </div>
+                <div>
+                  <label className={labelClass} htmlFor="name">Tu Nombre</label>
+                  <input
+                    autoComplete="name"
+                    className={inputClass}
+                    id="name" onChange={(e) => setName(e.target.value)}
+                    placeholder="Juan Pérez" required value={name}
+                  />
                 </div>
 
                 <div>
@@ -215,16 +201,20 @@ export default function RegisterPage() {
           ) : (
             <>
               <div className="mb-6">
-                <h2 className="font-display text-xl font-extrabold text-ink">Elige tu plan</h2>
+                <h2 className="font-display text-xl font-extrabold text-ink">Confirma tu cuenta</h2>
                 <p className="mt-1 text-sm text-ink-soft">
                   {trialDays} días gratis, sin cobro durante la prueba. Cancela cuando quieras.
                 </p>
               </div>
 
-              {plansLoading || !plans ? (
-                <p className="text-sm text-ink-soft">Cargando planes…</p>
+              {plansLoading ? (
+                <p className="text-sm text-ink-soft">Cargando…</p>
+              ) : plans.length ? (
+                <PlanList plans={plans} selectedPlanId={selectedPlanId} />
               ) : (
-                <PlanList onSelect={setManualPlanId} plans={plans} selectedPlanId={selectedPlanId} />
+                <p className="rounded-lg px-3 py-2 text-sm text-ink-soft" style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
+                  No hay un plan disponible para On Vacation en este momento. Contacta a soporte.
+                </p>
               )}
 
               <p className="mt-4 text-xs text-ink-muted">

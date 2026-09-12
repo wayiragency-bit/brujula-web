@@ -12,7 +12,7 @@ export interface AuthUser {
   lastName: string | null;
   avatarUrl: string | null;
   phone: string | null;
-  agency: { id: string; name: string; slug: string } | null;
+  agency: { id: string; name: string; slug: string; type: AgencyType } | null;
   // null for agencies with no subscription row at all (created before this feature existed) —
   // treated the same as "no trial limit".
   subscription: SubscriptionSummary | null;

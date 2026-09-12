@@ -11,6 +11,8 @@ import { Sparkline } from '@/components/dashboard/sparkline';
 import { QuoteActionsMenu } from '@/components/quotes/quote-actions-menu';
 import { QuoteShareModal } from '@/components/quotes/quote-share-modal';
 import { useDeleteQuote, useQuoteSellers, useQuotes } from '@/hooks/use-quotes';
+import { useAuth } from '@/lib/auth-context';
+import { quoteStatusLabel } from '@/lib/on-vacation-status';
 import type { Quote, QuoteStatus } from '@/lib/types';
 
 const SPARKLINES = [
@@ -22,11 +24,6 @@ const SPARKLINES = [
 ];
 
 const PAGE_SIZE = 24;
-
-const STATUS_LABELS: Record<QuoteStatus, string> = {
-  BORRADOR: 'Borrador', ENVIADA: 'Enviada', ACEPTADA: 'Aceptada', ABONADA: 'Abonada',
-  PAGADA: 'Pagada', RECHAZADA: 'Rechazada', VENCIDA: 'Vencida',
-};
 
 const STATUS_COLORS: Record<QuoteStatus, { dot: string; bg: string; text: string }> = {
   BORRADOR:  { dot: '#94a3b8', bg: 'rgba(148,163,184,0.15)', text: '#94a3b8' },
@@ -125,6 +122,8 @@ function formatDate(iso: string | null): string {
 }
 
 export default function QuotesPage() {
+  const { user } = useAuth();
+  const agencyType = user?.agency?.type;
   const [search, setSearch]   = useState('');
   const [status, setStatus]   = useState<QuoteStatus | undefined>(undefined);
   const [page, setPage]       = useState(1);
@@ -281,7 +280,7 @@ export default function QuotesPage() {
                 type="button"
               >
                 <div className="min-w-0 text-left">
-                  <p className="label-caps text-ink-soft" style={{ fontSize: '10px', letterSpacing: '1.5px' }}>{STATUS_LABELS[s]}</p>
+                  <p className="label-caps text-ink-soft" style={{ fontSize: '10px', letterSpacing: '1.5px' }}>{quoteStatusLabel(s, agencyType)}</p>
                   <p className="mt-1 font-black leading-none" style={{ fontSize: '22px', color: active ? col.text : 'var(--ink)' }}>
                     {counts.get(s) ?? 0}
                   </p>
@@ -428,7 +427,7 @@ export default function QuotesPage() {
               value={status ?? ''}
             >
               <option value="">Todos Los Estados</option>
-              {ALL_STATUSES.map((s) => <option key={s} value={s}>{STATUS_LABELS[s]}</option>)}
+              {ALL_STATUSES.map((s) => <option key={s} value={s}>{quoteStatusLabel(s, agencyType)}</option>)}
             </select>
           </label>
 
@@ -516,7 +515,7 @@ export default function QuotesPage() {
                           style={{ background: col.bg, color: col.text }}
                         >
                           <span className="h-1.5 w-1.5 rounded-full shrink-0" style={{ background: col.dot }} />
-                          {STATUS_LABELS[quote.status]}
+                          {quote.statusLabel}
                         </span>
                       </td>
                       <td className="px-4 py-3 text-center">

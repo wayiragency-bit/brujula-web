@@ -35,10 +35,6 @@ const SPARKLINES = [
   [16, 24, 14, 28, 20, 32],
 ];
 
-const STATUS_LABEL: Record<string, string> = {
-  ENVIADA: 'Enviada', ACEPTADA: 'Aceptada', ABONADA: 'Abonada',
-  PAGADA: 'Pagada', RECHAZADA: 'Rechazada', VENCIDA: 'Vencida', BORRADOR: 'Borrador',
-};
 const STATUS_COLOR: Record<string, string> = {
   ENVIADA: 'chip-enviada', ACEPTADA: 'chip-aceptada', ABONADA: 'chip-abonada',
   PAGADA: 'chip-pagada', RECHAZADA: 'chip-rechazada', VENCIDA: 'chip-vencida', BORRADOR: 'chip-borrador',
@@ -225,7 +221,7 @@ export default function DashboardPage() {
                       <div className="flex shrink-0 items-center gap-2">
                         <span className="font-mono text-sm font-semibold text-ink">{formatMoneyFull(Number(q.total), q.currency)}</span>
                         <span className={`${STATUS_COLOR[q.status] ?? 'chip-borrador'} rounded-full px-2 py-0.5 text-[10px] font-semibold`}>
-                          {STATUS_LABEL[q.status] ?? q.status}
+                          {q.statusLabel}
                         </span>
                       </div>
                     </Link>
@@ -316,7 +312,7 @@ export default function DashboardPage() {
                         <div className="flex shrink-0 flex-col items-end gap-1">
                           <span className="font-mono text-sm font-semibold text-ink">{formatMoneyFull(Number(q.total), q.currency)}</span>
                           <span className={`${STATUS_COLOR[q.status] ?? 'chip-borrador'} rounded-full px-2 py-0.5 text-[10px] font-semibold`}>
-                            {STATUS_LABEL[q.status] ?? q.status}
+                            {q.statusLabel}
                           </span>
                         </div>
                       </Link>
