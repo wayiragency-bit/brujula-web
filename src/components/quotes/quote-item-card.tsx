@@ -202,7 +202,7 @@ export function QuoteItemCard({ item, line, currency, editable, canEditPricing, 
           </div>
           {canEditPricing && isOnVacation && isCatalogItem ? (
             <div className="flex flex-col items-end gap-0.5">
-              <span className="text-[10px] text-ink-soft">Precio unitario</span>
+              <span className="text-[10px] text-ink-soft">Precio de venta</span>
               <input
                 className={`${inputClass} w-28 py-1 text-right`}
                 disabled={!editable}

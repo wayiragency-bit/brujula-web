@@ -188,8 +188,8 @@ export function QuoteBuilder({ initial }: { initial?: Quote }) {
     setShowCatalogModal(false);
   }
 
-  function addCatalogAccommodationItem(selection: { accommodation: CatalogAccommodationListItem; hotel: CatalogHotelListItem; netCost: string }) {
-    const { accommodation, hotel, netCost } = selection;
+  function addCatalogAccommodationItem(selection: { accommodation: CatalogAccommodationListItem; hotel: CatalogHotelListItem; sellPrice: string }) {
+    const { accommodation, hotel, sellPrice } = selection;
     setItems((prev) => [
       ...prev,
       {
@@ -202,7 +202,9 @@ export function QuoteBuilder({ initial }: { initial?: Quote }) {
         quantity: '1',
         adults: header.adults ?? accommodation.capacityAdults,
         children: header.children ?? accommodation.capacityChildren,
-        netCost,
+        // For ON_VACATION the asesor enters the sell price directly — no markup concept.
+        // netCost = sellPrice with markupValue=0 means sellPrice passes through unchanged.
+        netCost: sellPrice,
         markupType: 'PERCENT',
         markupValue: '0',
         priceTier: 'IDEAL' as const,
