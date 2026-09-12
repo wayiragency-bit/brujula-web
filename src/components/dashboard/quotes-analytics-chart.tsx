@@ -93,7 +93,7 @@ function ChartTooltip({ active, payload, label, currency }: { active?: boolean; 
   );
 }
 
-export function QuotesAnalyticsChart() {
+export function QuotesAnalyticsChart({ compact }: { compact?: boolean }) {
   const [granularity, setGranularity] = useState<AnalyticsGranularity>('month');
   const [window, setWindow] = useState<2 | 3 | 6 | 12>(2);
   const { data, isLoading } = useQuoteAnalytics({ granularity, window });
@@ -114,11 +114,11 @@ export function QuotesAnalyticsChart() {
   const hasAnyData = (data?.buckets.length ?? 0) > 0;
 
   return (
-    <article className="rounded-2xl p-7 sm:p-8" style={{ background: 'var(--paper-card)', border: '1px solid var(--border)' }}>
-      <div className="flex flex-wrap items-start justify-between gap-4">
+    <article className={`rounded-2xl ${compact ? 'p-5' : 'p-7 sm:p-8'}`} style={{ background: 'var(--paper-card)', border: '1px solid var(--border)' }}>
+      <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h2 className="font-semibold text-ink">Análisis de Cotizaciones</h2>
-          <p className="mt-1 text-xs text-ink-soft">Total Cotizado vs Aceptado ({window} meses)</p>
+          {!compact && <p className="mt-1 text-xs text-ink-soft">Total Cotizado vs Aceptado ({window} meses)</p>}
         </div>
         <div className="flex items-center gap-1.5">
           <div className="flex rounded-lg p-0.5" style={{ background: 'var(--surface)' }}>
@@ -150,7 +150,7 @@ export function QuotesAnalyticsChart() {
         </div>
       </div>
 
-      <div className="mt-5 flex items-center gap-4">
+      <div className={`${compact ? 'mt-3' : 'mt-5'} flex items-center gap-4`}>
         {SERIES.map((s) => (
           <span className="flex items-center gap-1.5 text-xs text-ink-soft" key={s.key}>
             <span className="h-2 w-2 rounded-full" style={{ background: s.color }} />
@@ -159,7 +159,7 @@ export function QuotesAnalyticsChart() {
         ))}
       </div>
 
-      <div className="mt-4 h-64 w-full">
+      <div className={`mt-4 w-full ${compact ? 'h-28' : 'h-64'}`}>
         {isLoading ? (
           <div className="flex h-full items-center justify-center text-sm text-ink-soft">Cargando…</div>
         ) : !hasAnyData ? (
