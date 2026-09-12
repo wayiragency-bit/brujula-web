@@ -113,6 +113,7 @@ export function QuoteBuilder({ initial }: { initial?: Quote }) {
   const { user, hasPermission } = useAuth();
   const canViewFinancial = hasPermission('quotes.view_financial');
   const canEditPricing = hasPermission('quotes.edit_pricing');
+  const isOnVacation = user?.agency?.type === 'ON_VACATION';
   const canManageAccess = Boolean(initial && (initial.sellerId === user?.id || hasPermission('quotes.manage_access')));
 
   const isNew = !initial;
@@ -187,8 +188,8 @@ export function QuoteBuilder({ initial }: { initial?: Quote }) {
     setShowCatalogModal(false);
   }
 
-  function addCatalogAccommodationItem(selection: { accommodation: CatalogAccommodationListItem; hotel: CatalogHotelListItem; netCost: string }) {
-    const { accommodation, hotel, netCost } = selection;
+  function addCatalogAccommodationItem(selection: { accommodation: CatalogAccommodationListItem; hotel: CatalogHotelListItem; sellPrice: string }) {
+    const { accommodation, hotel, sellPrice } = selection;
     setItems((prev) => [
       ...prev,
       {
@@ -201,7 +202,9 @@ export function QuoteBuilder({ initial }: { initial?: Quote }) {
         quantity: '1',
         adults: header.adults ?? accommodation.capacityAdults,
         children: header.children ?? accommodation.capacityChildren,
-        netCost,
+        // For ON_VACATION the asesor enters the sell price directly — no markup concept.
+        // netCost = sellPrice with markupValue=0 means sellPrice passes through unchanged.
+        netCost: sellPrice,
         markupType: 'PERCENT',
         markupValue: '0',
         priceTier: 'IDEAL' as const,
@@ -503,6 +506,7 @@ export function QuoteBuilder({ initial }: { initial?: Quote }) {
                     canViewFinancial={canViewFinancial}
                     currency={currency}
                     editable={editable}
+                    isOnVacation={isOnVacation}
                     item={item}
                     key={item.key}
                     line={previewItemByKey.get(item.key)}
@@ -552,10 +556,14 @@ export function QuoteBuilder({ initial }: { initial?: Quote }) {
             </div>
 
             <dl className="space-y-2 border-t border-ink/10 pt-4 text-sm">
-              <div className="flex justify-between"><dt className="text-ink-soft">Subtotal</dt><dd className="font-mono text-ink">{formatMoney(preview?.subtotal, currency)}</dd></div>
-              <div className="flex justify-between"><dt className="text-ink-soft">Impuestos</dt><dd className="font-mono text-ink">{formatMoney(preview?.taxTotal, currency)}</dd></div>
+              {user?.agency?.type !== 'ON_VACATION' ? (
+                <>
+                  <div className="flex justify-between"><dt className="text-ink-soft">Subtotal</dt><dd className="font-mono text-ink">{formatMoney(preview?.subtotal, currency)}</dd></div>
+                  <div className="flex justify-between"><dt className="text-ink-soft">Impuestos</dt><dd className="font-mono text-ink">{formatMoney(preview?.taxTotal, currency)}</dd></div>
+                </>
+              ) : null}
               <div className="flex justify-between border-t border-ink/10 pt-2 text-base font-bold"><dt className="text-ink">Total</dt><dd className="font-mono text-ink">{formatMoney(preview?.total, currency)}</dd></div>
-              {canViewFinancial ? (
+              {canViewFinancial && !isOnVacation ? (
                 <div className="flex justify-between border-t border-ink/10 pt-2"><dt className="text-ink-soft">Ganancia Estimada</dt><dd className="font-mono text-status-accepted">{formatMoney(preview?.marginTotal, currency)}</dd></div>
               ) : null}
               {initial ? (

@@ -172,6 +172,9 @@ export interface QuoteItemDraft {
   // is local-only display context and is never sent to the API (not a whitelisted DTO field).
   catalogAccommodationId?: string;
   catalogHotelId?: string;
+  // Informational only — never sent to the API (not a DTO field): infants don't affect pricing,
+  // the advisor just wants to keep track of them alongside adults/children.
+  infants?: number;
   name: string;
   description?: string;
   imageUrl?: string | null;

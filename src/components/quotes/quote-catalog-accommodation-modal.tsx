@@ -15,7 +15,7 @@ interface QuoteCatalogAccommodationModalProps {
   onConfirm: (selection: {
     accommodation: CatalogAccommodationListItem;
     hotel: CatalogHotelListItem;
-    netCost: string;
+    sellPrice: string;
   }) => void;
 }
 
@@ -24,7 +24,7 @@ export function QuoteCatalogAccommodationModal({ open, onClose, onConfirm }: Quo
   const [destination, setDestination] = useState<CatalogDestination | null>(null);
   const [hotel, setHotel] = useState<CatalogHotelListItem | null>(null);
   const [accommodation, setAccommodation] = useState<CatalogAccommodationListItem | null>(null);
-  const [netCost, setNetCost] = useState('');
+  const [sellPrice, setSellPrice] = useState('');
 
   const { data: destinations } = useCatalogDestinations();
   const { data: hotels } = useCatalogHotels({ destinationId: destination?.id, active: true });
@@ -35,7 +35,7 @@ export function QuoteCatalogAccommodationModal({ open, onClose, onConfirm }: Quo
     setDestination(null);
     setHotel(null);
     setAccommodation(null);
-    setNetCost('');
+    setSellPrice('');
   }
 
   function handleClose() {
@@ -44,8 +44,8 @@ export function QuoteCatalogAccommodationModal({ open, onClose, onConfirm }: Quo
   }
 
   function handleConfirm() {
-    if (!accommodation || !hotel || !netCost.trim()) return;
-    onConfirm({ accommodation, hotel, netCost: netCost.trim() });
+    if (!accommodation || !hotel || !sellPrice.trim()) return;
+    onConfirm({ accommodation, hotel, sellPrice: sellPrice.trim() });
     reset();
     onClose();
   }
@@ -151,19 +151,19 @@ export function QuoteCatalogAccommodationModal({ open, onClose, onConfirm }: Quo
               <p className="text-xs text-ink-soft">{destination?.name}, {destination?.country}</p>
             </div>
             <div>
-              <label className={labelClass}>Costo neto (lo que te cobra el hotel)</label>
+              <label className={labelClass}>Precio de venta</label>
               <input
                 autoFocus
                 className={inputClass}
                 inputMode="decimal"
-                onChange={(e) => setNetCost(e.target.value)}
+                onChange={(e) => setSellPrice(e.target.value)}
                 placeholder="0"
-                value={netCost}
+                value={sellPrice}
               />
-              <p className="mt-1 text-xs text-ink-soft">El catálogo oficial no trae precios — tú defines tu costo y tu margen, igual que con cualquier otro ítem.</p>
+              <p className="mt-1 text-xs text-ink-soft">Ingresa el precio de venta de On Vacation para este producto.</p>
             </div>
             <div className="flex justify-end border-t border-ink/10 pt-4">
-              <button className="button-primary" disabled={!netCost.trim()} onClick={handleConfirm} type="button">
+              <button className="button-primary" disabled={!sellPrice.trim()} onClick={handleConfirm} type="button">
                 Agregar a la cotización
               </button>
             </div>

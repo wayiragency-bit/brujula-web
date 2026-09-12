@@ -38,13 +38,18 @@ interface QuoteItemCardProps {
   editable: boolean;
   canEditPricing: boolean;
   canViewFinancial: boolean;
+  isOnVacation?: boolean;
   onChange: (patch: Partial<QuoteItemDraft>) => void;
   onRemove: () => void;
 }
 
-export function QuoteItemCard({ item, line, currency, editable, canEditPricing, canViewFinancial, onChange, onRemove }: QuoteItemCardProps) {
+export function QuoteItemCard({ item, line, currency, editable, canEditPricing, canViewFinancial, isOnVacation, onChange, onRemove }: QuoteItemCardProps) {
   const extras = item.extras ?? [];
   const tier = item.priceTier ?? 'IDEAL';
+  // A catalog item's price is never derived from a "Base" reference price — the advisor enters
+  // their own cost/margin directly, so the Base/Intermedio/Ideal/Personalizado tier concept
+  // (built for the private product catalog's preset markups) doesn't apply here.
+  const isCatalogItem = Boolean(item.catalogAccommodationId);
   const showsNights = item.unit === 'PER_NIGHT';
   const isTimedTour = item.reservationMode === 'HOUR' && !!item.durationHours && !!item.startTime && !!item.endTime;
   const quantity = Number(item.quantity) || 0;
@@ -63,9 +68,24 @@ export function QuoteItemCard({ item, line, currency, editable, canEditPricing, 
     onChange({ extras: extras.filter((_, i) => i !== index) });
   }
 
+  function nightsBetween(checkIn: string | null, checkOut: string | null): number | undefined {
+    if (!checkIn || !checkOut) return undefined;
+    const ms = new Date(checkOut).getTime() - new Date(checkIn).getTime();
+    const nights = Math.round(ms / (24 * 60 * 60 * 1000));
+    return nights > 0 ? nights : undefined;
+  }
+
   function updateCheckIn(value: string) {
     const v = value || null;
-    onChange(isTimedTour ? { serviceDate: v, serviceEndDate: v } : { serviceDate: v });
+    if (isTimedTour) { onChange({ serviceDate: v, serviceEndDate: v }); return; }
+    const nights = nightsBetween(v, item.serviceEndDate ?? null);
+    onChange({ serviceDate: v, ...(nights !== undefined ? { nights } : {}) });
+  }
+
+  function updateCheckOut(value: string) {
+    const v = value || null;
+    const nights = nightsBetween(item.serviceDate ?? null, v);
+    onChange({ serviceEndDate: v, ...(nights !== undefined ? { nights } : {}) });
   }
 
   return (
@@ -117,6 +137,18 @@ export function QuoteItemCard({ item, line, currency, editable, canEditPricing, 
                     {PAX_OPTIONS.map((n) => <option key={n} value={n}>{n}</option>)}
                   </select>
                 </span>
+                <span className="h-3 w-px bg-ink/10" />
+                <span className="flex items-center gap-1">
+                  Infantes
+                  <select
+                    className="border-0 bg-transparent p-0 text-xs font-semibold text-ink focus:outline-none"
+                    disabled={!editable}
+                    onChange={(e) => onChange({ infants: Number(e.target.value) })}
+                    value={item.infants ?? 0}
+                  >
+                    {PAX_OPTIONS.map((n) => <option key={n} value={n}>{n}</option>)}
+                  </select>
+                </span>
               </div>
               {showsNights ? (
                 <label className="inline-flex items-center gap-1.5 rounded-lg border border-ink/10 px-2 py-1 text-xs text-ink-soft">
@@ -137,7 +169,7 @@ export function QuoteItemCard({ item, line, currency, editable, canEditPricing, 
 
         <div className="flex shrink-0 flex-col items-end gap-1.5">
           <div className="flex items-center gap-1.5">
-            {canEditPricing ? (
+            {canEditPricing && !isCatalogItem ? (
               <select
                 className="rounded-lg border border-ink/15 bg-transparent px-2 py-1 text-xs font-semibold text-ink-soft"
                 disabled={!editable}
@@ -168,7 +200,21 @@ export function QuoteItemCard({ item, line, currency, editable, canEditPricing, 
             <p className="font-mono text-sm font-bold text-ink">{formatMoney(total, currency)}</p>
             {quantity > 1 ? <p className="font-mono text-xs text-ink-soft">{formatMoney(unitPrice, currency)} c/u</p> : null}
           </div>
-          {canEditPricing && tier === 'CUSTOM' ? (
+          {canEditPricing && isOnVacation && isCatalogItem ? (
+            <div className="flex flex-col items-end gap-0.5">
+              <span className="text-[10px] text-ink-soft">Precio de venta</span>
+              <input
+                className={`${inputClass} w-28 py-1 text-right`}
+                disabled={!editable}
+                min={0}
+                onChange={(e) => onChange({ netCost: e.target.value, markupValue: '0' })}
+                placeholder="0"
+                step="1"
+                type="number"
+                value={item.netCost ?? '0'}
+              />
+            </div>
+          ) : canEditPricing && !isOnVacation && (isCatalogItem || tier === 'CUSTOM') ? (
             <input
               className={`${inputClass} w-24 py-1 text-right`}
               disabled={!editable}
@@ -249,7 +295,7 @@ export function QuoteItemCard({ item, line, currency, editable, canEditPricing, 
             <input
               className={`${inputClass} py-1.5`}
               disabled={!editable || isTimedTour}
-              onChange={(e) => onChange({ serviceEndDate: e.target.value || null })}
+              onChange={(e) => updateCheckOut(e.target.value)}
               type="date"
               value={item.serviceEndDate ?? ''}
             />
@@ -265,7 +311,7 @@ export function QuoteItemCard({ item, line, currency, editable, canEditPricing, 
         ) : null}
       </div>
 
-      {canViewFinancial && line?.marginItem ? (
+      {canViewFinancial && !isOnVacation && line?.marginItem ? (
         <p className="text-xs text-status-accepted">Margen: {formatMoney(line.marginItem, currency)}</p>
       ) : null}
     </div>
