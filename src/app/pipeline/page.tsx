@@ -13,7 +13,7 @@ import { usePipelineCalendar, usePipelineKanban } from '@/hooks/use-pipeline';
 import { api } from '@/lib/api';
 import { useAuth } from '@/lib/auth-context';
 import { quoteStatusLabel } from '@/lib/on-vacation-status';
-import type { AgencyType, PipelineCard, QuoteStatus } from '@/lib/types';
+import type { AgencyType, PipelineCard, PipelineColumn, QuoteStatus } from '@/lib/types';
 
 const STATUS_COLORS: Record<QuoteStatus, { dot: string; badge: string; text: string }> = {
   BORRADOR:  { dot: '#94a3b8', badge: 'rgba(148,163,184,0.15)', text: '#94a3b8' },
@@ -76,6 +76,31 @@ function useChangeStatusMutation() {
   return useMutation({
     mutationFn: ({ id, version, status }: { id: string; version: number; status: QuoteStatus }) =>
       api.post(`/quotes/${id}/status`, { version, status }),
+    onMutate: async ({ id, status }) => {
+      await queryClient.cancelQueries({ queryKey: ['pipeline', 'kanban'] });
+      const previous = queryClient.getQueryData<{ data: PipelineColumn[] }>(['pipeline', 'kanban']);
+      queryClient.setQueryData<{ data: PipelineColumn[] }>(['pipeline', 'kanban'], (old) => {
+        if (!old) return old;
+        let movedCard: PipelineCard | undefined;
+        const stripped = old.data.map((col) => {
+          const found = col.cards.find((c) => c.id === id);
+          if (found) { movedCard = found; return { ...col, cards: col.cards.filter((c) => c.id !== id) }; }
+          return col;
+        });
+        if (!movedCard) return old;
+        const updated = movedCard;
+        return {
+          ...old,
+          data: stripped.map((col) =>
+            col.status === status ? { ...col, cards: [{ ...updated, status }, ...col.cards] } : col,
+          ),
+        };
+      });
+      return { previous };
+    },
+    onError: (_err, _vars, context) => {
+      if (context?.previous) queryClient.setQueryData(['pipeline', 'kanban'], context.previous);
+    },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['pipeline'] }),
   });
 }
@@ -278,6 +303,7 @@ function SidePanel({
 function KanbanBoard() {
   const { user } = useAuth();
   const agencyType = user?.agency?.type;
+  const isOnVacation = agencyType === 'ON_VACATION';
   const { data, isLoading } = usePipelineKanban();
   const changeStatus   = useChangeStatusMutation();
   const recordPayment  = useRecordPaymentMutation();
@@ -290,6 +316,13 @@ function KanbanBoard() {
   function handleDrop(status: QuoteStatus) {
     if (!dragging) return;
     if (dragging.status === status) { setDragging(null); return; }
+
+    // ON_VACATION: drag directly updates status — no payment modal, no financial recording
+    if (isOnVacation) {
+      changeStatus.mutate({ id: dragging.id, version: dragging.version, status });
+      setDragging(null);
+      return;
+    }
 
     // Financial transitions go through the payment endpoint
     if (PAYMENT_TARGETS.has(status) && dragging.canRecordPayment) {
