@@ -43,12 +43,12 @@ const navigation = [
 // different, read-only nav pointed at /manager/* instead of the per-agency modules above.
 const managerNavigation = [
   { label: 'Dashboard',      href: '/manager',              icon: LayoutDashboard, permission: 'on_vacation.dashboard_view' },
+  { label: 'Pipeline',       href: '/manager/pipeline',     icon: BarChart3,       permission: 'on_vacation.pipeline_view' },
+  { label: 'Cotizaciones',   href: '/manager/quotes',       icon: FileText,        permission: 'on_vacation.quotes_view' },
+  { label: 'Analítica',      href: '/manager/analytics',    icon: LineChart,       permission: 'on_vacation.analytics_view' },
+  { label: 'Clientes',       href: '/manager/clients',      icon: UsersRound,      permission: 'on_vacation.clients_view' },
   { label: 'Asesores',       href: '/manager/advisors',     icon: UsersRound,      permission: 'on_vacation.advisors_view' },
   { label: 'Suscripciones',  href: '/manager/subscriptions', icon: CreditCard,     permission: 'on_vacation.subscriptions_view' },
-  { label: 'Clientes',       href: '/manager/clients',      icon: UsersRound,      permission: 'on_vacation.clients_view' },
-  { label: 'Cotizaciones',   href: '/manager/quotes',       icon: FileText,        permission: 'on_vacation.quotes_view' },
-  { label: 'Pipeline',       href: '/manager/pipeline',     icon: BarChart3,       permission: 'on_vacation.pipeline_view' },
-  { label: 'Analítica',      href: '/manager/analytics',    icon: LineChart,       permission: 'on_vacation.analytics_view' },
 ];
 
 function isActive(pathname: string, href: string): boolean {
