@@ -6,9 +6,11 @@ import {
   Bell,
   CalendarDays,
   Compass,
+  CreditCard,
   FileText,
   Globe,
   LayoutDashboard,
+  LineChart,
   LogOut,
   Megaphone,
   Package,
@@ -37,6 +39,18 @@ const navigation = [
   { label: 'Configuración',   href: '/settings',        icon: Settings,        permission: undefined },
 ];
 
+// Manager On Vacation: a global user (agency === null), never a tenant — sees a completely
+// different, read-only nav pointed at /manager/* instead of the per-agency modules above.
+const managerNavigation = [
+  { label: 'Dashboard',      href: '/manager',              icon: LayoutDashboard, permission: 'on_vacation.dashboard_view' },
+  { label: 'Asesores',       href: '/manager/advisors',     icon: UsersRound,      permission: 'on_vacation.advisors_view' },
+  { label: 'Suscripciones',  href: '/manager/subscriptions', icon: CreditCard,     permission: 'on_vacation.subscriptions_view' },
+  { label: 'Clientes',       href: '/manager/clients',      icon: UsersRound,      permission: 'on_vacation.clients_view' },
+  { label: 'Cotizaciones',   href: '/manager/quotes',       icon: FileText,        permission: 'on_vacation.quotes_view' },
+  { label: 'Pipeline',       href: '/manager/pipeline',     icon: BarChart3,       permission: 'on_vacation.pipeline_view' },
+  { label: 'Analítica',      href: '/manager/analytics',    icon: LineChart,       permission: 'on_vacation.analytics_view' },
+];
+
 function isActive(pathname: string, href: string): boolean {
   return href === '/' ? pathname === '/' : pathname.startsWith(href);
 }
@@ -51,7 +65,10 @@ export function AppShell({ children }: Readonly<{ children: React.ReactNode }>) 
   const router   = useRouter();
   const { user, status, logout, hasPermission } = useAuth();
 
-  const visibleNav = navigation.filter((item) => !item.permission || hasPermission(item.permission));
+  // A Manager account has no agency of its own — that's how we tell it apart from a tenant user.
+  const isManager = user !== null && user !== undefined && user.agency === null;
+  const activeNavigation = isManager ? managerNavigation : navigation;
+  const visibleNav = activeNavigation.filter((item) => !item.permission || hasPermission(item.permission));
   const subscription = user?.subscription ?? null;
   // No subscription row (agencies created before this feature) is never blocked — only EXPIRED/CANCELLED are.
   const subscriptionBlocked = subscription?.status === 'EXPIRED' || subscription?.status === 'CANCELLED';
@@ -68,9 +85,19 @@ export function AppShell({ children }: Readonly<{ children: React.ReactNode }>) 
   // keeps a user from landing on a blank/erroring page for a module their role can't see.
   useEffect(() => {
     if (status !== 'authenticated') return;
-    const restricted = navigation.find((item) => item.permission && isActive(pathname, item.href));
-    if (restricted && !hasPermission(restricted.permission!)) router.replace('/');
-  }, [status, pathname, hasPermission, router]);
+    const home = isManager ? '/manager' : '/';
+    const restricted = activeNavigation.find((item) => item.permission && isActive(pathname, item.href));
+    if (restricted && !hasPermission(restricted.permission!)) router.replace(home);
+  }, [status, pathname, hasPermission, router, isManager, activeNavigation]);
+
+  // A Manager has no agency — the per-agency pages (/, /pipeline, /quotes...) call endpoints that
+  // assume one and would just come back empty. Likewise a normal tenant user has no business under
+  // /manager. Keep each on their own route tree.
+  useEffect(() => {
+    if (status !== 'authenticated') return;
+    if (isManager && !pathname.startsWith('/manager')) router.replace('/manager');
+    if (!isManager && pathname.startsWith('/manager')) router.replace('/');
+  }, [status, pathname, isManager, router]);
 
   if (status !== 'authenticated' || !user) {
     return (
