@@ -4,6 +4,7 @@ import { AppShell } from '@/components/app-shell';
 import { useManagerOperation } from '@/hooks/use-manager';
 import { formatMoneyFull } from '@/lib/format';
 import { STATUS_CHIP } from '@/lib/manager-status-colors';
+import { quoteStatusLabel } from '@/lib/on-vacation-status';
 
 export default function ManagerPipelinePage() {
   const { data } = useManagerOperation();
@@ -22,7 +23,7 @@ export default function ManagerPipelinePage() {
             <div className="w-72 shrink-0 rounded-2xl" key={column.status} style={{ background: 'var(--paper-card)', border: '1px solid var(--border)' }}>
               <div className="flex items-center justify-between px-4 py-3" style={{ borderBottom: '1px solid var(--border-faint)' }}>
                 <span className={`${STATUS_CHIP[column.status]} rounded-full px-2.5 py-1 text-xs font-semibold`}>
-                  {column.cards[0]?.statusLabel ?? column.status}
+                  {quoteStatusLabel(column.status, 'ON_VACATION')}
                 </span>
                 <span className="label-caps text-ink-muted">{column.cards.length}</span>
               </div>
