@@ -345,37 +345,39 @@ export default function DashboardPage() {
                 </div>
               </article>
 
-              {/* Top agentes */}
-              <article className="overflow-hidden rounded-2xl" style={{ background: 'var(--paper-card)', border: '1px solid var(--border)' }}>
-                <div className="flex items-center justify-between px-7 py-5" style={{ borderBottom: '1px solid var(--border-faint)' }}>
-                  <h2 className="font-semibold text-ink">Top Agentes</h2>
-                  <Pager onChange={setAgentsPage} page={agentsPage} totalPages={agentsTotalPages} />
-                </div>
-                <div className="divide-y" style={{ '--tw-divide-opacity': 1 } as React.CSSProperties}>
-                  {visibleAgents.length === 0 ? (
-                    <p className="px-6 py-8 text-center text-sm text-ink-soft">Aún no hay agentes con ventas.</p>
-                  ) : (
-                    visibleAgents.map((agent, i) => (
-                      <div className="flex items-center gap-3 px-7 py-3.5" key={agent.id}>
-                        <div
-                          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white"
-                          style={{ background: AVATAR_COLORS[(agentsPage - 1) * agentsPerPage + i] ?? AVATAR_COLORS[0] }}
-                        >
-                          {initials(agent.name)}
+              {/* Top agentes — not shown for ON_VACATION: single-advisor model, no team ranking */}
+              {!isOnVacation && (
+                <article className="overflow-hidden rounded-2xl" style={{ background: 'var(--paper-card)', border: '1px solid var(--border)' }}>
+                  <div className="flex items-center justify-between px-7 py-5" style={{ borderBottom: '1px solid var(--border-faint)' }}>
+                    <h2 className="font-semibold text-ink">Top Agentes</h2>
+                    <Pager onChange={setAgentsPage} page={agentsPage} totalPages={agentsTotalPages} />
+                  </div>
+                  <div className="divide-y" style={{ '--tw-divide-opacity': 1 } as React.CSSProperties}>
+                    {visibleAgents.length === 0 ? (
+                      <p className="px-6 py-8 text-center text-sm text-ink-soft">Aún no hay agentes con ventas.</p>
+                    ) : (
+                      visibleAgents.map((agent, i) => (
+                        <div className="flex items-center gap-3 px-7 py-3.5" key={agent.id}>
+                          <div
+                            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white"
+                            style={{ background: AVATAR_COLORS[(agentsPage - 1) * agentsPerPage + i] ?? AVATAR_COLORS[0] }}
+                          >
+                            {initials(agent.name)}
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="truncate text-sm font-medium text-ink">{agent.name}</p>
+                            <p className="text-xs text-ink-soft">Agente</p>
+                          </div>
+                          <div className="shrink-0 text-right">
+                            <p className="font-mono text-sm font-bold" style={{ color: '#22c55e' }}>{formatMoneyFull(agent.sold, currency)}</p>
+                            <p className="label-caps text-ink-muted">Generado</p>
+                          </div>
                         </div>
-                        <div className="min-w-0 flex-1">
-                          <p className="truncate text-sm font-medium text-ink">{agent.name}</p>
-                          <p className="text-xs text-ink-soft">Agente</p>
-                        </div>
-                        <div className="shrink-0 text-right">
-                          <p className="font-mono text-sm font-bold" style={{ color: '#22c55e' }}>{formatMoneyFull(agent.sold, currency)}</p>
-                          <p className="label-caps text-ink-muted">Generado</p>
-                        </div>
-                      </div>
-                    ))
-                  )}
-                </div>
-              </article>
+                      ))
+                    )}
+                  </div>
+                </article>
+              )}
             </div>
           </div>
         </section>
