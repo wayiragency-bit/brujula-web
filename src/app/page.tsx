@@ -168,24 +168,24 @@ export default function DashboardPage() {
         <section
           aria-label="Indicadores principales"
           className={isOnVacation
-            ? 'grid grid-cols-3 gap-4'
+            ? 'grid grid-cols-[1fr_1fr_1.25fr] gap-4'
             : `grid grid-cols-2 gap-5 sm:grid-cols-3 ${metrics.length === 4 ? 'xl:grid-cols-4' : 'xl:grid-cols-3'}`}
         >
           {metrics.map((metric) => {
             const Icon = metric.icon;
             return isOnVacation ? (
-              /* Compact strip card for ON_VACATION — fits above the fold */
-              <article className="glass-card rounded-xl p-3.5 transition hover:brightness-110" key={metric.label}>
+              /* Compact strip card for ON_VACATION */
+              <article className="glass-card rounded-xl p-4 transition hover:brightness-110" key={metric.label}>
                 <div className="flex items-center gap-3">
                   <div
-                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-white"
-                    style={{ background: metric.iconBg, boxShadow: `0 4px 8px ${metric.iconShadow}` }}
+                    className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-white"
+                    style={{ background: metric.iconBg, boxShadow: `0 4px 10px ${metric.iconShadow}` }}
                   >
                     <Icon className="h-5 w-5" />
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="label-caps text-[10px] text-ink-soft">{metric.label}</p>
-                    <strong className="font-mono text-xl font-bold leading-tight text-ink">{metric.value}</strong>
+                    <strong className="font-mono text-2xl font-bold leading-tight text-ink">{metric.value}</strong>
                   </div>
                   <div className="flex shrink-0 flex-col items-end gap-0.5">
                     <Sparkline color={metric.iconBg} points={metric.spark} />
@@ -226,7 +226,7 @@ export default function DashboardPage() {
              Col 2: Últimas Cotizaciones (tall, max items visible)
              Col 3: Top 3 Productos (compact list)  +  Análisis (mini chart)
           ─────────────────────────────────────────────────────────────────── */
-          <section aria-label="Panel de operación" className="grid items-start gap-4 xl:grid-cols-[1fr_1.1fr_1.1fr]">
+          <section aria-label="Panel de operación" className="grid items-start gap-4 xl:grid-cols-[1fr_1fr_1.6fr]">
 
             {/* Col 1: Ventas del mes → En Curso (Cotizada + Preconfirmada, últimas 5, estático) */}
             <div className="space-y-4">
@@ -298,13 +298,11 @@ export default function DashboardPage() {
               </article>
             </div>
 
-            {/* Col 2: Últimas Cotizaciones — Confirmada (ABONADA) + Reconfirmada (PAGADA)
-                Paginador numérico "1 · 2 · 3" encima del módulo. Altura fija: sin scroll. */}
-            <div className="space-y-2">
-              {/* Título + paginador encima de la tarjeta */}
-              <div className="flex items-center justify-between px-1">
+            {/* Col 2: Últimas Cotizaciones — misma estructura visual que En Curso */}
+            <article className="overflow-hidden rounded-2xl" style={{ background: 'var(--paper-card)', border: '1px solid var(--border)' }}>
+              <div className="flex items-center justify-between px-5 py-3.5" style={{ borderBottom: '1px solid var(--border-faint)' }}>
                 <h2 className="font-semibold text-ink">Últimas Cotizaciones</h2>
-                {(ovPaidQuotes?.meta.totalPages ?? 1) > 1 && (
+                {(ovPaidQuotes?.meta.totalPages ?? 1) > 1 ? (
                   <div className="flex items-center gap-0.5 text-xs">
                     {getPageNumbers(ovPaidPage, ovPaidQuotes!.meta.totalPages).map((p, i) => (
                       <span className="flex items-center" key={i}>
@@ -326,83 +324,76 @@ export default function DashboardPage() {
                       </span>
                     ))}
                   </div>
-                )}
-                {(ovPaidQuotes?.meta.totalPages ?? 1) <= 1 && (
+                ) : (
                   <span className="label-caps text-ink-muted">Confirmada · Reconfirmada</span>
                 )}
               </div>
+              <div className="divide-y" style={{ '--tw-divide-opacity': 1 } as React.CSSProperties}>
+                {(ovPaidQuotes?.data.length ?? 0) === 0 ? (
+                  <p className="px-5 py-6 text-center text-sm text-ink-soft">Aún no hay reservas confirmadas.</p>
+                ) : (
+                  ovPaidQuotes!.data.map((q) => (
+                    <Link
+                      className="flex items-center justify-between gap-3 px-5 py-3 transition hover:bg-white/[0.03]"
+                      href={`/quotes/${q.id}`}
+                      key={q.id}
+                      style={{ borderColor: 'var(--border-faint)' }}
+                    >
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-medium text-ink">{q.number} · {q.client?.name ?? '—'}</p>
+                        <p className="truncate text-xs text-ink-soft">{q.destination}</p>
+                      </div>
+                      <div className="flex shrink-0 items-center gap-2">
+                        <span className="font-mono text-xs font-semibold text-ink">{formatMoneyFull(Number(q.total), q.currency)}</span>
+                        <span className={`${STATUS_COLOR[q.status] ?? 'chip-borrador'} rounded-full px-2 py-0.5 text-[10px] font-semibold`}>
+                          {q.statusLabel}
+                        </span>
+                      </div>
+                    </Link>
+                  ))
+                )}
+              </div>
+            </article>
 
-              {/* Tarjeta — altura fija para 5 ítems, sin scroll */}
-              <article className="overflow-hidden rounded-2xl" style={{ background: 'var(--paper-card)', border: '1px solid var(--border)' }}>
-                <div
-                  className="divide-y"
-                  style={{ '--tw-divide-opacity': 1, minHeight: '260px' } as React.CSSProperties}
-                >
-                  {(ovPaidQuotes?.data.length ?? 0) === 0 ? (
-                    <div className="flex min-h-[260px] items-center justify-center">
-                      <p className="text-sm text-ink-soft">Aún no hay reservas confirmadas.</p>
-                    </div>
-                  ) : (
-                    ovPaidQuotes!.data.map((q) => (
-                      <Link
-                        className="flex items-center gap-3 px-5 py-3.5 transition hover:bg-white/[0.03]"
-                        href={`/quotes/${q.id}`}
-                        key={q.id}
-                      >
-                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg" style={{ background: 'var(--surface)' }}>
-                          <FileText className="h-3.5 w-3.5 text-ink-soft" />
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <p className="truncate text-sm font-medium text-ink">{q.client?.name ?? '—'}</p>
-                          <p className="text-xs text-ink-soft">{q.number} · {new Date(q.updatedAt).toLocaleDateString('es-CO')}</p>
-                        </div>
-                        <div className="flex shrink-0 flex-col items-end gap-0.5">
-                          <span className="font-mono text-sm font-semibold text-ink">{formatMoneyFull(Number(q.total), q.currency)}</span>
-                          <span className={`${STATUS_COLOR[q.status] ?? 'chip-borrador'} rounded-full px-2 py-0.5 text-[10px] font-semibold`}>
-                            {q.statusLabel}
-                          </span>
-                        </div>
-                      </Link>
-                    ))
-                  )}
-                </div>
-              </article>
-            </div>
-
-            {/* Col 3: Top 3 Productos (compact list) → Análisis (mini chart) */}
+            {/* Col 3: Top 3 Productos — protagonismo visual con imágenes grandes */}
             <div className="space-y-4">
 
-              {/* Top 3 Productos — lista compact sin imágenes grandes */}
               <article className="overflow-hidden rounded-2xl" style={{ background: 'var(--paper-card)', border: '1px solid var(--border)' }}>
-                <div className="flex items-center justify-between px-5 py-3.5" style={{ borderBottom: '1px solid var(--border-faint)' }}>
-                  <h2 className="font-semibold text-ink">Top 3 Productos</h2>
+                <div className="flex items-center justify-between px-5 py-4" style={{ borderBottom: '1px solid var(--border-faint)' }}>
+                  <div>
+                    <h2 className="font-semibold text-ink">Top 3 Productos del Mes</h2>
+                    <p className="mt-0.5 text-xs text-ink-soft">Los más cotizados este mes</p>
+                  </div>
                   <Link className="label-caps text-amber" href="/products">Ver todo</Link>
                 </div>
                 {topProducts.length === 0 ? (
-                  <p className="px-5 py-6 text-center text-sm text-ink-soft">Aún no hay productos cotizados.</p>
+                  <p className="px-5 py-8 text-center text-sm text-ink-soft">Aún no hay productos cotizados.</p>
                 ) : (
-                  <div className="divide-y" style={{ '--tw-divide-opacity': 1 } as React.CSSProperties}>
+                  <div className="grid grid-cols-3 gap-3 p-4">
                     {topProducts.map((product, i) => (
-                      <div className="flex items-center gap-3 px-5 py-3" key={product.id} style={{ borderColor: 'var(--border-faint)' }}>
-                        <span
-                          className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[10px] font-bold text-white"
-                          style={{ background: RANK_COLORS[i] ?? RANK_COLORS[2] }}
-                        >
-                          {i + 1}
-                        </span>
-                        <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-lg" style={{ background: 'var(--surface)' }}>
+                      <div className="overflow-hidden rounded-xl" key={product.id} style={{ background: 'var(--surface)', border: '1px solid var(--border-faint)' }}>
+                        <div className="relative h-36 w-full" style={{ background: 'var(--paper-elevated)' }}>
+                          <span
+                            className="absolute left-2 top-2 z-10 flex h-6 w-6 items-center justify-center rounded-full text-[10px] font-bold text-white"
+                            style={{ background: RANK_COLORS[i] ?? RANK_COLORS[2] }}
+                          >
+                            {i + 1}
+                          </span>
                           {product.imageUrl ? (
                             // eslint-disable-next-line @next/next/no-img-element
                             <img alt={product.name} className="h-full w-full object-cover" src={product.imageUrl} />
                           ) : (
-                            <div className="flex h-full items-center justify-center"><Package className="h-4 w-4 text-ink-muted" /></div>
+                            <div className="flex h-full items-center justify-center"><Package className="h-8 w-8 text-ink-muted" /></div>
                           )}
                         </div>
-                        <div className="min-w-0 flex-1">
+                        <div className="p-3">
                           <p className="truncate text-sm font-medium text-ink">{product.name}</p>
-                          <p className="text-xs text-ink-soft">{PRODUCT_TYPE_LABEL[product.type] ?? 'Servicio'} · {product.timesQuoted} ventas</p>
+                          <p className="mt-0.5 text-xs text-ink-soft">{PRODUCT_TYPE_LABEL[product.type] ?? 'Servicio'}</p>
+                          <div className="mt-2 flex items-center justify-between gap-1">
+                            <span className="text-xs text-ink-soft">{product.timesQuoted} ventas</span>
+                            <span className="font-mono text-sm font-bold text-ink">{formatMoneyFull(product.sellPrice, product.currency)}</span>
+                          </div>
                         </div>
-                        <span className="shrink-0 font-mono text-sm font-bold text-ink">{formatMoneyFull(product.sellPrice, product.currency)}</span>
                       </div>
                     ))}
                   </div>
