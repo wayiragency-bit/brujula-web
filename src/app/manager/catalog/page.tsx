@@ -84,16 +84,26 @@ function DestinationsTab() {
   );
 }
 
-function HotelsTab() {
+function HotelsTab({ onGoToDestinations }: { onGoToDestinations: () => void }) {
   const { data: destinations } = useCatalogDestinations();
   const { data: hotels } = useCatalogHotels();
   const createHotel = useCreateHotel();
   const [destinationId, setDestinationId] = useState('');
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
+  const hasDestinations = (destinations?.length ?? 0) > 0;
 
   return (
     <div className="space-y-6">
+      {destinations !== undefined && !hasDestinations ? (
+        <div
+          className="flex flex-wrap items-center justify-between gap-3 rounded-2xl p-4 text-sm"
+          style={{ background: 'rgba(245,158,11,0.12)', border: '1px solid rgba(245,158,11,0.25)', color: '#b45309' }}
+        >
+          <span>Primero crea al menos un destino — un hotel siempre pertenece a un destino.</span>
+          <button className="button-secondary" onClick={onGoToDestinations} type="button">Ir a Destinos</button>
+        </div>
+      ) : null}
       <form
         className="grid gap-3 rounded-2xl p-5 sm:grid-cols-2"
         onSubmit={(e) => {
@@ -108,8 +118,8 @@ function HotelsTab() {
       >
         <div>
           <label className={labelClass}>Destino</label>
-          <select className={inputClass} onChange={(e) => setDestinationId(e.target.value)} value={destinationId}>
-            <option value="">Selecciona un destino…</option>
+          <select className={inputClass} disabled={!hasDestinations} onChange={(e) => setDestinationId(e.target.value)} value={destinationId}>
+            <option value="">{hasDestinations ? 'Selecciona un destino…' : 'Aún no hay destinos creados'}</option>
             {(destinations ?? []).map((d) => <option key={d.id} value={d.id}>{d.name}, {d.country}</option>)}
           </select>
         </div>
@@ -228,7 +238,7 @@ export default function ManagerCatalogPage() {
         </div>
 
         {tab === 'destinations' ? <DestinationsTab /> : null}
-        {tab === 'hotels' ? <HotelsTab /> : null}
+        {tab === 'hotels' ? <HotelsTab onGoToDestinations={() => setTab('destinations')} /> : null}
         {tab === 'services' ? <ServicesTab /> : null}
       </div>
     </AppShell>
