@@ -177,66 +177,68 @@ function PaymentModal({
   );
 }
 
-function KanbanCard({ card, onDragStart }: { card: PipelineCard; onDragStart: (card: PipelineCard) => void }) {
+function KanbanCard({ card, onDragStart, spacious }: { card: PipelineCard; onDragStart: (card: PipelineCard) => void; spacious?: boolean }) {
   const clientName = card.client?.name ?? 'Sin cliente';
   const agentName  = (card as unknown as { agent?: { name: string } }).agent?.name;
   const sc         = STATUS_COLORS[card.status];
 
   return (
     <Link
-      className="relative block cursor-grab overflow-hidden rounded-xl p-4 transition hover:-translate-y-0.5 active:cursor-grabbing"
+      className={`relative block cursor-grab overflow-hidden rounded-xl transition hover:-translate-y-0.5 active:cursor-grabbing ${spacious ? 'p-5' : 'p-4'}`}
       style={{ background: 'var(--paper-card)', border: '1px solid var(--border-faint)' }}
       draggable
       href={`/quotes/${card.id}`}
       onDragStart={(e) => { e.dataTransfer.setData('text/plain', card.id); onDragStart(card); }}
     >
       {/* Colored left stripe */}
-      <span className="absolute left-0 top-0 bottom-0 w-[3px]" style={{ background: sc.dot }} />
+      <span className={`absolute left-0 top-0 bottom-0 ${spacious ? 'w-1' : 'w-[3px]'}`} style={{ background: sc.dot }} />
 
       {/* Quote number + issue date */}
-      <div className="flex items-center justify-between gap-1 pl-2">
-        <p className="text-[11px] font-bold" style={{ color: sc.text }}>{card.number}</p>
-        <span className="rounded px-1.5 py-0.5 text-[10px] font-medium" style={{ background: 'var(--surface)', color: 'var(--ink-muted)' }}>
+      <div className={`flex items-center justify-between gap-1 ${spacious ? 'pl-3' : 'pl-2'}`}>
+        <p className={`font-bold ${spacious ? 'text-xs' : 'text-[11px]'}`} style={{ color: sc.text }}>{card.number}</p>
+        <span className={`rounded px-1.5 py-0.5 font-medium ${spacious ? 'text-[11px]' : 'text-[10px]'}`} style={{ background: 'var(--surface)', color: 'var(--ink-muted)' }}>
           {formatShortDate(card.createdAt)}
         </span>
       </div>
 
       {/* Client row */}
-      <div className="mt-2 flex items-center gap-2 pl-2">
+      <div className={`flex items-center gap-2 ${spacious ? 'mt-3 pl-3' : 'mt-2 pl-2'}`}>
         <div
-          className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[10px] font-bold"
+          className={`flex shrink-0 items-center justify-center rounded-full font-bold ${spacious ? 'h-8 w-8 text-xs' : 'h-6 w-6 text-[10px]'}`}
           style={{ background: 'var(--paper-elevated)', color: 'var(--ink-soft)' }}
         >
           {clientInitials(clientName).charAt(0)}
         </div>
         <div className="min-w-0">
-          <p className="truncate text-sm font-bold leading-tight" style={{ color: 'var(--ink)' }}>{clientName}</p>
-          {agentName && <p className="truncate text-[10px] font-medium leading-tight" style={{ color: 'var(--ink-soft)' }}>{agentName}</p>}
+          <p className={`truncate font-bold leading-tight ${spacious ? 'text-[15px]' : 'text-sm'}`} style={{ color: 'var(--ink)' }}>{clientName}</p>
+          {agentName && <p className={`truncate font-medium leading-tight ${spacious ? 'text-xs' : 'text-[10px]'}`} style={{ color: 'var(--ink-soft)' }}>{agentName}</p>}
         </div>
       </div>
 
       {/* Destination */}
-      {card.destination && <p className="mt-1 truncate pl-2 text-[10px]" style={{ color: 'var(--ink-muted)' }}>{card.destination}</p>}
+      {card.destination && (
+        <p className={`truncate ${spacious ? 'mt-1.5 pl-3 text-xs' : 'mt-1 pl-2 text-[10px]'}`} style={{ color: 'var(--ink-muted)' }}>{card.destination}</p>
+      )}
 
       {/* Special status (On Vacation only) */}
       {card.specialStatusLabel && (
         <span
-          className="mt-1 ml-2 inline-block rounded px-1.5 py-0.5 text-[9px] font-bold uppercase"
+          className={`inline-block rounded font-bold uppercase ${spacious ? 'mt-2 ml-3 px-2 py-0.5 text-[10px]' : 'mt-1 ml-2 px-1.5 py-0.5 text-[9px]'}`}
           style={{ background: 'rgba(239,68,68,0.12)', color: '#dc2626' }}
         >
           {card.specialStatusLabel}
         </span>
       )}
 
-      {/* Amount + reservation date — the date advisors need to track */}
-      <div className="mt-2 flex items-center justify-between gap-1 pl-2">
-        <p className="text-[11px] font-semibold" style={{ color: 'var(--ink-soft)' }}>{formatMoney(card.total, card.currency)}</p>
+      {/* Amount + reservation date */}
+      <div className={`flex items-center justify-between gap-1 ${spacious ? 'mt-3 pl-3' : 'mt-2 pl-2'}`}>
+        <p className={`font-semibold ${spacious ? 'text-sm' : 'text-[11px]'}`} style={{ color: spacious ? 'var(--ink)' : 'var(--ink-soft)' }}>{formatMoney(card.total, card.currency)}</p>
         {card.startDate && (
           <span
-            className="flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] font-bold"
+            className={`flex items-center gap-1 rounded font-bold ${spacious ? 'px-2 py-1 text-xs' : 'px-1.5 py-0.5 text-[10px]'}`}
             style={{ background: sc.badge, color: sc.text }}
           >
-            <CalendarDays className="h-3 w-3 shrink-0" />
+            <CalendarDays className={spacious ? 'h-3.5 w-3.5 shrink-0' : 'h-3 w-3 shrink-0'} />
             {formatShortDate(card.startDate)}
           </span>
         )}
@@ -366,38 +368,55 @@ function KanbanBoard() {
       )}
       {error ? <p className="mb-3 rounded-lg px-4 py-2 text-sm text-red-400" style={{ background: 'rgba(248,113,113,0.10)' }} onClick={() => setError(null)}>{error} ✕</p> : null}
 
-      <div className="grid grid-cols-5 gap-4">
-        {mainColumns.map((column) => {
-          const total    = column.cards.reduce((sum, c) => sum + Number(c.total), 0);
-          const currency = column.cards[0]?.currency ?? 'COP';
-          return (
-            <div className="flex min-w-0 flex-col" key={column.status}>
-              <div
-                className="flex flex-1 flex-col overflow-hidden rounded-2xl"
-                style={{ border: '1px solid var(--border-faint)' }}
-              >
-                <ColumnHeader agencyType={agencyType} count={column.cards.length} status={column.status} />
-
-                {/* Cards area */}
+      {/* ON_VACATION: wider columns + natural page scroll. Non-OV: compact fixed layout. */}
+      <div className={isOnVacation ? 'overflow-x-auto pb-4' : ''}>
+        <div
+          className={isOnVacation ? 'grid gap-5' : 'grid grid-cols-5 gap-4'}
+          style={isOnVacation ? { gridTemplateColumns: 'repeat(5, minmax(260px, 1fr))' } : {}}
+        >
+          {mainColumns.map((column) => {
+            const total    = column.cards.reduce((sum, c) => sum + Number(c.total), 0);
+            const currency = column.cards[0]?.currency ?? 'COP';
+            return (
+              <div className="flex min-w-0 flex-col" key={column.status}>
                 <div
-                  className="flex flex-1 flex-col gap-2 p-2 min-h-[200px]"
-                  style={{ background: 'var(--paper)' }}
-                  onDragOver={(e) => e.preventDefault()}
-                  onDrop={() => handleDrop(column.status)}
+                  className={isOnVacation ? 'flex flex-col rounded-2xl' : 'flex flex-1 flex-col overflow-hidden rounded-2xl'}
+                  style={{ border: '1px solid var(--border-faint)' }}
                 >
-                  {column.cards.length === 0 ? (
-                    <p className="rounded-lg border border-dashed py-6 text-center text-xs text-ink-muted" style={{ borderColor: 'var(--border)' }}>Arrastra aquí</p>
-                  ) : (
-                    column.cards.map((card) => <KanbanCard card={card} key={card.id} onDragStart={setDragging} />)
-                  )}
-                </div>
-              </div>
+                  <ColumnHeader agencyType={agencyType} count={column.cards.length} status={column.status} />
 
-              {/* Column total — floats below the card, no box */}
-              <p className="mt-2.5 px-1 font-mono text-base font-bold text-ink">{formatMoney(String(total), currency)}</p>
-            </div>
-          );
-        })}
+                  {/* Cards area — OV: natural height (page scrolls). Non-OV: flex-1 fills viewport. */}
+                  <div
+                    className={isOnVacation
+                      ? 'flex flex-col gap-3 p-3'
+                      : 'flex flex-1 flex-col gap-2 p-2 min-h-[200px]'}
+                    style={{ background: 'var(--paper)' }}
+                    onDragOver={(e) => e.preventDefault()}
+                    onDrop={() => handleDrop(column.status)}
+                  >
+                    {column.cards.length === 0 ? (
+                      <p className={`rounded-lg border border-dashed text-center text-xs text-ink-muted ${isOnVacation ? 'py-10' : 'py-6'}`} style={{ borderColor: 'var(--border)' }}>
+                        Arrastra aquí
+                      </p>
+                    ) : (
+                      column.cards.map((card) => <KanbanCard card={card} key={card.id} onDragStart={setDragging} spacious={isOnVacation} />)
+                    )}
+                  </div>
+                </div>
+
+                {/* Column total */}
+                {isOnVacation ? (
+                  <div className="mt-3 flex items-center justify-between px-1">
+                    <span className="label-caps text-ink-muted">Total etapa</span>
+                    <span className="font-mono text-base font-bold text-ink">{formatMoney(String(total), currency)}</span>
+                  </div>
+                ) : (
+                  <p className="mt-2.5 px-1 font-mono text-base font-bold text-ink">{formatMoney(String(total), currency)}</p>
+                )}
+              </div>
+            );
+          })}
+        </div>
       </div>
     </div>
   );
