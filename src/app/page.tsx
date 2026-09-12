@@ -20,6 +20,19 @@ import type { Paginated, Product, ProductType, Quote, QuoteListSummaryRow, Quote
 const ACCEPTED_LIKE = new Set<QuoteStatus>(['ACEPTADA', 'ABONADA', 'PAGADA']);
 const IN_PROGRESS: QuoteStatus[] = ['ENVIADA', 'ACEPTADA', 'ABONADA'];
 
+// ON_VACATION semantic split:
+// "En Curso"             → advancing toward payment (not yet paid)
+// "Últimas Cotizaciones" → already have payment
+const OV_IN_PROGRESS: QuoteStatus[] = ['ENVIADA', 'ACEPTADA'];
+const OV_PAID: QuoteStatus[]        = ['ABONADA', 'PAGADA'];
+
+function getPageNumbers(current: number, total: number): (number | '...')[] {
+  if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
+  if (current <= 4) return [1, 2, 3, 4, 5, '...', total];
+  if (current >= total - 3) return [1, '...', total - 4, total - 3, total - 2, total - 1, total];
+  return [1, '...', current - 1, current, current + 1, '...', total];
+}
+
 const PRODUCT_TYPE_LABEL: Record<ProductType, string> = {
   HOTEL: 'Hotel', TOUR: 'Tour', TRANSPORT: 'Traslado', FLIGHT: 'Vuelo',
   INSURANCE: 'Seguro', EXPERIENCE: 'Experiencia', OTHER: 'Servicio',
@@ -67,11 +80,17 @@ export default function DashboardPage() {
     queryFn: () => api.get<Paginated<Quote> & { summary: QuoteListSummaryRow[] }>('/quotes?limit=1'),
   });
 
+  // Standard (non-OV) dashboard queries
   const [inProgressPage, setInProgressPage] = useState(1);
   const { data: inProgressQuotes } = useQuotes({ statuses: IN_PROGRESS, sort: 'updatedAt', order: 'DESC', page: inProgressPage, limit: 4 });
 
   const [recentPage, setRecentPage] = useState(1);
   const { data: recentQuotes } = useQuotes({ sort: 'updatedAt', order: 'DESC', page: recentPage, limit: 4 });
+
+  // ON_VACATION dashboard queries — separate semantics
+  const { data: ovInProgressQuotes } = useQuotes({ statuses: OV_IN_PROGRESS, sort: 'updatedAt', order: 'DESC', page: 1, limit: 5 });
+  const [ovPaidPage, setOvPaidPage] = useState(1);
+  const { data: ovPaidQuotes } = useQuotes({ statuses: OV_PAID, sort: 'updatedAt', order: 'DESC', page: ovPaidPage, limit: 5 });
 
   const [agentsPage, setAgentsPage] = useState(1);
   const { data: team } = useTeam();
@@ -209,7 +228,7 @@ export default function DashboardPage() {
           ─────────────────────────────────────────────────────────────────── */
           <section aria-label="Panel de operación" className="grid items-start gap-4 xl:grid-cols-[1fr_1.1fr_1.1fr]">
 
-            {/* Col 1: Ventas del mes → En Curso */}
+            {/* Col 1: Ventas del mes → En Curso (Cotizada + Preconfirmada, últimas 5, estático) */}
             <div className="space-y-4">
 
               {/* Ventas del mes */}
@@ -239,17 +258,17 @@ export default function DashboardPage() {
                 </div>
               </article>
 
-              {/* En Curso */}
+              {/* En Curso — Cotizada (ENVIADA) + Preconfirmada (ACEPTADA), últimas 5, sin paginación */}
               <article className="overflow-hidden rounded-2xl" style={{ background: 'var(--paper-card)', border: '1px solid var(--border)' }}>
                 <div className="flex items-center justify-between px-5 py-3.5" style={{ borderBottom: '1px solid var(--border-faint)' }}>
                   <h2 className="font-semibold text-ink">En Curso</h2>
-                  <Pager onChange={setInProgressPage} page={inProgressPage} totalPages={inProgressQuotes?.meta.totalPages ?? 1} />
+                  <span className="label-caps text-ink-muted">Cotizada · Preconfirmada</span>
                 </div>
                 <div className="divide-y" style={{ '--tw-divide-opacity': 1 } as React.CSSProperties}>
-                  {(inProgressQuotes?.data.length ?? 0) === 0 ? (
+                  {(ovInProgressQuotes?.data.length ?? 0) === 0 ? (
                     <p className="px-5 py-6 text-center text-sm text-ink-soft">No hay cotizaciones en curso.</p>
                   ) : (
-                    inProgressQuotes!.data.map((q) => (
+                    ovInProgressQuotes!.data.map((q) => (
                       <Link
                         className="flex items-center justify-between gap-3 px-5 py-3 transition hover:bg-white/[0.03]"
                         href={`/quotes/${q.id}`}
@@ -273,46 +292,82 @@ export default function DashboardPage() {
                 <div className="flex items-center justify-between px-5 py-3" style={{ borderTop: '1px solid var(--border-faint)', background: 'var(--surface)' }}>
                   <span className="label-caps text-ink-muted">Total en curso</span>
                   <span className="font-mono text-sm font-bold text-ink">
-                    {formatMoneyFull(summaryInCurrency.filter((r) => IN_PROGRESS.includes(r.status)).reduce((s, r) => s + Number(r.total), 0), currency)}
+                    {formatMoneyFull(summaryInCurrency.filter((r) => OV_IN_PROGRESS.includes(r.status)).reduce((s, r) => s + Number(r.total), 0), currency)}
                   </span>
                 </div>
               </article>
             </div>
 
-            {/* Col 2: Últimas Cotizaciones (alta — máxima visibilidad) */}
-            <article className="overflow-hidden rounded-2xl" style={{ background: 'var(--paper-card)', border: '1px solid var(--border)' }}>
-              <div className="flex items-center justify-between px-5 py-3.5" style={{ borderBottom: '1px solid var(--border-faint)' }}>
+            {/* Col 2: Últimas Cotizaciones — Confirmada (ABONADA) + Reconfirmada (PAGADA)
+                Paginador numérico "1 · 2 · 3" encima del módulo. Altura fija: sin scroll. */}
+            <div className="space-y-2">
+              {/* Título + paginador encima de la tarjeta */}
+              <div className="flex items-center justify-between px-1">
                 <h2 className="font-semibold text-ink">Últimas Cotizaciones</h2>
-                <Pager onChange={setRecentPage} page={recentPage} totalPages={recentQuotes?.meta.totalPages ?? 1} />
-              </div>
-              <div className="divide-y" style={{ '--tw-divide-opacity': 1 } as React.CSSProperties}>
-                {(recentQuotes?.data.length ?? 0) === 0 ? (
-                  <p className="px-5 py-8 text-center text-sm text-ink-soft">Aún no hay cotizaciones.</p>
-                ) : (
-                  recentQuotes!.data.map((q) => (
-                    <Link
-                      className="flex items-center gap-3 px-5 py-3.5 transition hover:bg-white/[0.03]"
-                      href={`/quotes/${q.id}`}
-                      key={q.id}
-                    >
-                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg" style={{ background: 'var(--surface)' }}>
-                        <FileText className="h-3.5 w-3.5 text-ink-soft" />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="truncate text-sm font-medium text-ink">{q.client?.name ?? '—'}</p>
-                        <p className="text-xs text-ink-soft">{q.number} · {new Date(q.updatedAt).toLocaleDateString('es-CO')}</p>
-                      </div>
-                      <div className="flex shrink-0 flex-col items-end gap-0.5">
-                        <span className="font-mono text-sm font-semibold text-ink">{formatMoneyFull(Number(q.total), q.currency)}</span>
-                        <span className={`${STATUS_COLOR[q.status] ?? 'chip-borrador'} rounded-full px-2 py-0.5 text-[10px] font-semibold`}>
-                          {q.statusLabel}
-                        </span>
-                      </div>
-                    </Link>
-                  ))
+                {(ovPaidQuotes?.meta.totalPages ?? 1) > 1 && (
+                  <div className="flex items-center gap-0.5 text-xs">
+                    {getPageNumbers(ovPaidPage, ovPaidQuotes!.meta.totalPages).map((p, i) => (
+                      <span className="flex items-center" key={i}>
+                        {i > 0 && <span className="mx-0.5 text-ink-muted opacity-40">·</span>}
+                        {p === '...' ? (
+                          <span className="px-1 text-ink-muted">···</span>
+                        ) : (
+                          <button
+                            className="rounded px-1.5 py-0.5 font-mono font-semibold transition"
+                            onClick={() => setOvPaidPage(p as number)}
+                            style={p === ovPaidPage
+                              ? { background: 'var(--surface)', color: 'var(--ink)' }
+                              : { color: 'var(--ink-muted)' }}
+                            type="button"
+                          >
+                            {p}
+                          </button>
+                        )}
+                      </span>
+                    ))}
+                  </div>
+                )}
+                {(ovPaidQuotes?.meta.totalPages ?? 1) <= 1 && (
+                  <span className="label-caps text-ink-muted">Confirmada · Reconfirmada</span>
                 )}
               </div>
-            </article>
+
+              {/* Tarjeta — altura fija para 5 ítems, sin scroll */}
+              <article className="overflow-hidden rounded-2xl" style={{ background: 'var(--paper-card)', border: '1px solid var(--border)' }}>
+                <div
+                  className="divide-y"
+                  style={{ '--tw-divide-opacity': 1, minHeight: '260px' } as React.CSSProperties}
+                >
+                  {(ovPaidQuotes?.data.length ?? 0) === 0 ? (
+                    <div className="flex min-h-[260px] items-center justify-center">
+                      <p className="text-sm text-ink-soft">Aún no hay reservas confirmadas.</p>
+                    </div>
+                  ) : (
+                    ovPaidQuotes!.data.map((q) => (
+                      <Link
+                        className="flex items-center gap-3 px-5 py-3.5 transition hover:bg-white/[0.03]"
+                        href={`/quotes/${q.id}`}
+                        key={q.id}
+                      >
+                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg" style={{ background: 'var(--surface)' }}>
+                          <FileText className="h-3.5 w-3.5 text-ink-soft" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-sm font-medium text-ink">{q.client?.name ?? '—'}</p>
+                          <p className="text-xs text-ink-soft">{q.number} · {new Date(q.updatedAt).toLocaleDateString('es-CO')}</p>
+                        </div>
+                        <div className="flex shrink-0 flex-col items-end gap-0.5">
+                          <span className="font-mono text-sm font-semibold text-ink">{formatMoneyFull(Number(q.total), q.currency)}</span>
+                          <span className={`${STATUS_COLOR[q.status] ?? 'chip-borrador'} rounded-full px-2 py-0.5 text-[10px] font-semibold`}>
+                            {q.statusLabel}
+                          </span>
+                        </div>
+                      </Link>
+                    ))
+                  )}
+                </div>
+              </article>
+            </div>
 
             {/* Col 3: Top 3 Productos (compact list) → Análisis (mini chart) */}
             <div className="space-y-4">
