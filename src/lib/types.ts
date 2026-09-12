@@ -311,7 +311,7 @@ export interface PipelineColumn {
 }
 
 export type PaymentMethod = 'BANK_TRANSFER' | 'CARD' | 'CASH';
-export type AgencyType = 'AGENCIA_VIAJES' | 'OPERADOR_TURISTICO' | 'HOTEL' | 'COMERCIALIZADOR_TURISTICO' | 'OTRO';
+export type AgencyType = 'AGENCIA_VIAJES' | 'OPERADOR_TURISTICO' | 'HOTEL' | 'COMERCIALIZADOR_TURISTICO' | 'OTRO' | 'ON_VACATION';
 
 export const AGENCY_TYPE_LABELS: Record<AgencyType, string> = {
   AGENCIA_VIAJES: 'Agencia de Viajes',
@@ -319,7 +319,14 @@ export const AGENCY_TYPE_LABELS: Record<AgencyType, string> = {
   HOTEL: 'Hotel',
   COMERCIALIZADOR_TURISTICO: 'Comercializador Turístico',
   OTRO: 'Otro',
+  ON_VACATION: 'On Vacation',
 };
+
+// ON_VACATION only registers through its own dedicated flow (/register/on-vacation) — never an
+// option a regular signup picks from the generic business-type dropdown.
+export const GENERIC_AGENCY_TYPES = (Object.keys(AGENCY_TYPE_LABELS) as AgencyType[]).filter(
+  (type) => type !== 'ON_VACATION',
+);
 
 export interface Agency {
   id: string;
@@ -418,6 +425,7 @@ export interface Plan {
   price: string;
   currency: string;
   billingPeriod: BillingPeriod;
+  trialDays: number;
   features: string[];
   recommended: boolean;
 }
