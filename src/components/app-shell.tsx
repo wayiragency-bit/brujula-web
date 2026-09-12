@@ -10,6 +10,7 @@ import {
   FileText,
   Globe,
   LayoutDashboard,
+  Hotel,
   LineChart,
   LogOut,
   Megaphone,
@@ -49,6 +50,7 @@ const managerNavigation = [
   { label: 'Clientes',       href: '/manager/clients',      icon: UsersRound,      permission: 'on_vacation.clients_view' },
   { label: 'Asesores',       href: '/manager/advisors',     icon: UsersRound,      permission: 'on_vacation.advisors_view' },
   { label: 'Suscripciones',  href: '/manager/subscriptions', icon: CreditCard,     permission: 'on_vacation.subscriptions_view' },
+  { label: 'Catálogo',       href: '/manager/catalog',      icon: Hotel,           permission: 'catalog.manage' },
 ];
 
 function isActive(pathname: string, href: string): boolean {
