@@ -1,10 +1,11 @@
 'use client';
 
-import { ChevronLeft, ChevronRight, Download, Plus, Search, SquarePen, Trash2, UserRound } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Download, Plus, Search, SquarePen, Trash2, UserRound, UsersRound } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { AppShell } from '@/components/app-shell';
 import { ClientFormModal } from '@/components/clients/client-form-modal';
+import { EmptyState } from '@/components/ui/empty-state';
 import { useClients, useCreateClient, useDeactivateClient, useUpdateClient } from '@/hooks/use-clients';
 import { API_BASE, getAccessToken } from '@/lib/api';
 import { countryLabel } from '@/lib/countries';
@@ -134,7 +135,24 @@ export default function ClientsPage() {
               {isLoading ? (
                 <tr><td className="px-4 py-8 text-center text-ink-soft" colSpan={5}>Cargando clientes…</td></tr>
               ) : data?.data.length === 0 ? (
-                <tr><td className="px-4 py-8 text-center text-ink-soft" colSpan={5}>No se encontraron clientes.</td></tr>
+                <tr>
+                  <td className="p-0" colSpan={5}>
+                    {search || type !== 'ALL' ? (
+                      <EmptyState
+                        description="Ajusta la búsqueda o el filtro para ver más resultados."
+                        icon={Search}
+                        title="No se encontraron clientes"
+                      />
+                    ) : (
+                      <EmptyState
+                        action={{ label: 'Nuevo cliente', onClick: openCreate }}
+                        description="Cuando registres tu primer cliente aparecerá aquí, listo para cotizar."
+                        icon={UsersRound}
+                        title="Aún no tienes clientes"
+                      />
+                    )}
+                  </td>
+                </tr>
               ) : (
                 data?.data.map((client) => (
                   <tr className="border-b border-ink/5 last:border-0 hover:bg-ink/[0.02]" key={client.id}>

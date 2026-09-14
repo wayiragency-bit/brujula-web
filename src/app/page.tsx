@@ -9,6 +9,7 @@ import { Pager } from '@/components/dashboard/pager';
 import { QuotesAnalyticsChart } from '@/components/dashboard/quotes-analytics-chart';
 import { SalesGoalEditor } from '@/components/dashboard/sales-goal-editor';
 import { Sparkline } from '@/components/dashboard/sparkline';
+import { EmptyState } from '@/components/ui/empty-state';
 import { useAgency } from '@/hooks/use-agency';
 import { useTeam } from '@/hooks/use-team';
 import { useQuotes } from '@/hooks/use-quotes';
@@ -184,7 +185,7 @@ export default function DashboardPage() {
                     <Icon className="h-5 w-5" />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="label-caps text-[10px] text-ink-soft">{metric.label}</p>
+                    <p className="label-caps break-words text-[10px] text-ink-soft">{metric.label}</p>
                     <strong className="font-mono text-2xl font-bold leading-tight text-ink">{metric.value}</strong>
                   </div>
                   <div className="flex shrink-0 flex-col items-end gap-0.5">
@@ -195,24 +196,24 @@ export default function DashboardPage() {
               </article>
             ) : (
               /* Standard card */
-              <article className="glass-card rounded-2xl p-6 transition hover:brightness-110" key={metric.label}>
-                <div className="mb-4 flex items-center gap-4">
+              <article className="glass-card rounded-2xl p-4 transition hover:brightness-110 sm:p-6" key={metric.label}>
+                <div className="mb-4 flex items-center gap-3 sm:gap-4">
                   <div
-                    className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl text-white transition-transform duration-300 hover:scale-110"
+                    className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl text-white transition-transform duration-300 hover:scale-110 sm:h-14 sm:w-14"
                     style={{ background: metric.iconBg, boxShadow: `0 4px 12px ${metric.iconShadow}` }}
                   >
-                    <Icon className="h-7 w-7" />
+                    <Icon className="h-5 w-5 sm:h-7 sm:w-7" />
                   </div>
                   <div className="min-w-0">
-                    <p className="label-caps text-[11px] text-ink-soft">{metric.label}</p>
-                    <strong className="font-mono text-3xl font-bold leading-tight text-ink">{metric.value}</strong>
+                    <p className="label-caps break-words text-[10px] text-ink-soft sm:text-[11px]">{metric.label}</p>
+                    <strong className="font-mono text-2xl font-bold leading-tight text-ink sm:text-3xl">{metric.value}</strong>
                   </div>
                 </div>
                 <div className="flex items-center justify-between gap-2">
-                  <span className="rounded-md px-2 py-1 text-xs font-semibold text-ink-soft" style={{ background: 'var(--surface)' }}>
+                  <span className="min-w-0 truncate rounded-md px-2 py-1 text-xs font-semibold text-ink-soft sm:whitespace-normal sm:overflow-visible" style={{ background: 'var(--surface)' }}>
                     ↗ {metric.sub}
                   </span>
-                  <Sparkline color={metric.iconBg} points={metric.spark} />
+                  <Sparkline className="hidden shrink-0 sm:block sm:h-10 sm:w-24" color={metric.iconBg} points={metric.spark} />
                 </div>
               </article>
             );
@@ -266,7 +267,12 @@ export default function DashboardPage() {
                 </div>
                 <div className="divide-y" style={{ '--tw-divide-opacity': 1 } as React.CSSProperties}>
                   {(ovInProgressQuotes?.data.length ?? 0) === 0 ? (
-                    <p className="px-5 py-6 text-center text-sm text-ink-soft">No hay cotizaciones en curso.</p>
+                    <EmptyState
+                      compact
+                      description="Las cotizaciones enviadas o preconfirmadas aparecerán aquí."
+                      icon={FileText}
+                      title="No hay cotizaciones en curso"
+                    />
                   ) : (
                     ovInProgressQuotes!.data.map((q) => (
                       <Link
@@ -330,7 +336,12 @@ export default function DashboardPage() {
               </div>
               <div className="divide-y" style={{ '--tw-divide-opacity': 1 } as React.CSSProperties}>
                 {(ovPaidQuotes?.data.length ?? 0) === 0 ? (
-                  <p className="px-5 py-6 text-center text-sm text-ink-soft">Aún no hay reservas confirmadas.</p>
+                  <EmptyState
+                    compact
+                    description="Tus reservas confirmadas y reconfirmadas aparecerán aquí."
+                    icon={FileText}
+                    title="Aún no hay reservas confirmadas"
+                  />
                 ) : (
                   ovPaidQuotes!.data.map((q) => (
                     <Link
@@ -367,7 +378,11 @@ export default function DashboardPage() {
                   <Link className="label-caps text-amber" href="/products">Ver todo</Link>
                 </div>
                 {topProducts.length === 0 ? (
-                  <p className="px-5 py-8 text-center text-sm text-ink-soft">Aún no hay productos cotizados.</p>
+                  <EmptyState
+                    description="Cotiza tus productos para ver aquí los más vendidos."
+                    icon={Package}
+                    title="Aún no hay productos cotizados"
+                  />
                 ) : (
                   <div className="grid grid-cols-3 gap-3 p-4">
                     {topProducts.map((product, i) => (
@@ -453,7 +468,12 @@ export default function DashboardPage() {
                 </div>
                 <div className="divide-y" style={{ '--tw-divide-opacity': 1 } as React.CSSProperties}>
                   {(inProgressQuotes?.data.length ?? 0) === 0 ? (
-                    <p className="px-6 py-8 text-center text-sm text-ink-soft">No hay cotizaciones en curso.</p>
+                    <EmptyState
+                      compact
+                      description="Las cotizaciones enviadas o aceptadas aparecerán aquí."
+                      icon={FileText}
+                      title="No hay cotizaciones en curso"
+                    />
                   ) : (
                     inProgressQuotes!.data.map((q) => (
                       <Link
@@ -499,7 +519,15 @@ export default function DashboardPage() {
                 </div>
                 <div className="grid grid-cols-1 gap-3 p-4 sm:grid-cols-3">
                   {topProducts.length === 0 ? (
-                    <p className="px-3 py-6 text-center text-sm text-ink-soft">Aún no hay productos cotizados.</p>
+                    <div className="col-span-full">
+                      <EmptyState
+                        action={{ label: 'Agregar producto', href: '/products' }}
+                        compact
+                        description="Cotiza tus productos para ver aquí los más vendidos."
+                        icon={Package}
+                        title="Aún no hay productos cotizados"
+                      />
+                    </div>
                   ) : (
                     topProducts.map((product, i) => (
                       <div className="rounded-xl p-3" key={product.id} style={{ background: 'var(--surface)', border: '1px solid var(--border-faint)' }}>
@@ -542,7 +570,13 @@ export default function DashboardPage() {
                   </div>
                   <div className="divide-y" style={{ '--tw-divide-opacity': 1 } as React.CSSProperties}>
                     {(recentQuotes?.data.length ?? 0) === 0 ? (
-                      <p className="px-6 py-8 text-center text-sm text-ink-soft">Aún no hay cotizaciones.</p>
+                      <EmptyState
+                        action={{ label: 'Nueva cotización', href: '/quotes/new' }}
+                        compact
+                        description="Tus cotizaciones más recientes aparecerán aquí."
+                        icon={FileText}
+                        title="Aún no hay cotizaciones"
+                      />
                     ) : (
                       recentQuotes!.data.map((q) => (
                         <Link
@@ -577,7 +611,12 @@ export default function DashboardPage() {
                   </div>
                   <div className="divide-y" style={{ '--tw-divide-opacity': 1 } as React.CSSProperties}>
                     {visibleAgents.length === 0 ? (
-                      <p className="px-6 py-8 text-center text-sm text-ink-soft">Aún no hay agentes con ventas.</p>
+                      <EmptyState
+                        compact
+                        description="Cuando tu equipo empiece a vender, el ranking aparecerá aquí."
+                        icon={Users}
+                        title="Aún no hay agentes con ventas"
+                      />
                     ) : (
                       visibleAgents.map((agent, i) => (
                         <div className="flex items-center gap-3 px-7 py-3.5" key={agent.id}>

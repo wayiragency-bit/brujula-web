@@ -14,7 +14,7 @@ export function Pager({ page, totalPages, onChange }: PagerProps) {
     <div className="flex items-center gap-1.5">
       <button
         aria-label="Página anterior"
-        className="flex h-6 w-6 items-center justify-center rounded-md text-ink-soft transition hover:bg-white/8 disabled:opacity-30"
+        className="flex h-8 w-8 items-center justify-center rounded-md text-ink-soft transition hover:bg-white/8 disabled:opacity-30"
         disabled={page <= 1}
         onClick={() => onChange(page - 1)}
         type="button"
@@ -24,7 +24,7 @@ export function Pager({ page, totalPages, onChange }: PagerProps) {
       <span className="label-caps min-w-[2.5rem] text-center text-ink-muted">{page}/{totalPages}</span>
       <button
         aria-label="Página siguiente"
-        className="flex h-6 w-6 items-center justify-center rounded-md text-ink-soft transition hover:bg-white/8 disabled:opacity-30"
+        className="flex h-8 w-8 items-center justify-center rounded-md text-ink-soft transition hover:bg-white/8 disabled:opacity-30"
         disabled={page >= totalPages}
         onClick={() => onChange(page + 1)}
         type="button"

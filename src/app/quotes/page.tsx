@@ -10,6 +10,7 @@ import { AppShell } from '@/components/app-shell';
 import { Sparkline } from '@/components/dashboard/sparkline';
 import { QuoteActionsMenu } from '@/components/quotes/quote-actions-menu';
 import { QuoteShareModal } from '@/components/quotes/quote-share-modal';
+import { EmptyState } from '@/components/ui/empty-state';
 import { useDeleteQuote, useQuoteSellers, useQuotes } from '@/hooks/use-quotes';
 import { useAuth } from '@/lib/auth-context';
 import { quoteStatusLabel } from '@/lib/on-vacation-status';
@@ -255,7 +256,7 @@ export default function QuotesPage() {
             type="button"
           >
             <div className="min-w-0 text-left">
-              <p className="label-caps text-ink-soft" style={{ fontSize: '10px', letterSpacing: '1.5px' }}>Total Cot</p>
+              <p className="label-caps text-ink-soft" style={{ fontSize: '10px', letterSpacing: '1.5px' }}>Todas</p>
               <p className="mt-1 font-black leading-none" style={{ fontSize: '22px', color: !status ? '#0d9488' : 'var(--ink)' }}>
                 {totalCount}
               </p>
@@ -469,8 +470,21 @@ export default function QuotesPage() {
                 </tr>
               ) : data?.data.length === 0 ? (
                 <tr>
-                  <td className="px-4 py-8 text-center text-sm text-ink-soft" colSpan={9}>
-                    No se encontraron cotizaciones.
+                  <td className="p-0" colSpan={9}>
+                    {search || status ? (
+                      <EmptyState
+                        description="Ajusta la búsqueda o el filtro de estado para ver más resultados."
+                        icon={Search}
+                        title="No se encontraron cotizaciones"
+                      />
+                    ) : (
+                      <EmptyState
+                        action={{ label: 'Nueva cotización', href: '/quotes/new' }}
+                        description="Crea tu primera cotización y empieza a moverla por el pipeline de ventas."
+                        icon={FileText}
+                        title="Aún no tienes cotizaciones"
+                      />
+                    )}
                   </td>
                 </tr>
               ) : (

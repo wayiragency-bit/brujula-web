@@ -1,10 +1,11 @@
 'use client';
 
-import { ChevronLeft, ChevronRight, Download, LayoutGrid, List, Plus, Search, SquarePen, Trash2, Upload } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Download, LayoutGrid, List, Package, Plus, Search, SquarePen, Trash2, Upload } from 'lucide-react';
 import { useState } from 'react';
 import { AppShell } from '@/components/app-shell';
 import { ProductFormModal } from '@/components/products/product-form-modal';
 import { ProductImportModal } from '@/components/products/product-import-modal';
+import { EmptyState } from '@/components/ui/empty-state';
 import { useCreateProduct, useDeactivateProduct, useProductCategories, useProducts, useUpdateProduct } from '@/hooks/use-products';
 import { API_BASE, getAccessToken } from '@/lib/api';
 import type { Product, ProductFormValues } from '@/lib/types';
@@ -178,7 +179,22 @@ export default function ProductsPage() {
         {isLoading ? (
           <p className="text-ink-soft">Cargando productos…</p>
         ) : products.length === 0 ? (
-          <p className="text-ink-soft">No se encontraron productos.</p>
+          <div className="rounded-2xl border border-ink/10 bg-paper-card shadow-card">
+            {search || category ? (
+              <EmptyState
+                description="Ajusta la búsqueda o la categoría para ver más resultados."
+                icon={Search}
+                title="No se encontraron productos"
+              />
+            ) : (
+              <EmptyState
+                action={{ label: 'Nuevo producto', onClick: openCreate }}
+                description="Agrega tu primer producto o servicio para empezar a cotizar."
+                icon={Package}
+                title="Aún no tienes productos"
+              />
+            )}
+          </div>
         ) : view === 'list' ? (
           <div className="overflow-x-auto rounded-2xl border border-ink/10 bg-paper-card shadow-card">
             <table className="w-full text-sm">
