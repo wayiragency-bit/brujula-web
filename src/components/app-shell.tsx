@@ -22,7 +22,8 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useAuth } from '@/lib/auth-context';
 import { TrialExpiredScreen } from '@/components/billing/trial-expired-screen';
 
@@ -66,6 +67,19 @@ export function AppShell({ children }: Readonly<{ children: React.ReactNode }>) 
   const pathname = usePathname();
   const router   = useRouter();
   const { user, status, logout, hasPermission } = useAuth();
+
+  // Sidebar icon tooltips are portaled to <body> instead of positioned relative to the icon:
+  // the nav list needs its own vertical scroll as a safety net on short screens, and any
+  // ancestor with overflow-y set forces overflow-x to be clipped too (per the CSS overflow
+  // spec), which would silently cut off a tooltip that pops out to the right of the rail.
+  const [sidebarTooltip, setSidebarTooltip] = useState<{ label: string; top: number } | null>(null);
+  function showSidebarTooltip(e: React.MouseEvent<HTMLElement> | React.FocusEvent<HTMLElement>, label: string) {
+    const rect = e.currentTarget.getBoundingClientRect();
+    setSidebarTooltip({ label, top: rect.top + rect.height / 2 });
+  }
+  function hideSidebarTooltip() {
+    setSidebarTooltip(null);
+  }
 
   // A Manager account has no agency of its own — that's how we tell it apart from a tenant user.
   const isManager = user !== null && user !== undefined && user.agency === null;
@@ -116,39 +130,42 @@ export function AppShell({ children }: Readonly<{ children: React.ReactNode }>) 
 
   return (
     <div className="min-h-screen bg-paper text-ink">
-      {/* ── SIDEBAR (desktop) ── */}
-      <aside className="glass-panel fixed top-4 bottom-4 left-4 z-40 hidden w-[92px] flex-col items-center py-[clamp(8px,1.8vh,16px)] rounded-2xl overflow-hidden lg:flex">
+      {/* ── SIDEBAR (desktop) — icon-only rail with hover tooltips.
+           Fixed, comfortably legible sizes at every viewport height instead of
+           shrinking with vh-based clamp(); the nav list scrolls on its own if a
+           very short screen or a future longer menu ever needs more room than
+           it has, rather than compressing icons/text below a readable size. ── */}
+      <aside className="glass-panel fixed top-4 bottom-4 left-4 z-40 hidden w-[76px] flex-col items-center py-4 rounded-2xl lg:flex">
 
         {/* Logo mark */}
         <Link
           aria-label="Brújula"
-          className="flex h-[clamp(44px,7vh,64px)] w-[clamp(44px,7vh,64px)] shrink-0 items-center justify-center rounded-2xl bg-amber/15 text-amber transition hover:bg-amber/25"
+          className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-amber/15 text-amber transition hover:bg-amber/25"
           href="/"
         >
-          <Compass className="h-[clamp(22px,3.5vh,32px)] w-[clamp(22px,3.5vh,32px)]" />
+          <Compass className="h-6 w-6" />
         </Link>
 
         {/* Nav icons */}
-        <nav aria-label="Navegación principal" className="mt-[clamp(8px,3.5vh,32px)] flex flex-1 min-h-0 flex-col items-center justify-start gap-[clamp(4px,1.3vh,12px)] w-full px-2 overflow-hidden">
+        <nav aria-label="Navegación principal" className="mt-6 flex min-h-0 w-full flex-1 flex-col items-center justify-start gap-1.5 overflow-y-auto overflow-x-hidden px-2">
           {visibleNav.map(({ label, href, icon: Icon }) => {
             const active = isActive(pathname, href);
             return (
               <Link
                 aria-label={label}
-                className={`flex w-full flex-col items-center justify-center gap-0.5 rounded-xl py-[clamp(0px,0.45vh,4px)] px-1 transition-all duration-200 ${
+                className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl transition-all duration-200 ${
                   active
                     ? 'bg-amber text-[var(--sidebar-bg)] shadow-[0_0_16px_rgba(254,178,59,0.25)]'
                     : 'text-[var(--sidebar-nav-text)] hover:bg-[var(--sidebar-nav-hover-bg)] hover:text-[var(--sidebar-nav-text-active)]'
                 }`}
                 href={href}
                 key={label}
+                onBlur={hideSidebarTooltip}
+                onFocus={(e) => showSidebarTooltip(e, label)}
+                onMouseEnter={(e) => showSidebarTooltip(e, label)}
+                onMouseLeave={hideSidebarTooltip}
               >
-                <Icon className="h-[clamp(16px,2.4vh,22px)] w-[clamp(16px,2.4vh,22px)]" />
-                <span className="text-[clamp(8px,1.1vh,10px)] font-medium leading-tight text-center w-full">
-                  {label.split(' ').map((word) => (
-                    <span className="block" key={word}>{word}</span>
-                  ))}
-                </span>
+                <Icon className="h-5 w-5 shrink-0" />
               </Link>
             );
           })}
@@ -157,17 +174,33 @@ export function AppShell({ children }: Readonly<{ children: React.ReactNode }>) 
         {/* Logout */}
         <button
           aria-label="Cerrar sesión"
-          className="group mt-[clamp(2px,0.9vh,8px)] flex shrink-0 flex-col items-center justify-center gap-1 rounded-xl py-[clamp(0px,0.9vh,8px)] px-4 transition-all duration-200 text-red-400 hover:bg-red-500 hover:text-white hover:shadow-[0_0_16px_rgba(239,68,68,0.3)]"
+          className="mt-3 flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-red-400 transition-all duration-200 hover:bg-red-500 hover:text-white hover:shadow-[0_0_16px_rgba(239,68,68,0.3)]"
+          onBlur={hideSidebarTooltip}
           onClick={() => logout().then(() => router.replace('/login'))}
+          onFocus={(e) => showSidebarTooltip(e, 'Cerrar sesión')}
+          onMouseEnter={(e) => showSidebarTooltip(e, 'Cerrar sesión')}
+          onMouseLeave={hideSidebarTooltip}
           type="button"
         >
-          <LogOut className="h-[clamp(18px,2.8vh,25px)] w-[clamp(18px,2.8vh,25px)]" />
-          <span className="text-[clamp(8px,1.2vh,11px)] font-medium leading-tight text-center">Salir</span>
+          <LogOut className="h-5 w-5" />
         </button>
       </aside>
 
+      {/* Sidebar tooltip — portaled to <body> so it's never clipped by the nav's own scroll container */}
+      {sidebarTooltip && typeof document !== 'undefined'
+        ? createPortal(
+            <div
+              className="pointer-events-none fixed z-[100] -translate-y-1/2 whitespace-nowrap rounded-lg px-2.5 py-1.5 text-xs font-semibold shadow-lg"
+              style={{ left: 100, top: sidebarTooltip.top, background: 'var(--paper-elevated)', border: '1px solid var(--border)', color: 'var(--ink)' }}
+            >
+              {sidebarTooltip.label}
+            </div>,
+            document.body,
+          )
+        : null}
+
       {/* ── CONTENT AREA ── */}
-      <div className="lg:pl-[124px]">
+      <div className="lg:pl-[108px]">
 
         {/* Top bar */}
         <header className="sticky top-0 z-30 flex h-16 items-center gap-4 px-4 sm:px-6 lg:px-6"
