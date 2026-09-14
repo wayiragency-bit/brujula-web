@@ -88,9 +88,10 @@ export default function SettingsPage() {
   // ON_VACATION advisors only have settings.edit_profile but still need to see their Plan and pay.
   const isOVAdvisor = user?.agency?.type === 'ON_VACATION';
   // Supervisor/Agente only manage their own profile and appearance; company config and billing stay with Administrador/Propietario.
-  const visibleTabs = TABS.filter((t) =>
-    canEditAgency || t.id === 'perfil' || t.id === 'apariencia' || (isOVAdvisor && t.id === 'pagos'),
-  );
+  const visibleTabs = TABS.filter((t) => {
+    if (isOVAdvisor && t.id === 'correo') return false;
+    return canEditAgency || t.id === 'perfil' || t.id === 'apariencia' || (isOVAdvisor && t.id === 'pagos');
+  });
   const [tab, setTab] = useState<Tab>(() => {
     if (typeof window !== 'undefined') {
       const t = new URLSearchParams(window.location.search).get('tab') as Tab | null;
