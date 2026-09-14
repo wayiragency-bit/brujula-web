@@ -197,6 +197,22 @@ export function AppShell({ children }: Readonly<{ children: React.ReactNode }>) 
             </div>
           </div>
 
+          {/* Trial reminder — inline in header, between search and actions */}
+          {showTrialReminder ? (
+            <Link
+              className="hidden shrink-0 items-center gap-2 rounded-xl px-3 py-2 text-xs font-semibold transition hover:brightness-110 sm:flex"
+              href="/settings"
+              style={{ background: 'rgba(245,158,11,0.15)', border: '1px solid rgba(245,158,11,0.35)', color: '#b45309' }}
+            >
+              <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
+              <span>
+                {trialDaysLeft && trialDaysLeft > 0
+                  ? `Prueba: ${trialDaysLeft} día${trialDaysLeft === 1 ? '' : 's'} restante${trialDaysLeft === 1 ? '' : 's'}`
+                  : 'Prueba: termina hoy'}
+              </span>
+            </Link>
+          ) : null}
+
           <div className="ml-auto flex items-center gap-3">
             {/* Notifications (visual only) */}
             <button
@@ -221,21 +237,6 @@ export function AppShell({ children }: Readonly<{ children: React.ReactNode }>) 
             </div>
           </div>
         </header>
-
-        {showTrialReminder ? (
-          <div
-            className="flex items-center gap-2 px-4 py-2.5 text-sm sm:px-6 lg:px-6"
-            role="alert"
-            style={{ background: 'rgba(245,158,11,0.12)', borderBottom: '1px solid rgba(245,158,11,0.25)', color: '#b45309' }}
-          >
-            <AlertTriangle className="h-4 w-4 shrink-0" />
-            <span>
-              {trialDaysLeft && trialDaysLeft > 0
-                ? `Tu prueba gratis termina en ${trialDaysLeft} día${trialDaysLeft === 1 ? '' : 's'}. Elige un plan en Configuración para no perder acceso.`
-                : 'Tu prueba gratis termina hoy. Elige un plan en Configuración para no perder acceso.'}
-            </span>
-          </div>
-        ) : null}
 
         <main>{children}</main>
       </div>
