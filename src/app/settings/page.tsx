@@ -83,10 +83,14 @@ function ToggleRow({ label, desc, checked, onChange }: { label: string; desc?: s
 /* ─── Page ───────────────────────────────────────────────────── */
 export default function SettingsPage() {
   const { data: agency, isLoading } = useAgency();
-  const { hasPermission } = useAuth();
+  const { hasPermission, user } = useAuth();
   const canEditAgency = hasPermission('settings.edit_agency');
+  // ON_VACATION advisors only have settings.edit_profile but still need to see their Plan and pay.
+  const isOVAdvisor = user?.agency?.type === 'ON_VACATION';
   // Supervisor/Agente only manage their own profile and appearance; company config and billing stay with Administrador/Propietario.
-  const visibleTabs = TABS.filter((t) => canEditAgency || t.id === 'perfil' || t.id === 'apariencia');
+  const visibleTabs = TABS.filter((t) =>
+    canEditAgency || t.id === 'perfil' || t.id === 'apariencia' || (isOVAdvisor && t.id === 'pagos'),
+  );
   const [tab, setTab] = useState<Tab>(() => {
     if (typeof window !== 'undefined') {
       const t = new URLSearchParams(window.location.search).get('tab') as Tab | null;
@@ -139,7 +143,7 @@ export default function SettingsPage() {
           {tab === 'perfil'     && <ProfileTab />}
           {tab === 'apariencia' && <AparienciaTab />}
           {tab === 'correo'     && canEditAgency && <CorreoTab />}
-          {tab === 'pagos'      && canEditAgency && <PagosTab />}
+          {tab === 'pagos'      && (canEditAgency || isOVAdvisor) && <PagosTab />}
         </div>
       </div>
     </AppShell>
