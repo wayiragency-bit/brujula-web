@@ -58,7 +58,7 @@ export default function LoginPage() {
               <div className="flex h-10 w-10 items-center justify-center rounded-xl" style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(254,178,59,0.3)' }}>
                 <Compass className="h-5 w-5 text-amber" />
               </div>
-              <span className="font-display text-xl font-extrabold text-white">Brújula</span>
+              <span className="font-display text-xl font-extrabold text-white">Chatiza</span>
             </div>
             <h1 className="font-display text-2xl font-extrabold leading-tight text-white">
               Tu operación comercial, siempre a la mano.

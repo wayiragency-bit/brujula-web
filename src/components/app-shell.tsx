@@ -14,6 +14,7 @@ import {
   LineChart,
   LogOut,
   Megaphone,
+  MoreHorizontal,
   Package,
   Search,
   Settings,
@@ -26,6 +27,7 @@ import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useAuth } from '@/lib/auth-context';
 import { TrialExpiredScreen } from '@/components/billing/trial-expired-screen';
+import { Modal } from '@/components/ui/modal';
 
 const navigation = [
   { label: 'Dashboard',       href: '/',                icon: LayoutDashboard, permission: undefined },
@@ -73,6 +75,7 @@ export function AppShell({ children }: Readonly<{ children: React.ReactNode }>) 
   // ancestor with overflow-y set forces overflow-x to be clipped too (per the CSS overflow
   // spec), which would silently cut off a tooltip that pops out to the right of the rail.
   const [sidebarTooltip, setSidebarTooltip] = useState<{ label: string; top: number } | null>(null);
+  const [showMoreNav, setShowMoreNav] = useState(false);
   function showSidebarTooltip(e: React.MouseEvent<HTMLElement> | React.FocusEvent<HTMLElement>, label: string) {
     const rect = e.currentTarget.getBoundingClientRect();
     setSidebarTooltip({ label, top: rect.top + rect.height / 2 });
@@ -85,6 +88,12 @@ export function AppShell({ children }: Readonly<{ children: React.ReactNode }>) 
   const isManager = user !== null && user !== undefined && user.agency === null;
   const activeNavigation = isManager ? managerNavigation : navigation;
   const visibleNav = activeNavigation.filter((item) => !item.permission || hasPermission(item.permission));
+  // Bottom bar has room for 5 slots. When there are more items than that, keep the first 4 and
+  // collapse the rest behind a "Más" sheet instead of silently truncating (that's how Catálogo
+  // used to disappear for the Manager, whose nav has 8 items).
+  const mobileNavOverflows = visibleNav.length > 5;
+  const primaryMobileNav = mobileNavOverflows ? visibleNav.slice(0, 4) : visibleNav;
+  const overflowMobileNav = mobileNavOverflows ? visibleNav.slice(4) : [];
   const subscription = user?.subscription ?? null;
   // No subscription row (agencies created before this feature) is never blocked — only EXPIRED/CANCELLED are.
   const subscriptionBlocked = subscription?.status === 'EXPIRED' || subscription?.status === 'CANCELLED';
@@ -139,7 +148,7 @@ export function AppShell({ children }: Readonly<{ children: React.ReactNode }>) 
 
         {/* Logo mark */}
         <Link
-          aria-label="Brújula"
+          aria-label="Chatiza"
           className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-amber/15 text-amber transition hover:bg-amber/25"
           href="/"
         >
@@ -213,7 +222,7 @@ export function AppShell({ children }: Readonly<{ children: React.ReactNode }>) 
           {/* Mobile: logo */}
           <div className="flex items-center gap-2 lg:hidden">
             <Compass className="h-5 w-5 text-amber" />
-            <span className="font-display text-base font-bold text-ink">Brújula</span>
+            <span className="font-display text-base font-bold text-ink">Chatiza</span>
           </div>
 
           {/* Search bar */}
@@ -284,7 +293,7 @@ export function AppShell({ children }: Readonly<{ children: React.ReactNode }>) 
           borderTop: '1px solid var(--border)',
         }}
       >
-        {visibleNav.slice(0, 5).map(({ label, href, icon: Icon }) => {
+        {primaryMobileNav.map(({ label, href, icon: Icon }) => {
           const active = isActive(pathname, href);
           return (
             <Link
@@ -299,7 +308,41 @@ export function AppShell({ children }: Readonly<{ children: React.ReactNode }>) 
             </Link>
           );
         })}
+        {mobileNavOverflows ? (
+          <button
+            className={`flex min-w-0 flex-col items-center gap-1 rounded-xl px-1 py-2 text-[10px] font-medium transition ${
+              overflowMobileNav.some((item) => isActive(pathname, item.href)) ? 'text-amber' : 'text-ink-muted'
+            }`}
+            onClick={() => setShowMoreNav(true)}
+            type="button"
+          >
+            <MoreHorizontal className={`h-5 w-5 ${overflowMobileNav.some((item) => isActive(pathname, item.href)) ? 'text-amber' : ''}`} />
+            <span className="truncate">Más</span>
+          </button>
+        ) : null}
       </nav>
+
+      {/* Mobile "Más" sheet — holds whatever didn't fit in the 5 bottom-bar slots */}
+      <Modal onClose={() => setShowMoreNav(false)} open={showMoreNav} title="Más opciones">
+        <div className="grid grid-cols-3 gap-3">
+          {overflowMobileNav.map(({ label, href, icon: Icon }) => {
+            const active = isActive(pathname, href);
+            return (
+              <Link
+                className={`flex flex-col items-center gap-2 rounded-xl border p-4 text-center text-xs font-semibold transition ${
+                  active ? 'border-amber bg-amber/10 text-amber' : 'border-ink/10 text-ink-soft hover:bg-ink/5'
+                }`}
+                href={href}
+                key={label}
+                onClick={() => setShowMoreNav(false)}
+              >
+                <Icon className="h-5 w-5" />
+                {label}
+              </Link>
+            );
+          })}
+        </div>
+      </Modal>
     </div>
   );
 }

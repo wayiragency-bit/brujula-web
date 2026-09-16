@@ -60,7 +60,7 @@ function AcceptInviteForm() {
           >
             <Compass className="h-6 w-6 text-amber" />
           </div>
-          <h1 className="font-display text-2xl font-extrabold text-ink">Brújula</h1>
+          <h1 className="font-display text-2xl font-extrabold text-ink">Chatiza</h1>
           <p className="mt-1 text-sm text-ink-soft">Crea tu contraseña para activar tu cuenta.</p>
         </div>
 

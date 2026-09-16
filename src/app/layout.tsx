@@ -5,7 +5,7 @@ import { ThemeProvider } from '@/lib/theme-context';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'Brújula — Cotizaciones que sí llegan a destino',
+  title: 'Chatiza — Cotizaciones que sí llegan a destino',
   description: 'Cotizador y operación comercial para agencias de viajes.',
 };
 

@@ -473,7 +473,7 @@ function AparienciaTab() {
 
   return (
     <>
-      <Card title="Tema y Visualización" subtitle="Personaliza cómo se ve Brújula en tu pantalla.">
+      <Card title="Tema y Visualización" subtitle="Personaliza cómo se ve Chatiza en tu pantalla.">
 
         {/* Theme selector */}
         <div className="mb-2">
@@ -586,7 +586,7 @@ function CorreoTab() {
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
             <label className={labelClass} htmlFor="email-from-name">Nombre del remitente</label>
-            <input className={inputClass} defaultValue="Brújula" id="email-from-name" />
+            <input className={inputClass} defaultValue="Chatiza" id="email-from-name" />
           </div>
           <div>
             <label className={labelClass} htmlFor="email-reply">Correo de respuesta (reply-to)</label>

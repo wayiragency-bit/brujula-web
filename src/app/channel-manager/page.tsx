@@ -41,7 +41,7 @@ export default function ChannelManagerPage() {
           <Wifi className="mt-0.5 h-4 w-4 shrink-0" />
           <p>
             ¿Cómo funciona? Añade la URL iCal de tu portal (Airbnb, Booking.com, etc.) para importar sus bloqueos al
-            Calendario PMS. También puedes copiar tu URL privada de Brújula y pegarla en el portal externo para
+            Calendario PMS. También puedes copiar tu URL privada de Chatiza y pegarla en el portal externo para
             mantenerlos sincronizados.
           </p>
         </div>
@@ -89,7 +89,7 @@ export default function ChannelManagerPage() {
         <div className="grid gap-4 sm:grid-cols-3">
           {[
             { step: '01', title: 'Copia la URL iCal', desc: 'Desde tu portal externo (Airbnb, Booking, etc.) copia la URL de exportación iCal.' },
-            { step: '02', title: 'Pega en Brújula', desc: 'Añade la URL al canal correspondiente y Brújula importará los bloqueos automáticamente.' },
+            { step: '02', title: 'Pega en Chatiza', desc: 'Añade la URL al canal correspondiente y Chatiza importará los bloqueos automáticamente.' },
             { step: '03', title: 'Sincronización automática', desc: 'Los calendarios se mantienen actualizados. Evita sobreventas sin esfuerzo.' },
           ].map((item) => (
             <div

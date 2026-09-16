@@ -362,7 +362,7 @@ export default function PublicQuotePage({ params }: { params: Promise<{ publicId
         </div>
 
         <p style={{ textAlign: 'center', fontSize: 12, color: '#3d5070', paddingBottom: 24, margin: 0 }}>
-          {quote.agency.name} · Powered by Brújula
+          {quote.agency.name} · Powered by Chatiza
         </p>
       </div>
     </div>
