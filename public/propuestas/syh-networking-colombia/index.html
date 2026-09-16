@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+
+  <!-- ============================================================
+       SEO
+  ============================================================ -->
+  <title>Propuesta Comercial | SYH Networking Colombia</title>
+  <meta name="description" content="Propuesta comercial de experiencia turística para SYH Networking Colombia S.A.S. | 20 de noviembre | 70 pasajeros." />
+  <meta name="robots" content="noindex, nofollow" />
+  <meta name="theme-color" content="#0b2239" />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Propuesta Comercial | SYH Networking Colombia" />
+  <meta property="og:description" content="Experiencia turística para SYH Networking Colombia S.A.S. | 20 de noviembre | 70 pasajeros." />
+  <!-- REEMPLAZAR: URL pública final donde se aloje esta propuesta -->
+  <meta property="og:url" content="https://propuestas.brujula.co/syh-networking-colombia" />
+  <!-- IMAGEN HERO (también usada como og:image) -->
+  <meta property="og:image" content="https://images.unsplash.com/photo-1544551763-46a013bb70d5?q=80&w=1200&auto=format&fit=crop" />
+  <meta property="og:locale" content="es_CO" />
+
+  <!-- Favicon (brújula) -->
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%230b2239'/%3E%3Cpath d='M50 20l7 23 23 7-23 7-7 23-7-23-23-7 23-7z' fill='%23c2a05a'/%3E%3C/svg%3E" />
+
+  <!-- Tipografía -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ============================================================
+       1. VARIABLES
+    ============================================================ */
+    :root {
+      /* Paleta sofisticada */
+      --navy-950: #071726;
+      --navy-900: #0b2239;
+      --navy-800: #0f2c47;
+      --navy-700: #14395c;
+      --sand: #e9ddc7;
+      --sand-soft: #f6f1e7;
+      --gold: #c2a05a;
+      --gold-soft: #d8c091;
+      --ink: #16202b;
+      --muted: #5c6a78;
+      --bg: #fbf9f5;
+      --white: #ffffff;
+      --line: rgba(11, 34, 57, 0.12);
+      --shadow-sm: 0 4px 16px rgba(11, 34, 57, 0.06);
+      --shadow-md: 0 14px 40px rgba(11, 34, 57, 0.10);
+      --shadow-lg: 0 26px 70px rgba(11, 34, 57, 0.18);
+      --radius: 18px;
+      --radius-lg: 26px;
+      --max: 1180px;
+      --ease: cubic-bezier(0.22, 1, 0.36, 1);
+
+      /* IMÁGENES — reemplazables fácilmente */
+      --img-hero: url('https://images.unsplash.com/photo-1544551763-46a013bb70d5?q=80&w=2000&auto=format&fit=crop');       /* IMAGEN HERO */
+      --img-experiencia: url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=1800&auto=format&fit=crop'); /* IMAGEN EXPERIENCIA */
+    }
+
+    /* ============================================================
+       2. RESET
+    ============================================================ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      line-height: 1.65;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+    img { max-width: 100%; display: block; }
+    a { color: inherit; text-decoration: none; }
+    button { font-family: inherit; cursor: pointer; border: none; background: none; }
+    ul { list-style: none; }
+
+    /* ============================================================
+       3. TIPOGRAFÍA
+    ============================================================ */
+    h1, h2, h3 { font-family: 'Playfair Display', Georgia, serif; font-weight: 600; line-height: 1.15; color: var(--navy-900); letter-spacing: -0.01em; }
+    .eyebrow {
+      font-size: 0.72rem; font-weight: 600; letter-spacing: 0.28em; text-transform: uppercase;
+      color: var(--gold); display: inline-block; margin-bottom: 1rem;
+    }
+    .section-title { font-size: clamp(1.9rem, 4.4vw, 3rem); margin-bottom: 1rem; }
+    .lead { font-size: clamp(1rem, 2.2vw, 1.14rem); color: var(--muted); max-width: 62ch; }
+
+    /* ============================================================
+       Layout helpers
+    ============================================================ */
+    .wrap { width: 100%; max-width: var(--max); margin: 0 auto; padding: 0 clamp(1rem, 5vw, 2.5rem); }
+    section { padding: clamp(3.6rem, 8vw, 6.5rem) 0; position: relative; }
+    .center { text-align: center; }
+    .center .lead { margin-left: auto; margin-right: auto; }
+
+    /* Reveal on scroll */
+    .reveal { opacity: 0; transform: translateY(28px); transition: opacity 0.9s var(--ease), transform 0.9s var(--ease); }
+    .reveal.in { opacity: 1; transform: none; }
+    .reveal.d1 { transition-delay: 0.08s; }
+    .reveal.d2 { transition-delay: 0.16s; }
+    .reveal.d3 { transition-delay: 0.24s; }
+    .reveal.d4 { transition-delay: 0.32s; }
+    @media (prefers-reduced-motion: reduce) {
+      .reveal { opacity: 1; transform: none; transition: none; }
+      html { scroll-behavior: auto; }
+    }
+
+    /* Botones */
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 0.6rem;
+      padding: 0.95rem 1.8rem; border-radius: 100px; font-weight: 600; font-size: 0.95rem;
+      letter-spacing: 0.02em; transition: transform 0.35s var(--ease), box-shadow 0.35s var(--ease), background 0.35s var(--ease);
+      text-align: center; min-height: 52px;
+    }
+    .btn-primary { background: var(--gold); color: var(--navy-950); box-shadow: 0 10px 26px rgba(194, 160, 90, 0.35); }
+    .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 16px 34px rgba(194, 160, 90, 0.45); }
+    .btn-ghost { background: transparent; color: var(--white); border: 1.5px solid rgba(255, 255, 255, 0.5); }
+    .btn-ghost:hover { background: rgba(255, 255, 255, 0.12); border-color: #fff; transform: translateY(-3px); }
+    .btn-dark { background: var(--navy-900); color: var(--white); }
+    .btn-dark:hover { transform: translateY(-3px); background: var(--navy-800); box-shadow: var(--shadow-md); }
+    .btn-outline { background: transparent; color: var(--navy-900); border: 1.5px solid var(--line); }
+    .btn-outline:hover { border-color: var(--navy-900); transform: translateY(-3px); }
+
+    /* ============================================================
+       4. NAVEGACIÓN
+    ============================================================ */
+    .nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      transition: background 0.4s var(--ease), box-shadow 0.4s var(--ease), padding 0.4s var(--ease);
+      padding: 1.1rem 0;
+    }
+    .nav.scrolled { background: rgba(251, 249, 245, 0.92); backdrop-filter: blur(14px); box-shadow: 0 1px 0 var(--line); padding: 0.7rem 0; }
+    .nav-inner { display: flex; align-items: center; justify-content: space-between; }
+    .brand { display: flex; align-items: center; gap: 0.7rem; color: var(--white); transition: color 0.4s; }
+    .nav.scrolled .brand { color: var(--navy-900); }
+    .brand-mark {
+      width: 38px; height: 38px; border-radius: 10px; background: var(--gold);
+      display: grid; place-items: center; flex-shrink: 0; box-shadow: 0 6px 16px rgba(194, 160, 90, 0.35);
+    }
+    .brand-mark svg { width: 22px; height: 22px; }
+    .brand-text { display: flex; flex-direction: column; line-height: 1.1; }
+    .brand-text b { font-weight: 700; font-size: 0.92rem; letter-spacing: 0.04em; }
+    .brand-text span { font-size: 0.62rem; letter-spacing: 0.22em; text-transform: uppercase; opacity: 0.75; }
+
+    .nav-links { display: flex; align-items: center; gap: 2rem; }
+    .nav-links a { color: var(--white); font-size: 0.9rem; font-weight: 500; opacity: 0.9; transition: opacity 0.3s, color 0.4s; }
+    .nav.scrolled .nav-links a { color: var(--navy-800); }
+    .nav-links a:hover { opacity: 1; color: var(--gold); }
+    .nav-cta { padding: 0.6rem 1.2rem; border-radius: 100px; background: var(--gold); color: var(--navy-950) !important; font-weight: 600; opacity: 1 !important; }
+    .nav-cta:hover { color: var(--navy-950) !important; transform: translateY(-2px); }
+
+    .nav-toggle { display: none; width: 44px; height: 44px; flex-direction: column; justify-content: center; gap: 5px; align-items: center; }
+    .nav-toggle span { width: 24px; height: 2px; background: var(--white); border-radius: 2px; transition: transform 0.35s var(--ease), opacity 0.3s; }
+    .nav.scrolled .nav-toggle span { background: var(--navy-900); }
+    body.menu-open .nav-toggle span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    body.menu-open .nav-toggle span:nth-child(2) { opacity: 0; }
+    body.menu-open .nav-toggle span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+    /* Menú móvil */
+    .mobile-menu {
+      position: fixed; inset: 0; z-index: 99; background: var(--navy-950);
+      display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 1.6rem;
+      opacity: 0; visibility: hidden; transition: opacity 0.4s var(--ease); padding: 2rem;
+    }
+    body.menu-open .mobile-menu { opacity: 1; visibility: visible; }
+    .mobile-menu a { color: var(--white); font-family: 'Playfair Display', serif; font-size: 1.7rem; opacity: 0; transform: translateY(14px); transition: opacity 0.5s var(--ease), transform 0.5s var(--ease); }
+    body.menu-open .mobile-menu a { opacity: 1; transform: none; }
+    body.menu-open .mobile-menu a:nth-child(1) { transition-delay: 0.1s; }
+    body.menu-open .mobile-menu a:nth-child(2) { transition-delay: 0.16s; }
+    body.menu-open .mobile-menu a:nth-child(3) { transition-delay: 0.22s; }
+    body.menu-open .mobile-menu a:nth-child(4) { transition-delay: 0.28s; }
+    body.menu-open .mobile-menu a:nth-child(5) { transition-delay: 0.34s; }
+    .mobile-menu .btn { margin-top: 1rem; opacity: 0; transition: opacity 0.5s 0.4s; }
+    body.menu-open .mobile-menu .btn { opacity: 1; }
+
+    /* ============================================================
+       5. HERO
+    ============================================================ */
+    .hero {
+      min-height: 100svh; display: flex; align-items: center; position: relative;
+      padding: 7rem 0 4rem; overflow: hidden; isolation: isolate;
+    }
+    .hero::before {
+      content: ''; position: absolute; inset: 0; z-index: -2;
+      background: var(--navy-900) var(--img-hero) center/cover no-repeat;
+      transform: scale(1.04);
+    }
+    .hero::after {
+      content: ''; position: absolute; inset: 0; z-index: -1;
+      background:
+        linear-gradient(180deg, rgba(7, 23, 38, 0.55) 0%, rgba(7, 23, 38, 0.35) 45%, rgba(7, 23, 38, 0.85) 100%),
+        linear-gradient(90deg, rgba(7, 23, 38, 0.55) 0%, rgba(7, 23, 38, 0) 60%);
+    }
+    .hero-content { max-width: 720px; color: var(--white); }
+    .hero .eyebrow { color: var(--gold-soft); }
+    .hero h1 { color: var(--white); font-size: clamp(2.4rem, 7vw, 4.6rem); font-weight: 600; line-height: 1.08; margin-bottom: 1.4rem; }
+    .hero-company {
+      display: inline-flex; align-items: center; gap: 0.7rem; font-weight: 600; letter-spacing: 0.04em;
+      font-size: clamp(1rem, 2.6vw, 1.25rem); margin-bottom: 0.5rem;
+    }
+    .hero-company::before { content: ''; width: 34px; height: 1.5px; background: var(--gold); }
+    .hero-meta { font-size: 1.02rem; opacity: 0.9; margin-bottom: 1.4rem; font-weight: 500; }
+    .hero-tag { font-size: clamp(1rem, 2.4vw, 1.18rem); opacity: 0.92; max-width: 44ch; margin-bottom: 2.4rem; line-height: 1.6; font-weight: 300; }
+    .hero-actions { display: flex; flex-wrap: wrap; gap: 1rem; }
+    .scroll-hint {
+      position: absolute; bottom: 1.8rem; left: 50%; transform: translateX(-50%);
+      color: rgba(255, 255, 255, 0.7); font-size: 0.68rem; letter-spacing: 0.24em; text-transform: uppercase;
+      display: flex; flex-direction: column; align-items: center; gap: 0.5rem;
+    }
+    .scroll-hint::after { content: ''; width: 1px; height: 34px; background: linear-gradient(var(--gold), transparent); animation: pulse 2s var(--ease) infinite; }
+    @keyframes pulse { 0%,100% { opacity: 0.3; transform: scaleY(0.6); } 50% { opacity: 1; transform: scaleY(1); } }
+
+    /* ============================================================
+       6. SECCIONES
+    ============================================================ */
+    .presentacion { background: var(--white); }
+    .presentacion .grid { display: grid; grid-template-columns: 0.9fr 1.1fr; gap: clamp(2rem, 5vw, 4.5rem); align-items: center; }
+    .presentacion p + p { margin-top: 1.2rem; }
+    .presentacion .side { position: relative; }
+    .presentacion .side-card {
+      background: linear-gradient(160deg, var(--navy-900), var(--navy-800)); color: var(--white);
+      border-radius: var(--radius-lg); padding: clamp(2rem, 4vw, 3rem); box-shadow: var(--shadow-lg);
+    }
+    .presentacion .side-card .eyebrow { color: var(--gold-soft); }
+    .presentacion .side-card h3 { color: var(--white); font-size: 1.5rem; margin-bottom: 1.4rem; }
+    .side-list li { display: flex; gap: 0.85rem; align-items: flex-start; padding: 0.7rem 0; border-top: 1px solid rgba(255, 255, 255, 0.12); font-size: 0.96rem; }
+    .side-list li:first-child { border-top: none; }
+    .side-list .ic { color: var(--gold); flex-shrink: 0; margin-top: 2px; }
+
+    /* ============================================================
+       7. CARDS — Resumen de la propuesta
+    ============================================================ */
+    .resumen { background: var(--sand-soft); }
+    .stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.1rem; margin-top: 2.6rem; }
+    .stat-card {
+      background: var(--white); border-radius: var(--radius); padding: 1.7rem 1.5rem; box-shadow: var(--shadow-sm);
+      border: 1px solid var(--line); transition: transform 0.4s var(--ease), box-shadow 0.4s var(--ease);
+    }
+    .stat-card:hover { transform: translateY(-6px); box-shadow: var(--shadow-md); }
+    .stat-card .ic { color: var(--gold); margin-bottom: 0.9rem; }
+    .stat-card .value { font-family: 'Playfair Display', serif; font-size: clamp(1.3rem, 3vw, 1.7rem); color: var(--navy-900); font-weight: 600; line-height: 1.15; }
+    .stat-card .label { font-size: 0.68rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); margin-top: 0.5rem; font-weight: 600; }
+
+    .stat-feature {
+      grid-column: span 2; background: linear-gradient(150deg, var(--navy-900), var(--navy-800));
+      color: var(--white); display: flex; flex-direction: column; justify-content: center; position: relative; overflow: hidden;
+    }
+    .stat-feature::after {
+      content: ''; position: absolute; right: -40px; top: -40px; width: 180px; height: 180px;
+      background: radial-gradient(circle, rgba(194, 160, 90, 0.35), transparent 70%);
+    }
+    .stat-feature .label { color: var(--gold-soft); }
+    .stat-feature .value { color: var(--white); font-size: clamp(1.9rem, 5vw, 2.7rem); }
+    .stat-feature .sub { font-size: 0.9rem; opacity: 0.75; margin-top: 0.4rem; }
+    .stat-price { grid-column: span 2; }
+    .stat-price .value { color: var(--gold); }
+
+    /* ============================================================
+       LOGÍSTICA — Timeline
+    ============================================================ */
+    .logistica { background: var(--white); }
+    .timeline { margin-top: 2.8rem; position: relative; }
+    .timeline::before { content: ''; position: absolute; left: 15px; top: 8px; bottom: 8px; width: 2px; background: linear-gradient(var(--gold), var(--sand)); }
+    .tl-item { display: grid; grid-template-columns: 44px 1fr; gap: 1.4rem; padding-bottom: 2rem; position: relative; }
+    .tl-item:last-child { padding-bottom: 0; }
+    .tl-dot { width: 32px; height: 32px; border-radius: 50%; background: var(--white); border: 2px solid var(--gold); display: grid; place-items: center; z-index: 1; }
+    .tl-dot span { width: 9px; height: 9px; border-radius: 50%; background: var(--gold); }
+    .tl-body h4 { font-family: 'Inter', sans-serif; font-size: 0.72rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--gold); font-weight: 700; margin-bottom: 0.25rem; }
+    .tl-body p { color: var(--ink); font-size: 1.02rem; font-weight: 500; }
+
+    .muelle-card {
+      margin-top: 2.6rem; display: flex; gap: 1.4rem; align-items: flex-start;
+      background: linear-gradient(150deg, var(--sand-soft), #fff); border: 1px solid var(--gold-soft);
+      border-radius: var(--radius); padding: 1.8rem; box-shadow: var(--shadow-sm);
+    }
+    .muelle-card .badge { width: 54px; height: 54px; border-radius: 14px; background: var(--navy-900); color: var(--gold); display: grid; place-items: center; flex-shrink: 0; }
+    .muelle-card h4 { font-family: 'Playfair Display', serif; font-size: 1.2rem; color: var(--navy-900); margin-bottom: 0.3rem; }
+    .muelle-card p { color: var(--muted); font-size: 0.98rem; }
+
+    /* ============================================================
+       EXPERIENCIA
+    ============================================================ */
+    .experiencia { background: var(--navy-950); color: var(--white); overflow: hidden; }
+    .experiencia .grid { display: grid; grid-template-columns: 1.05fr 0.95fr; gap: clamp(2rem, 5vw, 4rem); align-items: center; }
+    .experiencia .eyebrow { color: var(--gold-soft); }
+    .experiencia h2 { color: var(--white); }
+    .experiencia .lead { color: rgba(255, 255, 255, 0.72); }
+    .exp-figure { position: relative; border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-lg); aspect-ratio: 4/5; background: linear-gradient(150deg, var(--navy-700), var(--navy-900)); }
+    .exp-figure::after { content: '⚓'; position: absolute; inset: 0; display: grid; place-items: center; font-size: 3rem; color: rgba(255,255,255,0.14); }
+    .exp-figure img { position: relative; z-index: 1; width: 100%; height: 100%; object-fit: cover; transition: transform 1.2s var(--ease); }
+    .exp-figure:hover img { transform: scale(1.06); }
+    .exp-mini { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-top: 2.2rem; }
+    .exp-mini .m {
+      background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 14px; padding: 1.3rem 1rem; text-align: center;
+    }
+    .exp-mini .m .n { font-family: 'Playfair Display', serif; font-size: 1.6rem; color: var(--gold); }
+    .exp-mini .m .t { font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255, 255, 255, 0.7); margin-top: 0.3rem; }
+
+    /* ============================================================
+       QUÉ INCLUYE
+    ============================================================ */
+    .incluye { background: var(--sand-soft); }
+    .inc-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.1rem; margin-top: 2.6rem; }
+    .inc-card {
+      background: var(--white); border-radius: var(--radius); padding: 1.9rem 1.6rem; border: 1px solid var(--line);
+      box-shadow: var(--shadow-sm); display: flex; gap: 1.1rem; align-items: flex-start;
+      transition: transform 0.4s var(--ease), box-shadow 0.4s var(--ease);
+    }
+    .inc-card:hover { transform: translateY(-5px); box-shadow: var(--shadow-md); }
+    .inc-check { width: 42px; height: 42px; border-radius: 50%; background: rgba(194, 160, 90, 0.14); color: var(--gold); display: grid; place-items: center; flex-shrink: 0; }
+    .inc-card h4 { font-family: 'Inter', sans-serif; font-size: 1.02rem; font-weight: 600; color: var(--navy-900); margin-bottom: 0.2rem; }
+    .inc-card p { font-size: 0.88rem; color: var(--muted); }
+
+    /* ============================================================
+       8. GASTRONOMÍA
+    ============================================================ */
+    .gastronomia { background: var(--white); }
+    .food-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.6rem; margin-top: 2.8rem; }
+    .food-card {
+      background: var(--white); border-radius: var(--radius-lg); overflow: hidden; border: 1px solid var(--line);
+      box-shadow: var(--shadow-sm); transition: transform 0.45s var(--ease), box-shadow 0.45s var(--ease);
+      display: flex; flex-direction: column;
+    }
+    .food-card:hover { transform: translateY(-8px); box-shadow: var(--shadow-lg); }
+    .food-media { aspect-ratio: 4/3; overflow: hidden; background: linear-gradient(150deg, var(--sand), #ddccae); position: relative; }
+    .food-media::after { content: '🍽'; position: absolute; inset: 0; display: grid; place-items: center; font-size: 2.4rem; opacity: 0.28; }
+    .food-media img { position: relative; z-index: 1; width: 100%; height: 100%; object-fit: cover; transition: transform 1s var(--ease); }
+    .food-card:hover .food-media img { transform: scale(1.07); }
+    .food-tag { position: absolute; top: 1rem; left: 1rem; background: rgba(7, 23, 38, 0.82); color: var(--gold-soft); font-size: 0.66rem; letter-spacing: 0.16em; text-transform: uppercase; padding: 0.4rem 0.9rem; border-radius: 100px; font-weight: 600; }
+    .food-body { padding: 1.6rem 1.7rem 1.9rem; flex: 1; }
+    .food-body h3 { font-size: 1.4rem; margin-bottom: 1rem; }
+    .food-body .g-label { font-size: 0.68rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.7rem; font-weight: 600; }
+    .food-body ul li { display: flex; gap: 0.6rem; align-items: center; padding: 0.35rem 0; font-size: 0.95rem; color: var(--ink); }
+    .food-body ul li::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--gold); flex-shrink: 0; }
+    .food-note { text-align: center; margin-top: 2rem; color: var(--muted); font-size: 0.92rem; }
+
+    /* ============================================================
+       9. INVERSIÓN
+    ============================================================ */
+    .inversion { background: linear-gradient(160deg, var(--navy-900), var(--navy-950)); color: var(--white); text-align: center; overflow: hidden; }
+    .inversion .eyebrow { color: var(--gold-soft); }
+    .inversion h2 { color: var(--white); }
+    .calc {
+      display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 1.2rem 2rem;
+      margin: 2.8rem 0 1rem;
+    }
+    .calc .op { font-family: 'Playfair Display', serif; font-size: 2rem; color: var(--gold); opacity: 0.8; }
+    .calc-item .n { font-family: 'Playfair Display', serif; font-size: clamp(1.7rem, 5vw, 2.4rem); color: var(--white); }
+    .calc-item .l { font-size: 0.72rem; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(255, 255, 255, 0.6); margin-top: 0.3rem; }
+    .price-hero {
+      display: inline-block; margin: 1.4rem auto 0; padding: 2.2rem clamp(2rem, 6vw, 4rem);
+      border-radius: var(--radius-lg); background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(194, 160, 90, 0.4);
+      box-shadow: var(--shadow-lg);
+    }
+    .price-hero .big {
+      font-family: 'Playfair Display', serif; font-weight: 700; font-size: clamp(2.6rem, 10vw, 5rem);
+      color: var(--gold); line-height: 1; letter-spacing: -0.01em;
+    }
+    .price-hero .cap { font-size: 0.78rem; letter-spacing: 0.24em; text-transform: uppercase; color: rgba(255, 255, 255, 0.75); margin-top: 0.9rem; }
+    .inversion .fine { color: rgba(255, 255, 255, 0.55); font-size: 0.86rem; margin-top: 1.6rem; }
+    .inversion .fine span { display: block; }
+
+    /* ============================================================
+       RESUMEN ECONÓMICO — Cotización
+    ============================================================ */
+    .cotizacion { background: var(--sand-soft); }
+    .quote-card {
+      max-width: 560px; margin: 2.8rem auto 0; background: var(--white); border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-lg); overflow: hidden; border: 1px solid var(--line);
+    }
+    .quote-head {
+      background: linear-gradient(150deg, var(--navy-900), var(--navy-800)); color: var(--white);
+      padding: 1.8rem 2rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .quote-head .eyebrow { margin: 0 0 0.3rem; color: var(--gold-soft); }
+    .quote-head h3 { color: var(--white); font-size: 1.25rem; }
+    .quote-head .seal { width: 46px; height: 46px; border-radius: 12px; background: rgba(194, 160, 90, 0.18); color: var(--gold); display: grid; place-items: center; flex-shrink: 0; }
+    .quote-rows { padding: 0.6rem 2rem 0.8rem; }
+    .qrow { display: flex; justify-content: space-between; align-items: center; gap: 1rem; padding: 1rem 0; border-bottom: 1px dashed var(--line); }
+    .qrow:last-child { border-bottom: none; }
+    .qrow .k { color: var(--muted); font-size: 0.92rem; }
+    .qrow .v { font-weight: 600; color: var(--navy-900); text-align: right; }
+    .qtotal { background: var(--navy-950); color: var(--white); display: flex; justify-content: space-between; align-items: center; padding: 1.5rem 2rem; }
+    .qtotal .k { font-size: 0.72rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--gold-soft); }
+    .qtotal .v { font-family: 'Playfair Display', serif; font-size: clamp(1.5rem, 5vw, 2rem); color: var(--gold); }
+
+    /* ============================================================
+       CONDICIONES
+    ============================================================ */
+    .condiciones { background: var(--white); }
+    .cond-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.9rem; margin-top: 2.6rem; }
+    .cond-item {
+      display: flex; gap: 0.9rem; align-items: flex-start; padding: 1.2rem 1.3rem; background: var(--sand-soft);
+      border-radius: 14px; border: 1px solid var(--line);
+    }
+    .cond-item .ic { color: var(--gold); flex-shrink: 0; margin-top: 2px; }
+    .cond-item .k { font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+    .cond-item .v { font-weight: 600; color: var(--navy-900); font-size: 0.98rem; margin-top: 0.15rem; }
+    .cond-full { grid-column: 1 / -1; background: linear-gradient(150deg, var(--sand-soft), #fff); border-color: var(--gold-soft); }
+
+    /* ============================================================
+       10. CTA / CONTACTO
+    ============================================================ */
+    .contacto { position: relative; color: var(--white); text-align: center; overflow: hidden; isolation: isolate; }
+    .contacto::before { content: ''; position: absolute; inset: 0; z-index: -2; background: var(--navy-950) var(--img-experiencia) center/cover; }
+    .contacto::after { content: ''; position: absolute; inset: 0; z-index: -1; background: linear-gradient(180deg, rgba(7,23,38,0.9), rgba(7,23,38,0.82)); }
+    .contacto h2 { color: var(--white); font-size: clamp(2rem, 5vw, 3.2rem); }
+    .contacto .lead { color: rgba(255,255,255,0.82); margin: 1rem auto 2.2rem; }
+    .contact-card {
+      display: inline-flex; flex-direction: column; gap: 0.35rem; align-items: center; margin-bottom: 2.2rem;
+      background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.16); border-radius: var(--radius);
+      padding: 1.6rem 2.4rem; backdrop-filter: blur(6px);
+    }
+    .contact-card .co { font-family: 'Playfair Display', serif; font-size: 1.3rem; color: var(--white); }
+    .contact-card .nit { font-size: 0.82rem; letter-spacing: 0.06em; color: rgba(255,255,255,0.7); }
+    .contact-card .tel { font-size: 1.15rem; font-weight: 600; color: var(--gold-soft); margin-top: 0.4rem; }
+    .contact-actions { display: flex; flex-wrap: wrap; gap: 1rem; justify-content: center; }
+    .btn-wa { background: #25D366; color: #05391b; }
+    .btn-wa:hover { background: #1fbf5a; transform: translateY(-3px); box-shadow: 0 14px 30px rgba(37, 211, 102, 0.4); }
+
+    /* ============================================================
+       11. FOOTER
+    ============================================================ */
+    footer { background: var(--navy-950); color: rgba(255,255,255,0.7); padding: 3rem 0 2.4rem; }
+    .foot-inner { display: flex; flex-wrap: wrap; gap: 1.4rem 2rem; align-items: center; justify-content: space-between; }
+    .foot-brand { display: flex; align-items: center; gap: 0.8rem; }
+    .foot-brand .brand-mark { width: 40px; height: 40px; }
+    .foot-brand b { color: var(--white); font-size: 1rem; letter-spacing: 0.03em; }
+    .foot-brand span { display: block; font-size: 0.74rem; color: rgba(255,255,255,0.55); letter-spacing: 0.04em; }
+    .foot-meta { text-align: right; font-size: 0.86rem; line-height: 1.8; }
+    .foot-meta a { color: var(--gold-soft); }
+    .foot-bottom { margin-top: 2.2rem; padding-top: 1.4rem; border-top: 1px solid rgba(255,255,255,0.1); font-size: 0.76rem; color: rgba(255,255,255,0.45); text-align: center; letter-spacing: 0.04em; }
+
+    /* ============================================================
+       WhatsApp flotante
+    ============================================================ */
+    .wa-float {
+      position: fixed; right: clamp(1rem, 4vw, 2rem); bottom: clamp(1rem, 4vw, 2rem); z-index: 90;
+      width: 60px; height: 60px; border-radius: 50%; background: #25D366; display: grid; place-items: center;
+      box-shadow: 0 10px 28px rgba(37, 211, 102, 0.45); transition: transform 0.35s var(--ease), box-shadow 0.35s var(--ease);
+      animation: waIn 0.6s var(--ease) 1s both;
+    }
+    .wa-float:hover { transform: scale(1.08) translateY(-2px); box-shadow: 0 16px 36px rgba(37, 211, 102, 0.55); }
+    .wa-float svg { width: 32px; height: 32px; }
+    @keyframes waIn { from { opacity: 0; transform: scale(0.4); } to { opacity: 1; transform: scale(1); } }
+
+    /* ============================================================
+       12. RESPONSIVE
+    ============================================================ */
+    @media (max-width: 940px) {
+      .nav-links { display: none; }
+      .nav-toggle { display: flex; }
+      .presentacion .grid,
+      .experiencia .grid { grid-template-columns: 1fr; }
+      .experiencia .exp-figure { max-width: 460px; margin: 0 auto; order: -1; }
+      .stat-grid { grid-template-columns: repeat(2, 1fr); }
+      .inc-grid { grid-template-columns: repeat(2, 1fr); }
+      .food-grid { grid-template-columns: 1fr; max-width: 460px; margin-left: auto; margin-right: auto; }
+    }
+    @media (max-width: 620px) {
+      section { padding: 3.2rem 0; }
+      .stat-grid { grid-template-columns: 1fr; gap: 0.9rem; }
+      .stat-feature, .stat-price { grid-column: span 1; }
+      .inc-grid { grid-template-columns: 1fr; }
+      .cond-grid { grid-template-columns: 1fr; }
+      .hero-actions .btn, .contact-actions .btn { width: 100%; }
+      .foot-inner { flex-direction: column; align-items: flex-start; }
+      .foot-meta { text-align: left; }
+      .calc .op { transform: rotate(90deg); }
+      .calc { flex-direction: column; gap: 0.8rem; }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ============================================================
+       NAVEGACIÓN
+  ============================================================ -->
+  <header>
+    <nav class="nav" id="nav">
+      <div class="wrap nav-inner">
+        <a href="#inicio" class="brand" aria-label="Propuesta SYH Networking">
+          <span class="brand-mark">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M12 3l2.2 6.8L21 12l-6.8 2.2L12 21l-2.2-6.8L3 12l6.8-2.2L12 3z" fill="#071726"/></svg>
+          </span>
+          <span class="brand-text">
+            <b>Propuesta Comercial</b>
+            <span>SYH Networking</span>
+          </span>
+        </a>
+
+        <ul class="nav-links">
+          <li><a href="#experiencia">Experiencia</a></li>
+          <li><a href="#incluye">Incluye</a></li>
+          <li><a href="#gastronomia">Gastronomía</a></li>
+          <li><a href="#inversion">Inversión</a></li>
+          <li><a href="#contacto" class="nav-cta">Contacto</a></li>
+        </ul>
+
+        <button class="nav-toggle" id="navToggle" aria-label="Abrir menú" aria-expanded="false">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </nav>
+
+    <!-- Menú móvil -->
+    <div class="mobile-menu" id="mobileMenu">
+      <a href="#experiencia">Experiencia</a>
+      <a href="#incluye">Incluye</a>
+      <a href="#gastronomia">Gastronomía</a>
+      <a href="#inversion">Inversión</a>
+      <a href="#contacto">Contacto</a>
+      <a class="btn btn-primary" href="https://wa.me/573208346206?text=Hola%2C%20quiero%20confirmar%20la%20propuesta%20comercial%20del%2020%20de%20noviembre%20para%20SYH%20NETWORKING%20COLOMBIA%20S.A.S." target="_blank" rel="noopener">Contactar asesor</a>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- ============================================================
+         HERO
+    ============================================================ -->
+    <!-- IMAGEN HERO -> definida en :root (--img-hero) -->
+    <section class="hero" id="inicio">
+      <div class="wrap">
+        <div class="hero-content">
+          <span class="eyebrow reveal in">Propuesta Comercial</span>
+          <h1 class="reveal in d1">Una experiencia diseñada para compartir</h1>
+          <div class="hero-company reveal in d2">SYH Networking Colombia S.A.S.</div>
+          <p class="hero-meta reveal in d2">20 de noviembre &nbsp;·&nbsp; 70 pasajeros</p>
+          <p class="hero-tag reveal in d3">Una jornada diseñada para disfrutar, compartir y vivir una experiencia memorable.</p>
+          <div class="hero-actions reveal in d4">
+            <a href="#resumen" class="btn btn-primary">Ver propuesta</a>
+            <a class="btn btn-ghost" href="https://wa.me/573208346206?text=Hola%2C%20quiero%20confirmar%20la%20propuesta%20comercial%20del%2020%20de%20noviembre%20para%20SYH%20NETWORKING%20COLOMBIA%20S.A.S." target="_blank" rel="noopener">Contactar asesor</a>
+          </div>
+        </div>
+      </div>
+      <div class="scroll-hint" aria-hidden="true">Desliza</div>
+    </section>
+
+    <!-- ============================================================
+         7. PRESENTACIÓN
+    ============================================================ -->
+    <section class="presentacion" id="presentacion">
+      <div class="wrap grid">
+        <div class="reveal">
+          <span class="eyebrow">Presentación</span>
+          <h2 class="section-title">Una experiencia pensada para su equipo</h2>
+          <p class="lead">Presentamos una experiencia especialmente diseñada para <strong>SYH Networking Colombia S.A.S.</strong>, pensada para ofrecer a sus colaboradores una jornada de integración, entretenimiento y disfrute en un entorno turístico excepcional.</p>
+          <p class="lead">La propuesta contempla una jornada completa, con salida desde <strong>Muelle Cocoliso Alcatraz</strong>, cóctel de bienvenida, experiencia turística y almuerzo, buscando brindar una experiencia organizada, cómoda y memorable para los 70 participantes.</p>
+        </div>
+        <div class="side reveal d1">
+          <div class="side-card">
+            <span class="eyebrow">En resumen</span>
+            <h3>Los detalles esenciales</h3>
+            <ul class="side-list">
+              <li><span class="ic">📅</span><span><strong>Fecha</strong> · 20 de noviembre</span></li>
+              <li><span class="ic">👥</span><span><strong>Grupo</strong> · 70 pasajeros</span></li>
+              <li><span class="ic">🕣</span><span><strong>Horario</strong> · 8:30 a.&nbsp;m. – 5:30 p.&nbsp;m.</span></li>
+              <li><span class="ic">📍</span><span><strong>Salida</strong> · Muelle Cocoliso Alcatraz</span></li>
+              <li><span class="ic">🍽️</span><span><strong>Incluye</strong> · Cóctel de bienvenida y almuerzo</span></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         8. RESUMEN DE LA PROPUESTA
+    ============================================================ -->
+    <section class="resumen" id="resumen">
+      <div class="wrap center">
+        <span class="eyebrow reveal">Resumen de la propuesta</span>
+        <h2 class="section-title reveal d1">Todo lo que contempla la jornada</h2>
+      </div>
+      <div class="wrap">
+        <div class="stat-grid">
+          <div class="stat-card reveal">
+            <div class="ic">👥</div>
+            <div class="value">70</div>
+            <div class="label">Pasajeros</div>
+          </div>
+          <div class="stat-card reveal d1">
+            <div class="ic">📅</div>
+            <div class="value">20 de noviembre</div>
+            <div class="label">Fecha</div>
+          </div>
+          <div class="stat-card reveal d2">
+            <div class="ic">🕣</div>
+            <div class="value">8:30 a.&nbsp;m. – 5:30 p.&nbsp;m.</div>
+            <div class="label">Horario</div>
+          </div>
+          <div class="stat-card reveal d3">
+            <div class="ic">📍</div>
+            <div class="value">Muelle Cocoliso Alcatraz</div>
+            <div class="label">Punto de salida</div>
+          </div>
+
+          <div class="stat-card stat-feature reveal d1">
+            <div class="label">Valor total de la propuesta</div>
+            <div class="value">$25.200.000 COP</div>
+            <div class="sub">Grupo de 70 personas</div>
+          </div>
+          <div class="stat-card stat-price reveal d2">
+            <div class="ic">💳</div>
+            <div class="value">$360.000 COP</div>
+            <div class="label">Por persona</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         9. LOGÍSTICA
+    ============================================================ -->
+    <section class="logistica" id="logistica">
+      <div class="wrap center">
+        <span class="eyebrow reveal">Logística</span>
+        <h2 class="section-title reveal d1">Información de la experiencia</h2>
+        <p class="lead reveal d2">Una jornada organizada de principio a fin para que su equipo solo se ocupe de disfrutar.</p>
+      </div>
+      <div class="wrap">
+        <div class="timeline reveal d1" style="max-width: 760px; margin-left:auto; margin-right:auto;">
+          <div class="tl-item">
+            <div class="tl-dot"><span></span></div>
+            <div class="tl-body"><h4>8:30 a.&nbsp;m.</h4><p>Salida desde Muelle Cocoliso Alcatraz.</p></div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-dot"><span></span></div>
+            <div class="tl-body"><h4>Cóctel de bienvenida</h4><p>Recepción y bienvenida para el grupo.</p></div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-dot"><span></span></div>
+            <div class="tl-body"><h4>Durante la jornada</h4><p>Desarrollo de la experiencia turística.</p></div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-dot"><span></span></div>
+            <div class="tl-body"><h4>Almuerzo</h4><p>Servicio de almuerzo con opciones previamente seleccionadas.</p></div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-dot"><span></span></div>
+            <div class="tl-body"><h4>5:30 p.&nbsp;m.</h4><p>Finalización de la jornada.</p></div>
+          </div>
+        </div>
+
+        <div class="muelle-card reveal d2" style="max-width: 760px; margin-left:auto; margin-right:auto;">
+          <div class="badge">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M12 2v20M5 9h14M12 8a2 2 0 100-4 2 2 0 000 4zM6 13c0 4 2.7 6 6 6s6-2 6-6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div>
+            <h4>Sin impuesto de muelle</h4>
+            <p>Los pasajeros <strong>no deben realizar un pago adicional</strong> por impuesto de muelle al realizar la salida desde Muelle Cocoliso Alcatraz.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         10. EXPERIENCIA
+    ============================================================ -->
+    <section class="experiencia" id="experiencia">
+      <div class="wrap grid">
+        <div class="reveal">
+          <span class="eyebrow">La experiencia</span>
+          <h2 class="section-title">Una jornada para disfrutar y compartir</h2>
+          <p class="lead">Una experiencia completa diseñada para que los 70 colaboradores de SYH Networking Colombia S.A.S. compartan un día especial en un entorno turístico privilegiado, con la comodidad y la organización que una jornada empresarial merece.</p>
+          <div class="exp-mini">
+            <div class="m"><div class="n">70</div><div class="t">Participantes</div></div>
+            <div class="m"><div class="n">9&nbsp;h</div><div class="t">De jornada</div></div>
+            <div class="m"><div class="n">1</div><div class="t">Día para recordar</div></div>
+          </div>
+        </div>
+        <!-- IMAGEN EXPERIENCIA -->
+        <figure class="exp-figure reveal d1">
+          <img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=1200&auto=format&fit=crop" alt="Experiencia turística en el mar Caribe" loading="lazy" onerror="this.style.display=\'none\'" />
+        </figure>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         11. QUÉ INCLUYE
+    ============================================================ -->
+    <section class="incluye" id="incluye">
+      <div class="wrap center">
+        <span class="eyebrow reveal">Qué incluye</span>
+        <h2 class="section-title reveal d1">La experiencia incluye</h2>
+        <p class="lead reveal d2">Todos los servicios contemplados para una jornada completa y sin preocupaciones.</p>
+      </div>
+      <div class="wrap">
+        <div class="inc-grid">
+          <div class="inc-card reveal"><span class="inc-check">✓</span><div><h4>Cóctel de bienvenida</h4><p>Recepción para dar inicio a la jornada.</p></div></div>
+          <div class="inc-card reveal d1"><span class="inc-check">✓</span><div><h4>Almuerzo</h4><p>Con opciones de plato principal a elegir.</p></div></div>
+          <div class="inc-card reveal d2"><span class="inc-check">✓</span><div><h4>Experiencia turística</h4><p>Desarrollo de la jornada en el destino.</p></div></div>
+          <div class="inc-card reveal"><span class="inc-check">✓</span><div><h4>Atención durante la jornada</h4><p>Acompañamiento para el grupo.</p></div></div>
+          <div class="inc-card reveal d1"><span class="inc-check">✓</span><div><h4>Jornada completa</h4><p>De 8:30 a.&nbsp;m. a 5:30 p.&nbsp;m.</p></div></div>
+          <div class="inc-card reveal d2"><span class="inc-check">✓</span><div><h4>Servicio para 70 personas</h4><p>Capacidad para todo el equipo.</p></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         12. GASTRONOMÍA
+    ============================================================ -->
+    <section class="gastronomia" id="gastronomia">
+      <div class="wrap center">
+        <span class="eyebrow reveal">Gastronomía</span>
+        <h2 class="section-title reveal d1">Una propuesta gastronómica para todos</h2>
+        <p class="lead reveal d2">Para el almuerzo, los participantes podrán seleccionar previamente entre diferentes opciones de plato principal, acompañadas de una guarnición completa.</p>
+      </div>
+      <div class="wrap">
+        <div class="food-grid">
+          <!-- IMAGEN CHULETA -->
+          <article class="food-card reveal">
+            <div class="food-media">
+              <span class="food-tag">Opción 1</span>
+              <img src="https://images.unsplash.com/photo-1432139555190-58524dae6a55?q=80&w=1000&auto=format&fit=crop" alt="Chuleta de cerdo" loading="lazy" onerror="this.style.display=\'none\'" />
+            </div>
+            <div class="food-body">
+              <h3>Chuleta de cerdo</h3>
+              <div class="g-label">Acompañada de</div>
+              <ul><li>Arroz de coco</li><li>Arroz blanco</li><li>Ensalada fresca</li><li>Patacones</li></ul>
+            </div>
+          </article>
+
+          <!-- IMAGEN PECHUGA -->
+          <article class="food-card reveal d1">
+            <div class="food-media">
+              <span class="food-tag">Opción 2</span>
+              <img src="https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?q=80&w=1000&auto=format&fit=crop" alt="Pechuga de pollo" loading="lazy" onerror="this.style.display=\'none\'" />
+            </div>
+            <div class="food-body">
+              <h3>Pechuga</h3>
+              <div class="g-label">Acompañada de</div>
+              <ul><li>Arroz de coco</li><li>Arroz blanco</li><li>Ensalada fresca</li><li>Patacones</li></ul>
+            </div>
+          </article>
+
+          <!-- IMAGEN MOJARRA -->
+          <article class="food-card reveal d2">
+            <div class="food-media">
+              <span class="food-tag">Opción 3</span>
+              <img src="https://images.unsplash.com/photo-1580476262798-bddd9f4b7369?q=80&w=1000&auto=format&fit=crop" alt="Mojarra frita" loading="lazy" onerror="this.style.display=\'none\'" />
+            </div>
+            <div class="food-body">
+              <h3>Mojarra frita</h3>
+              <div class="g-label">Acompañada de</div>
+              <ul><li>Arroz de coco</li><li>Arroz blanco</li><li>Ensalada fresca</li><li>Patacones</li></ul>
+            </div>
+          </article>
+        </div>
+        <p class="food-note reveal">Cada participante selecciona previamente su plato principal.</p>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         13. INVERSIÓN
+    ============================================================ -->
+    <section class="inversion" id="inversion">
+      <div class="wrap">
+        <span class="eyebrow reveal">Inversión</span>
+        <h2 class="section-title reveal d1">La inversión de la experiencia</h2>
+
+        <div class="calc reveal d2">
+          <div class="calc-item"><div class="n">70</div><div class="l">Personas</div></div>
+          <div class="op">×</div>
+          <div class="calc-item"><div class="n">$360.000</div><div class="l">Por persona (COP)</div></div>
+          <div class="op">=</div>
+        </div>
+
+        <div class="price-hero reveal d2">
+          <div class="big">$25.200.000</div>
+          <div class="cap">Valor total de la propuesta · COP</div>
+        </div>
+
+        <div class="fine reveal d3">
+          <span>Valores expresados en pesos colombianos.</span>
+          <span>El valor corresponde a un grupo de 70 personas.</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         14. RESUMEN ECONÓMICO — Cotización
+    ============================================================ -->
+    <section class="cotizacion" id="cotizacion">
+      <div class="wrap center">
+        <span class="eyebrow reveal">Resumen económico</span>
+        <h2 class="section-title reveal d1">Su cotización</h2>
+      </div>
+      <div class="wrap">
+        <div class="quote-card reveal d1">
+          <div class="quote-head">
+            <div>
+              <span class="eyebrow">Propuesta comercial</span>
+              <h3>SYH Networking Colombia S.A.S.</h3>
+            </div>
+            <div class="seal">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M9 12l2 2 4-4M12 3l7 3v6c0 4.5-3 7.3-7 9-4-1.7-7-4.5-7-9V6l7-3z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+          </div>
+          <div class="quote-rows">
+            <div class="qrow"><span class="k">Fecha</span><span class="v">20 de noviembre</span></div>
+            <div class="qrow"><span class="k">Pasajeros</span><span class="v">70</span></div>
+            <div class="qrow"><span class="k">Valor unitario</span><span class="v">$360.000 COP</span></div>
+            <div class="qrow"><span class="k">Impuesto de muelle</span><span class="v">No aplica</span></div>
+          </div>
+          <div class="qtotal">
+            <span class="k">Valor total</span>
+            <span class="v">$25.200.000 COP</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         15. CONDICIONES
+    ============================================================ -->
+    <section class="condiciones" id="condiciones">
+      <div class="wrap center">
+        <span class="eyebrow reveal">Condiciones</span>
+        <h2 class="section-title reveal d1">Condiciones de la propuesta</h2>
+      </div>
+      <div class="wrap">
+        <div class="cond-grid">
+          <div class="cond-item reveal"><span class="ic">📅</span><div><div class="k">Fecha del servicio</div><div class="v">20 de noviembre</div></div></div>
+          <div class="cond-item reveal d1"><span class="ic">👥</span><div><div class="k">Número de pasajeros</div><div class="v">70 personas</div></div></div>
+          <div class="cond-item reveal"><span class="ic">🕣</span><div><div class="k">Horario</div><div class="v">8:30 a.&nbsp;m. a 5:30 p.&nbsp;m.</div></div></div>
+          <div class="cond-item reveal d1"><span class="ic">📍</span><div><div class="k">Punto de salida</div><div class="v">Muelle Cocoliso Alcatraz</div></div></div>
+          <div class="cond-item reveal"><span class="ic">💳</span><div><div class="k">Valor por persona</div><div class="v">$360.000 COP</div></div></div>
+          <div class="cond-item reveal d1"><span class="ic">💰</span><div><div class="k">Valor total</div><div class="v">$25.200.000 COP</div></div></div>
+          <div class="cond-item reveal"><span class="ic">🍸</span><div><div class="k">Incluye</div><div class="v">Cóctel de bienvenida</div></div></div>
+          <div class="cond-item reveal d1"><span class="ic">🍽️</span><div><div class="k">Incluye</div><div class="v">Almuerzo</div></div></div>
+          <div class="cond-item cond-full reveal"><span class="ic">⚓</span><div><div class="k">Impuesto de muelle</div><div class="v">No aplica impuesto de muelle para los pasajeros al realizar la salida desde Muelle Cocoliso Alcatraz.</div></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         16. CONTACTO
+    ============================================================ -->
+    <section class="contacto" id="contacto">
+      <div class="wrap">
+        <span class="eyebrow reveal">Contacto</span>
+        <h2 class="reveal d1">¿Listos para vivir la experiencia?</h2>
+        <p class="lead reveal d2">Estamos listos para acompañar a su equipo en una jornada especial.</p>
+
+        <div class="contact-card reveal d2">
+          <div class="co">SYH Networking Colombia S.A.S.</div>
+          <div class="nit">NIT 901066307-8</div>
+          <div class="tel">+57 320 834 6206</div>
+        </div>
+
+        <div class="contact-actions reveal d3">
+          <a class="btn btn-wa" href="https://wa.me/573208346206?text=Hola%2C%20quiero%20confirmar%20la%20propuesta%20comercial%20para%20SYH%20NETWORKING%20COLOMBIA%20S.A.S.%20del%2020%20de%20noviembre%20para%2070%20personas." target="_blank" rel="noopener">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.5 14.4c-.3-.15-1.7-.85-2-.94-.26-.1-.45-.15-.64.14-.2.3-.74.94-.9 1.13-.17.2-.34.22-.63.08-.3-.15-1.24-.46-2.36-1.46-.87-.78-1.46-1.74-1.63-2.03-.17-.3-.02-.45.13-.6.13-.13.3-.34.44-.5.15-.18.2-.3.3-.5.1-.2.05-.37-.02-.52-.08-.14-.64-1.55-.88-2.12-.23-.55-.47-.48-.64-.49h-.55c-.2 0-.5.07-.76.36-.26.3-1 .98-1 2.4 0 1.4 1.03 2.76 1.17 2.96.15.2 2.02 3.08 4.9 4.32.68.3 1.22.47 1.63.6.69.22 1.31.19 1.8.11.55-.08 1.7-.69 1.94-1.36.24-.67.24-1.24.17-1.36-.07-.12-.26-.2-.55-.34zM12 2C6.48 2 2 6.48 2 12c0 1.85.5 3.58 1.38 5.07L2 22l5.05-1.33A9.94 9.94 0 0012 22c5.52 0 10-4.48 10-10S17.52 2 12 2z"/></svg>
+            Confirmar propuesta
+          </a>
+          <a class="btn btn-ghost" href="https://wa.me/573208346206?text=Hola%2C%20quiero%20hablar%20con%20un%20asesor%20sobre%20la%20propuesta%20comercial%20para%20SYH%20NETWORKING%20COLOMBIA%20S.A.S." target="_blank" rel="noopener">Hablar con un asesor</a>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ============================================================
+       17. FOOTER
+  ============================================================ -->
+  <footer>
+    <div class="wrap foot-inner">
+      <div class="foot-brand">
+        <span class="brand-mark">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M12 3l2.2 6.8L21 12l-6.8 2.2L12 21l-2.2-6.8L3 12l6.8-2.2L12 3z" fill="#071726"/></svg>
+        </span>
+        <div>
+          <b>SYH Networking Colombia S.A.S.</b>
+          <span>NIT 901066307-8</span>
+        </div>
+      </div>
+      <div class="foot-meta">
+        <div><a href="https://wa.me/573208346206" target="_blank" rel="noopener">+57 320 834 6206</a></div>
+        <div>20 de noviembre · Propuesta comercial</div>
+      </div>
+    </div>
+    <div class="wrap foot-bottom">
+      Propuesta comercial de carácter privado, preparada para SYH Networking Colombia S.A.S.
+    </div>
+  </footer>
+
+  <!-- WhatsApp flotante -->
+  <a class="wa-float" href="https://wa.me/573208346206?text=Hola%2C%20quiero%20confirmar%20la%20propuesta%20comercial%20del%2020%20de%20noviembre%20para%20SYH%20NETWORKING%20COLOMBIA%20S.A.S." target="_blank" rel="noopener" aria-label="Escribir por WhatsApp">
+    <svg viewBox="0 0 24 24" fill="#fff"><path d="M17.5 14.4c-.3-.15-1.7-.85-2-.94-.26-.1-.45-.15-.64.14-.2.3-.74.94-.9 1.13-.17.2-.34.22-.63.08-.3-.15-1.24-.46-2.36-1.46-.87-.78-1.46-1.74-1.63-2.03-.17-.3-.02-.45.13-.6.13-.13.3-.34.44-.5.15-.18.2-.3.3-.5.1-.2.05-.37-.02-.52-.08-.14-.64-1.55-.88-2.12-.23-.55-.47-.48-.64-.49h-.55c-.2 0-.5.07-.76.36-.26.3-1 .98-1 2.4 0 1.4 1.03 2.76 1.17 2.96.15.2 2.02 3.08 4.9 4.32.68.3 1.22.47 1.63.6.69.22 1.31.19 1.8.11.55-.08 1.7-.69 1.94-1.36.24-.67.24-1.24.17-1.36-.07-.12-.26-.2-.55-.34zM12 2C6.48 2 2 6.48 2 12c0 1.85.5 3.58 1.38 5.07L2 22l5.05-1.33A9.94 9.94 0 0012 22c5.52 0 10-4.48 10-10S17.52 2 12 2z"/></svg>
+  </a>
+
+  <script>
+    /* ============================================================
+       JS — solo lo necesario
+    ============================================================ */
+    (function () {
+      var nav = document.getElementById('nav');
+      var toggle = document.getElementById('navToggle');
+      var body = document.body;
+
+      // Nav sticky con cambio de fondo
+      var onScroll = function () {
+        if (window.scrollY > 40) { nav.classList.add('scrolled'); }
+        else { nav.classList.remove('scrolled'); }
+      };
+      window.addEventListener('scroll', onScroll, { passive: true });
+      onScroll();
+
+      // Menú hamburguesa
+      var closeMenu = function () {
+        body.classList.remove('menu-open');
+        toggle.setAttribute('aria-expanded', 'false');
+      };
+      toggle.addEventListener('click', function () {
+        var open = body.classList.toggle('menu-open');
+        toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+      });
+      document.querySelectorAll('#mobileMenu a').forEach(function (a) {
+        a.addEventListener('click', closeMenu);
+      });
+      window.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') { closeMenu(); }
+      });
+
+      // Reveal on scroll (IntersectionObserver)
+      var els = document.querySelectorAll('.reveal:not(.in)');
+      if ('IntersectionObserver' in window) {
+        var io = new IntersectionObserver(function (entries) {
+          entries.forEach(function (entry) {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('in');
+              io.unobserve(entry.target);
+            }
+          });
+        }, { threshold: 0.14, rootMargin: '0px 0px -8% 0px' });
+        els.forEach(function (el) { io.observe(el); });
+      } else {
+        els.forEach(function (el) { el.classList.add('in'); });
+      }
+    })();
+  </script>
+</body>
+</html>
